@@ -498,7 +498,6 @@ export class Component<Props extends {} = any, T extends Env = Env> {
     __owl__.isMounted = false;
     if (this.__owl__.currentFiber) {
       this.__owl__.currentFiber.isCompleted = true;
-      this.__owl__.currentFiber.root.counter = 0;
     }
     const children = __owl__.children;
     for (let id in children) {
