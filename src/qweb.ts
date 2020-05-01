@@ -84,3 +84,22 @@ templates[`<div>Hello <t t-esc="name"/></div>`] = function (
   vn1.children.push(vn3);
   return tree;
 };
+
+templates[`<span><Test/></span>`] = function (data: RootData, context: RenderContext): VTree {
+  const tree: VTree = { type: NodeType.Content, children: [], data, key: 14, hooks: {} };
+  const vn1: VDOMNode<RootData> = {
+    type: NodeType.DOM,
+    tag: "span",
+    el: null,
+    children: [],
+    key: 15,
+  };
+  tree.children.push(vn1);
+  // const vn2 = componentNode('Test', tree, context);
+  // tree.children.push(vn2);
+  // const vn2: VTextNode = { type: NodeType.Text, text: "Hello ", el: null };
+  // vn1.children.push(vn2);
+  // const vn3: VTextNode = { type: NodeType.Text, text: context.name, el: null };
+  // vn1.children.push(vn3);
+  return tree;
+};

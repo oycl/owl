@@ -161,11 +161,20 @@ describe("mount", () => {
     expect(fixture.innerHTML).toBe("<div>Hello Lyra</div>");
   });
 
-  // // ---------------------------------------------------------------------------
-  // // a component inside a component
-  // // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // composition
+  // ---------------------------------------------------------------------------
 
-  // test.skip("a class component inside a class component", async () => {
+  test.skip("a functional component inside a template", async () => {
+    function Test() {
+      return () => render(`<div>simple vnode</div>`);
+    }
+    const vnode = render(`<span><Test/></span>`, { Test });
+    await mount(vnode, { target: fixture });
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
+
+  // test("a class component inside a class component", async () => {
   //   class Child extends Component {
   //     static template = `<div>class component</div>`;
   //   }
