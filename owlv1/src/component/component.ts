@@ -303,7 +303,7 @@ export class Component<Props extends {} = any, T extends Env = Env> {
    *
    * Note that a component can be mounted an unmounted several times
    */
-  async mount(target: HTMLElement | DocumentFragment, options: MountOptions = {}): Promise<void> {
+  mount(target: HTMLElement | DocumentFragment, options: MountOptions = {}): Promise<void> {
     const position = options.position || "last-child";
     const __owl__ = this.__owl__;
     if (__owl__.isMounted) {

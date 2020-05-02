@@ -1,5 +1,5 @@
 import { makeTestFixture } from "./helpers";
-import { mount, render, update, RootType } from "../src/owl";
+import { mount } from "../src/index";
 import { Component } from "../src/component";
 
 let fixture: HTMLElement;
@@ -9,54 +9,51 @@ beforeEach(() => {
 });
 
 describe("mount", () => {
-  test("simple static template", async () => {
-    const vnode = render(`<div>simple vnode</div>`);
-    await mount(vnode, { target: fixture });
+  test("can mount a simple functional component", async () => {
+    const Test = {
+      template: `<div>simple vnode</div>`,
+    };
+
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
-    expect(vnode.data.type).toBe(RootType.Basic);
   });
 
-  test("can render a simple functional component", async () => {
-    function Test() {
-      return () => render(`<div>simple vnode</div>`);
-    }
-
-    const vnode = await mount(Test, { target: fixture });
-    expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
-    expect(vnode.data.type).toBe(RootType.Function);
-    expect(typeof (vnode.data as any).fn).toBe("function");
-  });
-
-  test("can render a simple class component", async () => {
+  test("can mount a simple class component", async () => {
     class Test extends Component {
       static template = `<div>simple vnode</div>`;
     }
 
-    const vnode = await mount(Test, { target: fixture });
+    const test = await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
-    expect(vnode.data.type).toBe(RootType.Component);
-    expect((vnode.data as any).comp).toBeInstanceOf(Component);
+    expect(test).toBeInstanceOf(Component);
 
     const div = fixture.querySelector("div");
     expect(div).toBeDefined();
-    expect((vnode.data as any).comp.el).toBe(div);
+    expect(test.el).toBe(div);
+  });
+
+  test("return value of mount is the result of setup", async () => {
+    const obj = {};
+    const Test = {
+      template: `<div>simple vnode</div>`,
+      setup() {
+        return obj;
+      },
+    };
+
+    const mountResult = await mount(fixture, Test);
+    expect(mountResult).toBe(obj);
+    expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
   });
 
   // ---------------------------------------------------------------------------
-  // simple mounting operation, only a text node
+  // only a text node
   // ---------------------------------------------------------------------------
-  test("just a template, text node", async () => {
-    const vnode = render(`simple text node`);
-    await mount(vnode, { target: fixture });
-    expect(fixture.innerHTML).toBe("simple text node");
-  });
-
-  test("functional component, text node", async () => {
-    function Test() {
-      return () => render(`simple text node`);
-    }
-
-    await mount(Test, { target: fixture });
+  test("functional component, just a text node", async () => {
+    const Test = {
+      template: "simple text node",
+    };
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("simple text node");
   });
 
@@ -65,25 +62,20 @@ describe("mount", () => {
       static template = `simple text node`;
     }
 
-    await mount(Test, { target: fixture });
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("simple text node");
   });
 
   // ---------------------------------------------------------------------------
-  // simple mounting operation, multiroot content
+  // multiroot content
   // ---------------------------------------------------------------------------
-  test("simple template, multiroot", async () => {
-    const vnode = render(`<div>a</div><div>b</div>`);
-    await mount(vnode, { target: fixture });
-    expect(fixture.innerHTML).toBe("<div>a</div><div>b</div>");
-  });
 
   test("simple functional component, multiroot", async () => {
-    function Test() {
-      return () => render(`<div>a</div><div>b</div>`);
-    }
+    const Test = {
+      template: `<div>a</div><div>b</div>`,
+    };
 
-    await mount(Test, { target: fixture });
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>a</div><div>b</div>");
   });
 
@@ -92,26 +84,23 @@ describe("mount", () => {
       static template = `<div>a</div><div>b</div>`;
     }
 
-    await mount(Test, { target: fixture });
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>a</div><div>b</div>");
   });
 
   // ---------------------------------------------------------------------------
   // simple mounting operation, dynamic content
   // ---------------------------------------------------------------------------
-  test("vnode with dynamic content", async () => {
-    const vnode = render(`<div>Hello <t t-esc="name"/></div>`, { name: "Alex" });
-
-    await mount(vnode, { target: fixture });
-    expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
-  });
 
   test("functional component with dynamic content", async () => {
-    function Test() {
-      return () => render(`<div>Hello <t t-esc="name"/></div>`, { name: "Alex" });
-    }
+    const Test = {
+      template: `<div>Hello <t t-esc="name"/></div>`,
+      setup() {
+        return { name: "Alex" };
+      },
+    };
 
-    await mount(Test, { target: fixture });
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
   });
 
@@ -121,70 +110,70 @@ describe("mount", () => {
       static template = `<div>Hello <t t-esc="name"/></div>`;
     }
 
-    await mount(Test, { target: fixture });
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
-  });
-
-  // ---------------------------------------------------------------------------
-  // mounting, then update (on dynamic content)
-  // ---------------------------------------------------------------------------
-  test("updating a vnode with dynamic content", async () => {
-    const vnode = render(`<div>Hello <t t-esc="name"/></div>`, { name: "Alex" });
-
-    await mount(vnode, { target: fixture });
-    expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
-
-    await update(vnode, { name: "Lyra" });
-    expect(fixture.innerHTML).toBe("<div>Hello Lyra</div>");
-  });
-
-  test("updating a functional component with dynamic content", async () => {
-    function Test() {
-      return () => render(`<div>Hello <t t-esc="name"/></div>`, { name: "Alex" });
-    }
-    const vnode = await mount(Test, { target: fixture });
-    expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
-
-    await update(vnode, { name: "Lyra" });
-    expect(fixture.innerHTML).toBe("<div>Hello Lyra</div>");
-  });
-
-  test("updating a class component with dynamic content", async () => {
-    class Test extends Component {
-      name = "Alex";
-      static template = `<div>Hello <t t-esc="name"/></div>`;
-    }
-    const vnode = await mount(Test, { target: fixture });
-    expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
-
-    await update(vnode, { name: "Lyra" });
-    expect(fixture.innerHTML).toBe("<div>Hello Lyra</div>");
   });
 
   // ---------------------------------------------------------------------------
   // composition
   // ---------------------------------------------------------------------------
 
-  test.skip("a functional component inside a template", async () => {
-    function Test() {
-      return () => render(`<div>simple vnode</div>`);
-    }
-    const vnode = render(`<span><Test/></span>`, { Test });
-    await mount(vnode, { target: fixture });
+  test("a functional component inside another", async () => {
+    const Child = {
+      template: `<div>simple vnode</div>`,
+    };
+    const Parent = {
+      template: `<span><Child/></span>`,
+      setup() {
+        return { Child };
+      },
+    };
+
+    await mount(fixture, Parent);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
-  // test("a class component inside a class component", async () => {
-  //   class Child extends Component {
-  //     static template = `<div>class component</div>`;
-  //   }
+  test("a class component inside a function component", async () => {
+    class Child extends Component {
+      static template = `<div>simple vnode</div>`;
+    }
 
-  //   class Parent extends Component {
-  //     static template = `<span><Child /></span>`;
-  //     Child = Child;
-  //   }
+    const Parent = {
+      template: `<span><Child/></span>`,
+      setup() {
+        return { Child };
+      },
+    };
+    await mount(fixture, Parent);
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
 
-  //   await mount(Parent, { target: fixture });
-  //   expect(fixture.innerHTML).toBe("<span><div>class component</div></span>");
-  // });
+  test("a function component inside a class component", async () => {
+    const Child = {
+      template: `<div>simple vnode</div>`,
+    };
+
+    class Parent extends Component {
+      static template = `<span><Child/></span>`;
+      Child = Child;
+    }
+
+    await mount(fixture, Parent);
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
+
+  test("a class component inside a class component", async () => {
+    class Child extends Component {
+      static template = `<div>simple vnode</div>`;
+    }
+
+    class Parent extends Component {
+      static template = `<span><Child/></span>`;
+      Child = Child;
+    }
+
+    await mount(fixture, Parent);
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
+
 });

@@ -3,10 +3,11 @@ import {
   update,
   NodeType,
   VTextNode,
-  VDataNodeMulti,
+  VMultiNode,
+  // VBoundaryNode,
   VDataNode,
-  VNode,
   VDOMNode,
+  VNode,
 } from "../src/vdom";
 
 let nextId = 1;
@@ -18,8 +19,8 @@ function textNode(text: string): VTextNode {
   };
 }
 
-function domNode(tag: string, children: VNode[]): VDOMNode<any>;
-function domNode(tag: string, key: string | number, children: VNode[]): VDOMNode<any>;
+function domNode(tag: string, children: VNode<any>[]): VDOMNode<any>;
+function domNode(tag: string, key: string | number, children: VNode<any>[]): VDOMNode<any>;
 function domNode(tag: string, arg2, arg3?): VDOMNode<any> {
   const children = arg3 instanceof Array ? arg3 : arg2;
   const key = arg3 instanceof Array ? arg2 : nextId++;
@@ -32,17 +33,14 @@ function domNode(tag: string, arg2, arg3?): VDOMNode<any> {
   };
 }
 
-function dataNodeMulti(children: VNode[]): VDataNodeMulti<any> {
+function multiNode(children: VNode<any>[]): VMultiNode<any> {
   return {
-    type: NodeType.DataMulti,
+    type: NodeType.Multi,
     children,
-    data: null,
-    key: nextId++,
-    hooks: {},
   };
 }
 
-function dataNode(child: VNode): VDataNode<any> {
+function dataNode(child: VNode<any>): VDataNode<any> {
   return {
     type: NodeType.Data,
     child,
@@ -51,6 +49,13 @@ function dataNode(child: VNode): VDataNode<any> {
     hooks: {},
   };
 }
+
+// function boundaryNode(): VBoundaryNode<any> {
+//   return {
+//     type: NodeType.Boundary,
+//     child: null,
+//   }
+// }
 
 let fixture: HTMLElement;
 
@@ -91,8 +96,8 @@ describe("patch function", () => {
     expect(fixture.innerHTML).toBe("<div>abc</div>");
   });
 
-  test("can patch an empty data multi node", () => {
-    const vnode = dataNodeMulti([]);
+  test("can patch an empty multi node", () => {
+    const vnode = multiNode([]);
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("");
   });
@@ -103,23 +108,20 @@ describe("patch function", () => {
     expect(fixture.innerHTML).toBe("abc");
   });
 
-  test("can patch a  data node with dom node", () => {
+  test("can patch a data node with dom node", () => {
     const vnode = dataNode(domNode("div", [textNode("abc")]));
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("<div>abc</div>");
   });
 
-  test("can patch a non empty data multi node", () => {
-    const vnode = dataNodeMulti([textNode("abc"), domNode("div", [])]);
+  test("can patch a non empty multi node", () => {
+    const vnode = multiNode([textNode("abc"), domNode("div", [])]);
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("abc<div></div>");
   });
 
-  test("content node in a dom node in a content node", () => {
-    const vnode = dataNodeMulti([
-      textNode("abc"),
-      dataNodeMulti([domNode("span", [textNode("text")])]),
-    ]);
+  test("multi node in a multi node", () => {
+    const vnode = multiNode([textNode("abc"), multiNode([domNode("span", [textNode("text")])])]);
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("abc<span>text</span>");
   });
@@ -162,7 +164,7 @@ describe("update function", () => {
   });
 
   test("can transform a dom node into a different dom node type", async () => {
-    let vnode: VNode = domNode("div", [textNode("abc")]);
+    let vnode = domNode("div", [textNode("abc")]);
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("<div>abc</div>");
 
@@ -190,9 +192,9 @@ describe("update function", () => {
     expect(fixture.innerHTML).toBe("<div>def</div>");
   });
 
-  test("can transform a multi data node into another multi data node", async () => {
-    const oldvnode = dataNodeMulti([domNode("div", [textNode("abc")])]);
-    const newvnode = dataNodeMulti([domNode("div", [textNode("def")])]);
+  test("can transform a multi node into another multi node", async () => {
+    const oldvnode = multiNode([domNode("div", [textNode("abc")])]);
+    const newvnode = multiNode([domNode("div", [textNode("def")])]);
     patch(fixture, oldvnode);
     expect(fixture.innerHTML).toBe("<div>abc</div>");
 
@@ -201,8 +203,8 @@ describe("update function", () => {
   });
 
   test("can update two text nodes", async () => {
-    const vnode = dataNodeMulti([textNode("abc"), textNode("def")]);
-    const newvnode = dataNodeMulti([textNode("abc"), textNode("ghi")]);
+    const vnode = multiNode([textNode("abc"), textNode("def")]);
+    const newvnode = multiNode([textNode("abc"), textNode("ghi")]);
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("abcdef");
 
@@ -260,14 +262,18 @@ describe("update function", () => {
 });
 
 describe("hooks", () => {
-  test("create hook on a multi data node", () => {
-    const vnode = dataNodeMulti([]);
+  test("create hook on a  data node, 1 text node", () => {
+    const vnode = dataNode(textNode("abc"));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
+    expect(fixture.innerHTML).toBe("abc");
+    const text = fixture.firstChild;
+    expect(text).toBeDefined();
     expect(vnode.hooks.create).toHaveBeenCalledTimes(1);
+    expect(vnode.hooks.create).toHaveBeenCalledWith(text);
   });
 
-  test("create hook on a data node", () => {
+  test("create hook on a data node, with domnode", () => {
     const vnode = dataNode(domNode("div", [textNode("abc")]));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
@@ -277,8 +283,8 @@ describe("hooks", () => {
     expect(vnode.hooks.create).toHaveBeenCalledWith(div);
   });
 
-  test("create hook on a multi data node", () => {
-    const vnode = dataNodeMulti([domNode("div", [])]);
+  test("create hook on a datanode with inside multi node", () => {
+    const vnode = dataNode(multiNode([domNode("div", [])]));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("<div></div>");
@@ -287,8 +293,8 @@ describe("hooks", () => {
     expect(vnode.hooks.create).toHaveBeenCalledWith(div);
   });
 
-  test("create hook, multi data node with two dom children", () => {
-    const vnode = dataNodeMulti([domNode("div", []), domNode("span", [])]);
+  test("create hook, data node with multi node with two dom children", () => {
+    const vnode = dataNode(multiNode([domNode("div", []), domNode("span", [])]));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("<div></div><span></span>");
@@ -296,16 +302,5 @@ describe("hooks", () => {
     expect(span).toBeDefined();
     expect(vnode.hooks.create).toHaveBeenCalledTimes(1);
     expect(vnode.hooks.create).toHaveBeenCalledWith(span);
-  });
-
-  test("create hook on a multi data node, 1 text node", () => {
-    const vnode = dataNodeMulti([textNode("abc")]);
-    vnode.hooks.create = jest.fn();
-    patch(fixture, vnode);
-    expect(fixture.innerHTML).toBe("abc");
-    const text = fixture.firstChild;
-    expect(text).toBeDefined();
-    expect(vnode.hooks.create).toHaveBeenCalledTimes(1);
-    expect(vnode.hooks.create).toHaveBeenCalledWith(text);
   });
 });

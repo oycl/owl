@@ -6,9 +6,10 @@
 // VDOM Type
 // -----------------------------------------------------------------------------
 export type Key = string | number;
+export type VNodeEl = HTMLElement | Text | null;
 
 // when DOM has been created (so, only first time)
-type CreateHook = (HTMLElement) => void;
+type CreateHook = (el: VNodeEl) => void;
 
 interface Hooks {
   create?: CreateHook;
@@ -18,8 +19,9 @@ export const enum NodeType {
   DOM,
   Text,
   Data,
-  DataMulti,
+  Multi,
 }
+
 export interface VDOMNode<T> {
   type: NodeType.DOM;
   tag: string;
@@ -37,50 +39,48 @@ export interface VTextNode {
 export interface VDataNode<T> {
   type: NodeType.Data;
   data: T;
-  child: VNode<T>;
+  child: VNode<T> | null;
   key: Key;
   hooks: Hooks;
 }
 
-export interface VDataNodeMulti<T> {
-  type: NodeType.DataMulti;
-  data: T;
+export interface VMultiNode<T> {
+  type: NodeType.Multi;
   children: VNode<T>[];
-  key: Key;
-  hooks: Hooks;
 }
 
-export type VNode<T = any> = VDOMNode<T> | VTextNode | VDataNode<T> | VDataNodeMulti<T>;
+export type VNode<T> = VDOMNode<T> | VTextNode | VDataNode<T> | VMultiNode<T>;
 
 // -----------------------------------------------------------------------------
 // patch and update
 // -----------------------------------------------------------------------------
 
-export function patch(el: HTMLElement | DocumentFragment, vnode: VNode) {
+export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): VNodeEl {
   switch (vnode.type) {
     case NodeType.Text:
       const textEl = document.createTextNode(vnode.text);
       vnode.el = textEl;
       el.appendChild(textEl);
-      break;
+      return textEl;
     case NodeType.DOM:
       let htmlEl = makeDOMVNode(vnode);
       el.appendChild(htmlEl);
-      break;
-    case NodeType.Data:
-      patch(el, vnode.child);
-      if (vnode.hooks.create) {
-        vnode.hooks.create(el.lastChild);
+      return htmlEl;
+    case NodeType.Data: {
+      const nodeEl = patch(el, vnode.child!);
+      const createHook = vnode.hooks.create;
+      if (createHook) {
+        createHook(nodeEl);
       }
-      break;
-    case NodeType.DataMulti:
+      return nodeEl;
+    }
+    case NodeType.Multi: {
+      let nodeEl: VNodeEl = null;
       for (let child of vnode.children) {
-        patch(el, child);
+        nodeEl = patch(el, child);
       }
-      if (vnode.hooks.create) {
-        vnode.hooks.create(el.lastChild);
-      }
-      break;
+      return nodeEl;
+    }
   }
 }
 
@@ -112,7 +112,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           return;
         case NodeType.Data:
           return;
-        case NodeType.DataMulti:
+        case NodeType.Multi:
           throw new Error("not yet implemented");
       }
     case NodeType.DOM:
@@ -126,28 +126,34 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           return;
         case NodeType.Text:
         case NodeType.Data:
-          return;
-        case NodeType.DataMulti:
+        case NodeType.Multi:
           throw new Error("not yet implemented");
       }
     case NodeType.Data:
       switch (target.type) {
         case NodeType.Data:
-          update(vnode.child, target.child);
+          update(vnode.child!, target.child!);
           return;
+        case NodeType.Text:
+        case NodeType.DOM:
+        case NodeType.Data:
+        case NodeType.Multi:
+          throw new Error("not yet implemented");
       }
-      throw new Error("not yet implemented");
-    case NodeType.DataMulti:
+    case NodeType.Multi:
       switch (target.type) {
-        case NodeType.DataMulti:
+        case NodeType.Multi:
           updateChildren(vnode.children, target);
           return;
+        case NodeType.Text:
+        case NodeType.DOM:
+        case NodeType.Data:
+          throw new Error("not yet implemented");
       }
-      throw new Error("not yet implemented");
   }
 }
 
-function updateChildren<T>(oldChildren: VNode<T>[], newParent: VDOMNode<T> | VDataNodeMulti<T>) {
+function updateChildren<T>(oldChildren: VNode<T>[], newParent: VDOMNode<T> | VMultiNode<T>) {
   const newChildren = newParent.children;
   const l = newChildren.length;
   for (let i = 0; i < l; i++) {
