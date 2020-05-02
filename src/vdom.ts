@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // VDOM Type
 // -----------------------------------------------------------------------------
-type Key = string | number;
+export type Key = string | number;
 
 // when DOM has been created (so, only first time)
 type CreateHook = (HTMLElement) => void;
@@ -17,7 +17,8 @@ interface Hooks {
 export const enum NodeType {
   DOM,
   Text,
-  Content,
+  Data,
+  DataMulti,
 }
 export interface VDOMNode<T> {
   type: NodeType.DOM;
@@ -33,15 +34,23 @@ export interface VTextNode {
   el: Text | null;
 }
 
-export interface VMainNode<T> {
-  type: NodeType.Content;
+export interface VDataNode<T> {
+  type: NodeType.Data;
+  data: T;
+  child: VNode<T>;
+  key: Key;
+  hooks: Hooks;
+}
+
+export interface VDataNodeMulti<T> {
+  type: NodeType.DataMulti;
   data: T;
   children: VNode<T>[];
   key: Key;
   hooks: Hooks;
 }
 
-export type VNode<T = any> = VDOMNode<T> | VTextNode | VMainNode<T>;
+export type VNode<T = any> = VDOMNode<T> | VTextNode | VDataNode<T> | VDataNodeMulti<T>;
 
 // -----------------------------------------------------------------------------
 // patch and update
@@ -58,7 +67,13 @@ export function patch(el: HTMLElement | DocumentFragment, vnode: VNode) {
       let htmlEl = makeDOMVNode(vnode);
       el.appendChild(htmlEl);
       break;
-    case NodeType.Content:
+    case NodeType.Data:
+      patch(el, vnode.child);
+      if (vnode.hooks.create) {
+        vnode.hooks.create(el.lastChild);
+      }
+      break;
+    case NodeType.DataMulti:
       for (let child of vnode.children) {
         patch(el, child);
       }
@@ -95,7 +110,9 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
         case NodeType.DOM:
           vnode.el!.replaceWith(makeDOMVNode(target));
           return;
-        case NodeType.Content:
+        case NodeType.Data:
+          return;
+        case NodeType.DataMulti:
           throw new Error("not yet implemented");
       }
     case NodeType.DOM:
@@ -108,12 +125,21 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           }
           return;
         case NodeType.Text:
-        case NodeType.Content:
+        case NodeType.Data:
+          return;
+        case NodeType.DataMulti:
           throw new Error("not yet implemented");
       }
-    case NodeType.Content:
+    case NodeType.Data:
       switch (target.type) {
-        case NodeType.Content:
+        case NodeType.Data:
+          update(vnode.child, target.child);
+          return;
+      }
+      throw new Error("not yet implemented");
+    case NodeType.DataMulti:
+      switch (target.type) {
+        case NodeType.DataMulti:
           updateChildren(vnode.children, target);
           return;
       }
@@ -121,7 +147,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
   }
 }
 
-function updateChildren<T>(oldChildren: VNode<T>[], newParent: VDOMNode<T> | VMainNode<T>) {
+function updateChildren<T>(oldChildren: VNode<T>[], newParent: VDOMNode<T> | VDataNodeMulti<T>) {
   const newChildren = newParent.children;
   const l = newChildren.length;
   for (let i = 0; i < l; i++) {

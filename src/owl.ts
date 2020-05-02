@@ -2,7 +2,7 @@ import { Component } from "./component";
 import { Fiber } from "./fiber";
 import { RenderContext, renderTemplate } from "./qweb";
 import { scheduler } from "./scheduler";
-import { patch, update as updateVNode, VMainNode } from "./vdom";
+import { patch, update as updateVNode, VDataNodeMulti, VDataNode } from "./vdom";
 
 export const enum RootType {
   Basic,
@@ -33,7 +33,7 @@ interface ComponentRootData extends Data {
 
 export type RootData = BasicRootData | FunctionRootData | ComponentRootData;
 
-export type VTree = VMainNode<RootData>;
+export type VTree = VDataNode<RootData> | VDataNodeMulti<RootData>;
 
 let currentType: RootType = RootType.Basic;
 let currentFn: FnInstance;
