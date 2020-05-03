@@ -1,5 +1,6 @@
 import { makeTestFixture } from "./helpers";
 import { mount } from "../src/index";
+import { xml } from "../src/qweb";
 import { Component } from "../src/component";
 
 let fixture: HTMLElement;
@@ -11,7 +12,7 @@ beforeEach(() => {
 describe("mount", () => {
   test("can mount a simple functional component", async () => {
     const Test = {
-      template: `<div>simple vnode</div>`,
+      template: xml`<div>simple vnode</div>`,
     };
 
     await mount(fixture, Test);
@@ -106,8 +107,8 @@ describe("mount", () => {
 
   test("class component with dynamic content", async () => {
     class Test extends Component {
-      name = "Alex";
       static template = `<div>Hello <t t-esc="name"/></div>`;
+      name = "Alex";
     }
 
     await mount(fixture, Test);
@@ -175,5 +176,4 @@ describe("mount", () => {
     await mount(fixture, Parent);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
-
 });

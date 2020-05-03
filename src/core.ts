@@ -1,6 +1,6 @@
 import { Component } from "./component";
 import { Fiber } from "./fiber";
-import { renderTemplate, utils as qwebUtils, RenderContext } from "./qweb";
+import { QWeb, RenderContext, CompiledTemplate } from "./qweb";
 import { scheduler } from "./scheduler";
 import { patch, VDataNode, NodeType } from "./vdom";
 
@@ -15,7 +15,7 @@ interface FunctionComponent {
 
 export interface ComponentData {
   fiber: Fiber;
-  template: string;
+  templateFn: CompiledTemplate;
   context: any;
 }
 
@@ -24,6 +24,8 @@ export type VTree = VDataNode<ComponentData>;
 // -----------------------------------------------------------------------------
 // mount
 // -----------------------------------------------------------------------------
+
+const qweb = new QWeb();
 
 type MountTarget = HTMLElement;
 
@@ -55,7 +57,7 @@ function makeFnComponent(fn: FunctionComponent): VTree {
   const data: ComponentData = {
     fiber,
     context,
-    template: fn.template,
+    templateFn: qweb.getTemplate(fn.template),
   };
   const tree: VTree = {
     type: NodeType.Data,
@@ -65,7 +67,7 @@ function makeFnComponent(fn: FunctionComponent): VTree {
     hooks: {},
   };
   new Promise(async (resolve) => {
-    renderTemplate(tree, context);
+    tree.data.templateFn(tree, context);
     fiber.counter--;
     resolve();
   });
@@ -79,7 +81,7 @@ function makeClassComponent(C: typeof Component): VTree {
   const data: ComponentData = {
     fiber,
     context: c,
-    template,
+    templateFn: qweb.getTemplate(template),
   };
   const tree: VTree = {
     type: NodeType.Data,
@@ -90,14 +92,14 @@ function makeClassComponent(C: typeof Component): VTree {
   };
   tree.hooks.create = (el) => (c.el = el);
   new Promise((resolve) => {
-    renderTemplate(tree, c);
+    tree.data.templateFn(tree, c);
     fiber.counter--;
     resolve();
   });
   return tree;
 }
 
-qwebUtils.makeComponent = function (parent: VTree, name: string, context: RenderContext): VTree {
+QWeb.utils.makeComponent = function (parent: VTree, name: string, context: RenderContext): VTree {
   const definition = context[name];
   if (definition instanceof Component) {
     throw new Error("not done yet");
@@ -105,4 +107,3 @@ qwebUtils.makeComponent = function (parent: VTree, name: string, context: Render
     return makeFnComponent(definition);
   }
 };
-
