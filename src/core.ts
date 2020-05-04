@@ -1,6 +1,7 @@
 import { Component } from "./component";
 import { Fiber } from "./fiber";
-import { QWeb, RenderContext, CompiledTemplate } from "./qweb";
+import { QWeb } from "./qweb/qweb";
+import { CompiledTemplate, RenderContext } from "./qweb/compiler";
 import { scheduler } from "./scheduler";
 import { patch, VDataNode, NodeType } from "./vdom";
 

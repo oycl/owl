@@ -1,6 +1,6 @@
 import { makeTestFixture } from "./helpers";
 import { mount } from "../src/index";
-import { xml } from "../src/qweb";
+import { xml } from "../src/qweb/qweb";
 import { Component } from "../src/component";
 
 let fixture: HTMLElement;
@@ -21,7 +21,7 @@ describe("mount", () => {
 
   test("can mount a simple class component", async () => {
     class Test extends Component {
-      static template = `<div>simple vnode</div>`;
+      static template = xml`<div>simple vnode</div>`;
     }
 
     const test = await mount(fixture, Test);
@@ -36,7 +36,7 @@ describe("mount", () => {
   test("return value of mount is the result of setup", async () => {
     const obj = {};
     const Test = {
-      template: `<div>simple vnode</div>`,
+      template: xml`<div>simple vnode</div>`,
       setup() {
         return obj;
       },
@@ -52,7 +52,7 @@ describe("mount", () => {
   // ---------------------------------------------------------------------------
   test("functional component, just a text node", async () => {
     const Test = {
-      template: "simple text node",
+      template: xml`simple text node`,
     };
     await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("simple text node");
@@ -60,7 +60,7 @@ describe("mount", () => {
 
   test("class component, text node", async () => {
     class Test extends Component {
-      static template = `simple text node`;
+      static template = xml`simple text node`;
     }
 
     await mount(fixture, Test);
@@ -73,7 +73,7 @@ describe("mount", () => {
 
   test("simple functional component, multiroot", async () => {
     const Test = {
-      template: `<div>a</div><div>b</div>`,
+      template: xml`<div>a</div><div>b</div>`,
     };
 
     await mount(fixture, Test);
@@ -82,7 +82,7 @@ describe("mount", () => {
 
   test("simple class component, multiroot", async () => {
     class Test extends Component {
-      static template = `<div>a</div><div>b</div>`;
+      static template = xml`<div>a</div><div>b</div>`;
     }
 
     await mount(fixture, Test);
@@ -95,7 +95,7 @@ describe("mount", () => {
 
   test("functional component with dynamic content", async () => {
     const Test = {
-      template: `<div>Hello <t t-esc="name"/></div>`,
+      template: xml`<div>Hello <t t-esc="name"/></div>`,
       setup() {
         return { name: "Alex" };
       },
@@ -107,7 +107,7 @@ describe("mount", () => {
 
   test("class component with dynamic content", async () => {
     class Test extends Component {
-      static template = `<div>Hello <t t-esc="name"/></div>`;
+      static template = xml`<div>Hello <t t-esc="name"/></div>`;
       name = "Alex";
     }
 
@@ -121,10 +121,10 @@ describe("mount", () => {
 
   test("a functional component inside another", async () => {
     const Child = {
-      template: `<div>simple vnode</div>`,
+      template: xml`<div>simple vnode</div>`,
     };
     const Parent = {
-      template: `<span><Child/></span>`,
+      template: xml`<span><Child/></span>`,
       setup() {
         return { Child };
       },
@@ -136,11 +136,11 @@ describe("mount", () => {
 
   test("a class component inside a function component", async () => {
     class Child extends Component {
-      static template = `<div>simple vnode</div>`;
+      static template = xml`<div>simple vnode</div>`;
     }
 
     const Parent = {
-      template: `<span><Child/></span>`,
+      template: xml`<span><Child/></span>`,
       setup() {
         return { Child };
       },
@@ -151,11 +151,11 @@ describe("mount", () => {
 
   test("a function component inside a class component", async () => {
     const Child = {
-      template: `<div>simple vnode</div>`,
+      template: xml`<div>simple vnode</div>`,
     };
 
     class Parent extends Component {
-      static template = `<span><Child/></span>`;
+      static template = xml`<span><Child/></span>`;
       Child = Child;
     }
 
@@ -165,11 +165,11 @@ describe("mount", () => {
 
   test("a class component inside a class component", async () => {
     class Child extends Component {
-      static template = `<div>simple vnode</div>`;
+      static template = xml`<div>simple vnode</div>`;
     }
 
     class Parent extends Component {
-      static template = `<span><Child/></span>`;
+      static template = xml`<span><Child/></span>`;
       Child = Child;
     }
 
