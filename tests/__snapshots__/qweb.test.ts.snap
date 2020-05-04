@@ -4,10 +4,8 @@ exports[`static template div with a class attribute 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div class=\\"abc\\">word</div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"class\\":\\"abc\\"}, key: 1};
-    tree.child = vn1;
-    const vn2 = {type: 1, text: \\"word\\", el: null};
-    vn1.children.push(vn2);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"class\\":\\"abc\\"}, key: 1};
+    vn1.children.push({type: 1, text: \\"word\\", el: null});
 }"
 `;
 
@@ -15,10 +13,8 @@ exports[`static template div with a class attribute with a quote 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div class=\\"a'bc\\">word</div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"class\\":\\"a'bc\\"}, key: 1};
-    tree.child = vn1;
-    const vn2 = {type: 1, text: \\"word\\", el: null};
-    vn1.children.push(vn2);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"class\\":\\"a'bc\\"}, key: 1};
+    vn1.children.push({type: 1, text: \\"word\\", el: null});
 }"
 `;
 
@@ -26,10 +22,8 @@ exports[`static template div with a empty class attribute 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div class=\\"\\">word</div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    tree.child = vn1;
-    const vn2 = {type: 1, text: \\"word\\", el: null};
-    vn1.children.push(vn2);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: \\"word\\", el: null});
 }"
 `;
 
@@ -37,12 +31,10 @@ exports[`static template div with a span child node 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div><span>word</span></div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    tree.child = vn1;
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
     const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
     vn1.children.push(vn2);
-    const vn3 = {type: 1, text: \\"word\\", el: null};
-    vn2.children.push(vn3);
+    vn2.children.push({type: 1, text: \\"word\\", el: null});
 }"
 `;
 
@@ -50,10 +42,8 @@ exports[`static template div with a text node 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div>word</div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    tree.child = vn1;
-    const vn2 = {type: 1, text: \\"word\\", el: null};
-    vn1.children.push(vn2);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: \\"word\\", el: null});
 }"
 `;
 
@@ -61,10 +51,8 @@ exports[`static template div with an arbitrary attribute with a quote 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div abc=\\"a'bc\\">word</div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"abc\\":\\"a'bc\\"}, key: 1};
-    tree.child = vn1;
-    const vn2 = {type: 1, text: \\"word\\", el: null};
-    vn1.children.push(vn2);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"abc\\":\\"a'bc\\"}, key: 1};
+    vn1.children.push({type: 1, text: \\"word\\", el: null});
 }"
 `;
 
@@ -72,8 +60,7 @@ exports[`static template empty div 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div></div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    tree.child = vn1;
+    tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
 }"
 `;
 
@@ -81,8 +68,7 @@ exports[`static template no template (*) 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: 
-    const vn1 = {type: 4, children:[]};
-    tree.child = vn1;
+    tree.child = {type: 4, children:[]};
 }"
 `;
 
@@ -90,14 +76,10 @@ exports[`static template properly handle comments 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div>hello <!-- comment-->owl</div>
-    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    tree.child = vn1;
-    const vn2 = {type: 1, text: \\"hello \\", el: null};
-    vn1.children.push(vn2);
-    const vn3 = {type: 2, text: \\" comment\\", el: null};
-    vn1.children.push(vn3);
-    const vn4 = {type: 1, text: \\"owl\\", el: null};
-    vn1.children.push(vn4);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: \\"hello \\", el: null});
+    vn1.children.push({type: 2, text: \\" comment\\", el: null});
+    vn1.children.push({type: 1, text: \\"owl\\", el: null});
 }"
 `;
 
@@ -105,8 +87,7 @@ exports[`static template simple dynamic value 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <t><t t-esc=\\"text\\"/></t>
-    const vn1 = {type: 1, text: context[\\"text\\"], el: null};
-    tree.child = vn1;
+    tree.child = {type: 1, text: context[\\"text\\"], el: null};
 }"
 `;
 
@@ -114,8 +95,7 @@ exports[`static template simple string (*) 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: hello vdom
-    const vn1 = {type: 1, text: \\"hello vdom\\", el: null};
-    tree.child = vn1;
+    tree.child = {type: 1, text: \\"hello vdom\\", el: null};
 }"
 `;
 
@@ -123,8 +103,7 @@ exports[`static template simple string 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <t>hello vdom</t>
-    const vn1 = {type: 1, text: \\"hello vdom\\", el: null};
-    tree.child = vn1;
+    tree.child = {type: 1, text: \\"hello vdom\\", el: null};
 }"
 `;
 
@@ -132,12 +111,9 @@ exports[`static template simple string, with some dynamic value 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <t>hello <t t-esc=\\"text\\"/></t>
-    const vn1 = {type: 4, children:[]};
-    tree.child = vn1;
-    const vn2 = {type: 1, text: \\"hello \\", el: null};
-    vn1.children.push(vn2);
-    const vn3 = {type: 1, text: context[\\"text\\"], el: null};
-    vn1.children.push(vn3);
+    const vn1 = tree.child = {type: 4, children:[]};
+    vn1.children.push({type: 1, text: \\"hello \\", el: null});
+    vn1.children.push({type: 1, text: context[\\"text\\"], el: null});
 }"
 `;
 
@@ -145,11 +121,8 @@ exports[`static template two empty divs (*) 1`] = `
 "function anonymous(tree, context
 ) {
     // Template: <div></div><div></div>
-    const vn1 = {type: 4, children:[]};
-    tree.child = vn1;
-    const vn2 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    vn1.children.push(vn2);
-    const vn3 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    vn1.children.push(vn3);
+    const vn1 = tree.child = {type: 4, children:[]};
+    vn1.children.push({type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1});
+    vn1.children.push({type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1});
 }"
 `;

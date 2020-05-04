@@ -28,13 +28,19 @@ export function compileTemplate(name: string, template: string): CompiledTemplat
   return fn;
 }
 
-function addVNode(str: string, ctx: CodeContext): string {
+function addVNode(str: string, ctx: CodeContext, keepRef: boolean = true): string {
   const id = ctx.nextId++;
-  addLine(ctx, `const vn${id} = ${str};`);
   if (ctx.currentParent === "tree") {
-    addLine(ctx, `tree.child = vn${id};`);
-  } else {
+    if (keepRef) {
+      addLine(ctx, `const vn${id} = tree.child = ${str};`);
+    } else {
+      addLine(ctx, `tree.child = ${str};`);
+    }
+  } else if (keepRef) {
+    addLine(ctx, `const vn${id} = ${str};`);
     addLine(ctx, `${ctx.currentParent}.children.push(vn${id});`);
+  } else {
+    addLine(ctx, `${ctx.currentParent}.children.push(${str});`);
   }
   return `vn${id}`;
 }
@@ -56,7 +62,7 @@ function generateCode(ast: AST, ctx: CodeContext) {
       const vnode = `{type: ${NodeType.DOM}, tag: "${
         ast.tag
       }", el: null, children: [], attrs: ${JSON.stringify(ast.attrs)}, key: ${ast.key}}`;
-      const id = addVNode(vnode, ctx);
+      const id = addVNode(vnode, ctx, ast.children.length > 0);
       withParent(id, ctx, () => {
         for (let child of ast.children) {
           generateCode(child, ctx);
@@ -66,17 +72,17 @@ function generateCode(ast: AST, ctx: CodeContext) {
     }
     case ASTNodeType.Text: {
       const vnode = `{type: ${NodeType.Text}, text: ${ast.text}, el: null}`;
-      addVNode(vnode, ctx);
+      addVNode(vnode, ctx, false);
       break;
     }
     case ASTNodeType.Comment: {
       const vnode = `{type: ${NodeType.Comment}, text: ${ast.text}, el: null}`;
-      addVNode(vnode, ctx);
+      addVNode(vnode, ctx, false);
       break;
     }
     case ASTNodeType.Multi: {
       const vnode = `{type: ${NodeType.Multi}, children:[]}`;
-      const id = addVNode(vnode, ctx);
+      const id = addVNode(vnode, ctx, ast.children.length > 0);
       withParent(id, ctx, () => {
         for (let child of ast.children) {
           generateCode(child, ctx);
@@ -86,7 +92,7 @@ function generateCode(ast: AST, ctx: CodeContext) {
     }
     case ASTNodeType.Component: {
       const vnode = `this.makeComponent(tree, "${ast.name}", context)`;
-      addVNode(vnode, ctx);
+      addVNode(vnode, ctx, false);
       break;
     }
   }

@@ -73,7 +73,6 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
     case NodeType.Comment:
       const comment = document.createComment(vnode.text);
       vnode.el = comment;
-      console.log(vnode);
       el.appendChild(comment);
       return comment;
     case NodeType.DOM:
