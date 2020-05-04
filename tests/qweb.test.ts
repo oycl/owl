@@ -42,5 +42,4 @@ describe("static template", () => {
     const template = xml`<div></div><div></div>`;
     expect(render(template)).toBe("<div></div><div></div>");
   });
-
 });

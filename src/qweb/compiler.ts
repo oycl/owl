@@ -12,66 +12,74 @@ interface CodeContext {
   currentParent: string;
   code: string[];
   nextId: number;
+  indentLevel: number;
 }
 
 export function compileTemplate(name: string, template: string): CompiledTemplate {
   const ast = parse(template);
   // console.warn(ast)
-  const context: CodeContext = { currentParent: "tree", code: [], nextId: 1 };
-  generateCode(ast, context);
+  const ctx: CodeContext = { currentParent: "tree", code: [], nextId: 1, indentLevel: 0 };
+  const descr = template.replace(/`/g, "'").slice(0, 200);
+  addLine(ctx, `// Template: ${descr}`);
+
+  generateCode(ast, ctx);
   // console.warn(context.code.join('\n'))
-  const fn = new Function("tree, context", context.code.join("\n")) as CompiledTemplate;
+  const fn = new Function("tree, context", ctx.code.join("\n")) as CompiledTemplate;
   return fn;
 }
 
-function addVNode(str: string, context: CodeContext): string {
-  const id = context.nextId++;
-  context.code.push(`const vn${id} = ${str};`);
-  if (context.currentParent === "tree") {
-    context.code.push(`tree.child = vn${id};`);
+function addVNode(str: string, ctx: CodeContext): string {
+  const id = ctx.nextId++;
+  addLine(ctx, `const vn${id} = ${str};`);
+  if (ctx.currentParent === "tree") {
+    addLine(ctx, `tree.child = vn${id};`);
   } else {
-    context.code.push(`${context.currentParent}.children.push(vn${id});`);
+    addLine(ctx, `${ctx.currentParent}.children.push(vn${id});`);
   }
   return `vn${id}`;
 }
 
-function withParent(parent: string, context: CodeContext, cb: Function) {
-  const current = context.currentParent;
-  context.currentParent = parent;
+function withParent(parent: string, ctx: CodeContext, cb: Function) {
+  const current = ctx.currentParent;
+  ctx.currentParent = parent;
   cb();
-  context.currentParent = current;
+  ctx.currentParent = current;
 }
 
-function generateCode(ast: AST, context: CodeContext) {
+function addLine(ctx: CodeContext, code: string) {
+  ctx.code.push(new Array(ctx.indentLevel + 2).join("    ") + code);
+}
+
+function generateCode(ast: AST, ctx: CodeContext) {
   switch (ast.type) {
     case ASTNodeType.DOM: {
       const vnode = `{type: ${NodeType.DOM}, tag: "${ast.tag}", el: null, children: [], key: ${ast.key}}`;
-      const id = addVNode(vnode, context);
-      withParent(id, context, () => {
+      const id = addVNode(vnode, ctx);
+      withParent(id, ctx, () => {
         for (let child of ast.children) {
-          generateCode(child, context);
+          generateCode(child, ctx);
         }
       });
       break;
     }
     case ASTNodeType.Text: {
       const vnode = `{type: ${NodeType.Text}, text: ${ast.text}, el: null}`;
-      addVNode(vnode, context);
+      addVNode(vnode, ctx);
       break;
     }
     case ASTNodeType.Multi: {
       const vnode = `{type: ${NodeType.Multi}, children:[]}`;
-      const id = addVNode(vnode, context);
-      withParent(id, context, () => {
+      const id = addVNode(vnode, ctx);
+      withParent(id, ctx, () => {
         for (let child of ast.children) {
-          generateCode(child, context);
+          generateCode(child, ctx);
         }
       });
       break;
     }
     case ASTNodeType.Component: {
       const vnode = `this.makeComponent(tree, "${ast.name}", context)`;
-      addVNode(vnode, context);
+      addVNode(vnode, ctx);
       break;
     }
   }

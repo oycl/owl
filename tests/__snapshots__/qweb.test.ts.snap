@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`static template empty div 1`] = `
+"function anonymous(tree, context
+) {
+    // Template: <div></div>
+    const vn1 = {type: 0, tag: \\"div\\", el: null, children: [], key: 1};
+    tree.child = vn1;
+}"
+`;
+
+exports[`static template no template (*) 1`] = `
+"function anonymous(tree, context
+) {
+    // Template: 
+    const vn1 = {type: 3, children:[]};
+    tree.child = vn1;
+}"
+`;
+
+exports[`static template simple dynamic value 1`] = `
+"function anonymous(tree, context
+) {
+    // Template: <t><t t-esc=\\"text\\"/></t>
+    const vn1 = {type: 1, text: context[\\"text\\"], el: null};
+    tree.child = vn1;
+}"
+`;
+
+exports[`static template simple string (*) 1`] = `
+"function anonymous(tree, context
+) {
+    // Template: hello vdom
+    const vn1 = {type: 1, text: \\"hello vdom\\", el: null};
+    tree.child = vn1;
+}"
+`;
+
+exports[`static template simple string 1`] = `
+"function anonymous(tree, context
+) {
+    // Template: <t>hello vdom</t>
+    const vn1 = {type: 1, text: \\"hello vdom\\", el: null};
+    tree.child = vn1;
+}"
+`;
+
+exports[`static template simple string, with some dynamic value 1`] = `
+"function anonymous(tree, context
+) {
+    // Template: <t>hello <t t-esc=\\"text\\"/></t>
+    const vn1 = {type: 3, children:[]};
+    tree.child = vn1;
+    const vn2 = {type: 1, text: \\"hello \\", el: null};
+    vn1.children.push(vn2);
+    const vn3 = {type: 1, text: context[\\"text\\"], el: null};
+    vn1.children.push(vn3);
+}"
+`;
+
+exports[`static template two empty divs (*) 1`] = `
+"function anonymous(tree, context
+) {
+    // Template: <div></div><div></div>
+    const vn1 = {type: 3, children:[]};
+    tree.child = vn1;
+    const vn2 = {type: 0, tag: \\"div\\", el: null, children: [], key: 1};
+    vn1.children.push(vn2);
+    const vn3 = {type: 0, tag: \\"div\\", el: null, children: [], key: 1};
+    vn1.children.push(vn3);
+}"
+`;
