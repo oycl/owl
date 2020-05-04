@@ -5,6 +5,7 @@
 export const enum ASTNodeType {
   DOM,
   Text,
+  Comment,
   Multi,
   Component,
 }
@@ -14,6 +15,7 @@ export interface ASTDOMNode {
   tag: string;
   children: AST[];
   key: string | number;
+  attrs: { [name: string]: string };
 }
 
 export interface ASTComponentNode {
@@ -26,12 +28,17 @@ export interface ASTTextNode {
   text: string;
 }
 
+export interface ASTCommentNode {
+  type: ASTNodeType.Comment;
+  text: string;
+}
+
 export interface ASTMultiNode {
   type: ASTNodeType.Multi;
   children: AST[];
 }
 
-export type AST = ASTDOMNode | ASTTextNode | ASTMultiNode | ASTComponentNode;
+export type AST = ASTDOMNode | ASTTextNode | ASTCommentNode | ASTMultiNode | ASTComponentNode;
 
 // -----------------------------------------------------------------------------
 // Parser
@@ -45,9 +52,10 @@ export function parse(xml: string): AST {
 
 function parseNode(node: ChildNode): AST {
   if (!(node instanceof Element)) {
+    const type = node.nodeType === 3 ? ASTNodeType.Text : ASTNodeType.Comment;
     let text = '"' + node.textContent! + '"';
     return {
-      type: ASTNodeType.Text,
+      type,
       text,
     };
   }
@@ -73,12 +81,24 @@ function parseNode(node: ChildNode): AST {
       name: node.tagName,
     };
   }
+
+  const attributes = (<Element>node).attributes;
+  const attrs: { [name: string]: string } = {};
+  for (let i = 0; i < attributes.length; i++) {
+    let attrName = attributes[i].name;
+    let attrValue = attributes[i].textContent;
+    if (attrValue) {
+      attrs[attrName] = attrValue;
+    }
+  }
   let children = Array.from(node.childNodes).map(parseNode);
+
   return {
     type: ASTNodeType.DOM,
     tag: node.tagName,
     children,
     key: 1,
+    attrs,
   };
 }
 

@@ -6,7 +6,7 @@
 // VDOM Type
 // -----------------------------------------------------------------------------
 export type Key = string | number;
-export type VNodeEl = HTMLElement | Text | null;
+export type VNodeEl = HTMLElement | Text | Comment | null;
 
 // when DOM has been created (so, only first time)
 type CreateHook = (el: VNodeEl) => void;
@@ -18,6 +18,7 @@ interface Hooks {
 export const enum NodeType {
   DOM,
   Text,
+  Comment,
   Data,
   Multi,
 }
@@ -27,6 +28,7 @@ export interface VDOMNode<T> {
   tag: string;
   el: HTMLElement | null;
   children: VNode<T>[];
+  attrs: { [name: string]: string };
   key: Key;
 }
 
@@ -34,6 +36,12 @@ export interface VTextNode {
   type: NodeType.Text;
   text: string;
   el: Text | null;
+}
+
+export interface VCommentNode {
+  type: NodeType.Comment;
+  text: string;
+  el: Comment | null;
 }
 
 export interface VDataNode<T> {
@@ -49,7 +57,7 @@ export interface VMultiNode<T> {
   children: VNode<T>[];
 }
 
-export type VNode<T> = VDOMNode<T> | VTextNode | VDataNode<T> | VMultiNode<T>;
+export type VNode<T> = VDOMNode<T> | VTextNode | VDataNode<T> | VMultiNode<T> | VCommentNode;
 
 // -----------------------------------------------------------------------------
 // patch and update
@@ -62,8 +70,18 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
       vnode.el = textEl;
       el.appendChild(textEl);
       return textEl;
+    case NodeType.Comment:
+      const comment = document.createComment(vnode.text);
+      vnode.el = comment;
+      console.log(vnode);
+      el.appendChild(comment);
+      return comment;
     case NodeType.DOM:
       let htmlEl = makeDOMVNode(vnode);
+      const attrs = vnode.attrs;
+      for (let name in attrs) {
+        htmlEl.setAttribute(name, attrs[name]);
+      }
       el.appendChild(htmlEl);
       return htmlEl;
     case NodeType.Data: {
@@ -111,8 +129,8 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           vnode.el!.replaceWith(makeDOMVNode(target));
           return;
         case NodeType.Data:
-          return;
         case NodeType.Multi:
+        case NodeType.Comment:
           throw new Error("not yet implemented");
       }
     case NodeType.DOM:
@@ -126,6 +144,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           return;
         case NodeType.Text:
         case NodeType.Data:
+        case NodeType.Comment:
         case NodeType.Multi:
           throw new Error("not yet implemented");
       }
@@ -137,6 +156,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
         case NodeType.Text:
         case NodeType.DOM:
         case NodeType.Data:
+        case NodeType.Comment:
         case NodeType.Multi:
           throw new Error("not yet implemented");
       }
@@ -147,6 +167,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           return;
         case NodeType.Text:
         case NodeType.DOM:
+        case NodeType.Comment:
         case NodeType.Data:
           throw new Error("not yet implemented");
       }

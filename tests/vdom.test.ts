@@ -1,13 +1,13 @@
 import {
+  NodeType,
   patch,
   update,
-  NodeType,
-  VTextNode,
-  VMultiNode,
-  // VBoundaryNode,
   VDataNode,
   VDOMNode,
+  VMultiNode,
   VNode,
+  VTextNode,
+  VCommentNode,
 } from "../src/vdom";
 
 let nextId = 1;
@@ -19,16 +19,54 @@ function textNode(text: string): VTextNode {
   };
 }
 
+function commentNode(text: string): VCommentNode {
+  return {
+    type: NodeType.Comment,
+    text,
+    el: null,
+  };
+}
+
+type Attrs = { [name: string]: string };
+
 function domNode(tag: string, children: VNode<any>[]): VDOMNode<any>;
+function domNode(tag: string, attrs: Attrs, children: VNode<any>[]): VDOMNode<any>;
 function domNode(tag: string, key: string | number, children: VNode<any>[]): VDOMNode<any>;
-function domNode(tag: string, arg2, arg3?): VDOMNode<any> {
-  const children = arg3 instanceof Array ? arg3 : arg2;
-  const key = arg3 instanceof Array ? arg2 : nextId++;
+function domNode(
+  tag: string,
+  attrs: Attrs,
+  key: string | number,
+  children: VNode<any>[]
+): VDOMNode<any>;
+function domNode(tag: string, arg2, arg3?, arg4?): VDOMNode<any> {
+  let children: VNode<any>[];
+  let attrs: Attrs;
+  let key: string | number;
+
+  if (arg2 instanceof Array) {
+    children = arg2;
+    attrs = {};
+    key = nextId++;
+  } else if (typeof arg2 === "object") {
+    attrs = arg2;
+    if (arg3 instanceof Array) {
+      children = arg3;
+      key = nextId++;
+    } else {
+      key = arg3;
+      children = arg4;
+    }
+  } else {
+    key = arg2;
+    children = arg3;
+    attrs = {};
+  }
   return {
     type: NodeType.DOM,
     tag: tag,
     el: null,
     children,
+    attrs,
     key,
   };
 }
@@ -49,13 +87,6 @@ function dataNode(child: VNode<any>): VDataNode<any> {
     hooks: {},
   };
 }
-
-// function boundaryNode(): VBoundaryNode<any> {
-//   return {
-//     type: NodeType.Boundary,
-//     child: null,
-//   }
-// }
 
 let fixture: HTMLElement;
 
@@ -102,7 +133,7 @@ describe("patch function", () => {
     expect(fixture.innerHTML).toBe("");
   });
 
-  test("can patch a  data node with text node", () => {
+  test("can patch a data node with text node", () => {
     const vnode = dataNode(textNode("abc"));
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("abc");
@@ -124,6 +155,20 @@ describe("patch function", () => {
     const vnode = multiNode([textNode("abc"), multiNode([domNode("span", [textNode("text")])])]);
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("abc<span>text</span>");
+  });
+
+  test("comment node", () => {
+    const vnode = commentNode("comment");
+    patch(fixture, vnode);
+    expect(fixture.innerHTML).toBe("<!--comment-->");
+  });
+
+  describe("attributes", () => {
+    test("can make a dom node with an attribute", () => {
+      const vnode = domNode("div", { a: "b" }, []);
+      patch(fixture, vnode);
+      expect(fixture.innerHTML).toBe(`<div a="b"></div>`);
+    });
   });
 });
 

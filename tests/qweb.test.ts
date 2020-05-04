@@ -42,4 +42,39 @@ describe("static template", () => {
     const template = xml`<div></div><div></div>`;
     expect(render(template)).toBe("<div></div><div></div>");
   });
+
+  test("div with a text node", () => {
+    const template = xml`<div>word</div>`;
+    expect(render(template)).toBe("<div>word</div>");
+  });
+
+  test("div with a class attribute", () => {
+    const template = xml`<div class="abc">word</div>`;
+    expect(render(template)).toBe(`<div class="abc">word</div>`);
+  });
+
+  test("div with a class attribute with a quote", () => {
+    const template = xml`<div class="a'bc">word</div>`;
+    expect(render(template)).toBe(`<div class="a'bc">word</div>`);
+  });
+
+  test("div with an arbitrary attribute with a quote", () => {
+    const template = xml`<div abc="a'bc">word</div>`;
+    expect(render(template)).toBe(`<div abc="a'bc">word</div>`);
+  });
+
+  test("div with a empty class attribute", () => {
+    const template = xml`<div class="">word</div>`;
+    expect(render(template)).toBe(`<div>word</div>`);
+  });
+
+  test("div with a span child node", () => {
+    const template = xml`<div><span>word</span></div>`;
+    expect(render(template)).toBe(`<div><span>word</span></div>`);
+  });
+
+  test("properly handle comments", () => {
+    const template = xml`<div>hello <!-- comment-->owl</div>`;
+    expect(render(template)).toBe(`<div>hello <!-- comment-->owl</div>`);
+  });
 });

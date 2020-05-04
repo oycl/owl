@@ -23,7 +23,7 @@ export function compileTemplate(name: string, template: string): CompiledTemplat
   addLine(ctx, `// Template: ${descr}`);
 
   generateCode(ast, ctx);
-  // console.warn(context.code.join('\n'))
+  // console.warn(ctx.code.join('\n'))
   const fn = new Function("tree, context", ctx.code.join("\n")) as CompiledTemplate;
   return fn;
 }
@@ -53,7 +53,9 @@ function addLine(ctx: CodeContext, code: string) {
 function generateCode(ast: AST, ctx: CodeContext) {
   switch (ast.type) {
     case ASTNodeType.DOM: {
-      const vnode = `{type: ${NodeType.DOM}, tag: "${ast.tag}", el: null, children: [], key: ${ast.key}}`;
+      const vnode = `{type: ${NodeType.DOM}, tag: "${
+        ast.tag
+      }", el: null, children: [], attrs: ${JSON.stringify(ast.attrs)}, key: ${ast.key}}`;
       const id = addVNode(vnode, ctx);
       withParent(id, ctx, () => {
         for (let child of ast.children) {
@@ -64,6 +66,11 @@ function generateCode(ast: AST, ctx: CodeContext) {
     }
     case ASTNodeType.Text: {
       const vnode = `{type: ${NodeType.Text}, text: ${ast.text}, el: null}`;
+      addVNode(vnode, ctx);
+      break;
+    }
+    case ASTNodeType.Comment: {
+      const vnode = `{type: ${NodeType.Comment}, text: ${ast.text}, el: null}`;
       addVNode(vnode, ctx);
       break;
     }

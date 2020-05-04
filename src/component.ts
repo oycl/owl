@@ -1,5 +1,5 @@
 export class Component {
   static template: string;
 
-  el: HTMLElement | Text | null = null;
+  el: HTMLElement | Text | Comment | null = null;
 }
