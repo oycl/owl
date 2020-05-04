@@ -1,9 +1,10 @@
 import { Component } from "./component";
 import { Fiber } from "./fiber";
-import { QWeb } from "./qweb/qweb";
+import { getTemplateFn, utils as qwebUtils } from "./qweb/qweb";
 import { CompiledTemplate, RenderContext } from "./qweb/compiler";
 import { scheduler } from "./scheduler";
 import { patch, VDataNode, NodeType } from "./vdom";
+import { escape } from "./utils";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -25,8 +26,6 @@ export type VTree = VDataNode<ComponentData>;
 // -----------------------------------------------------------------------------
 // mount
 // -----------------------------------------------------------------------------
-
-const qweb = new QWeb();
 
 type MountTarget = HTMLElement;
 
@@ -58,7 +57,7 @@ function makeFnComponent(fn: FunctionComponent): VTree {
   const data: ComponentData = {
     fiber,
     context,
-    templateFn: qweb.getTemplate(fn.template),
+    templateFn: getTemplateFn(fn.template),
   };
   const tree: VTree = {
     type: NodeType.Data,
@@ -68,7 +67,7 @@ function makeFnComponent(fn: FunctionComponent): VTree {
     hooks: {},
   };
   new Promise(async (resolve) => {
-    tree.data.templateFn(tree, context);
+    tree.data.templateFn.call(qwebUtils, tree, context);
     fiber.counter--;
     resolve();
   });
@@ -82,7 +81,7 @@ function makeClassComponent(C: typeof Component): VTree {
   const data: ComponentData = {
     fiber,
     context: c,
-    templateFn: qweb.getTemplate(template),
+    templateFn: getTemplateFn(template),
   };
   const tree: VTree = {
     type: NodeType.Data,
@@ -93,14 +92,14 @@ function makeClassComponent(C: typeof Component): VTree {
   };
   tree.hooks.create = (el) => (c.el = el);
   new Promise((resolve) => {
-    tree.data.templateFn(tree, c);
+    tree.data.templateFn.call(qwebUtils, tree, c);
     fiber.counter--;
     resolve();
   });
   return tree;
 }
 
-QWeb.utils.makeComponent = function (parent: VTree, name: string, context: RenderContext): VTree {
+qwebUtils.makeComponent = function (parent: VTree, name: string, context: RenderContext): VTree {
   const definition = context[name];
   if (definition instanceof Component) {
     throw new Error("not done yet");
@@ -108,3 +107,35 @@ QWeb.utils.makeComponent = function (parent: VTree, name: string, context: Rende
     return makeFnComponent(definition);
   }
 };
+
+/**
+ * Render a template to a html string.
+ *
+ * Note that this is more limited than the `render` method: it is not suitable
+ * to render a full component tree, since this is an asynchronous operation.
+ * This method can only render templates without components.
+ */
+export function renderToString(name: string, context: RenderContext = {}): string {
+  const fn = getTemplateFn(name);
+  const tree: VTree = {
+    type: NodeType.Data,
+    data: {} as any,
+    child: null,
+    key: 1,
+    hooks: {},
+  };
+  fn.call(qwebUtils, tree, context);
+  const div = document.createElement("div");
+  patch(div, tree);
+
+  function escapeTextNodes(node) {
+    if (node.nodeType === 3) {
+      node.textContent = escape(node.textContent);
+    }
+    for (let n of node.childNodes) {
+      escapeTextNodes(n);
+    }
+  }
+  escapeTextNodes(div);
+  return div.innerHTML;
+}

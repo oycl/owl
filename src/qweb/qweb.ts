@@ -22,22 +22,20 @@ export function xml(strings, ...args) {
 // QWeb
 // -----------------------------------------------------------------------------
 
-export class QWeb {
-  static utils: any = {};
+export const utils: any = {};
 
-  templates: { [name: string]: CompiledTemplate } = {};
+export const compiledTemplates: { [name: string]: CompiledTemplate } = {};
 
-  getTemplate(template: string): CompiledTemplate {
-    let fn = this.templates[template];
-    if (!fn) {
-      const rawTemplate = templateMap[template];
-      if (!rawTemplate) {
-        throw new Error("qweb not implemented yet...");
-      }
-
-      fn = compileTemplate(template, rawTemplate).bind(QWeb.utils);
-      this.templates[template] = fn;
+export function getTemplateFn(template: string): CompiledTemplate {
+  let fn = compiledTemplates[template];
+  if (!fn) {
+    const rawTemplate = templateMap[template];
+    if (rawTemplate === undefined) {
+      throw new Error("qweb not implemented yet...");
     }
-    return fn;
+
+    fn = compileTemplate(template, rawTemplate);
+    compiledTemplates[template] = fn;
   }
+  return fn;
 }

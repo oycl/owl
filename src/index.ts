@@ -1,4 +1,5 @@
-import { mount } from "./core";
+import { mount, renderToString } from "./core";
 import { Component } from "./component";
+import { xml } from "./qweb/qweb";
 
-export { mount, Component };
+export { mount, renderToString, Component, xml };
