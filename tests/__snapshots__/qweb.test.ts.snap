@@ -1,128 +1,234 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`static template div with a class attribute 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div class=\\"abc\\">word</div>
+    // Template: \`<div class=\\"abc\\">word</div>\`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"class\\":\\"abc\\"}, key: 1};
-    vn1.children.push({type: 1, text: \\"word\\", el: null});
+    vn1.children.push({type: 1, text: \`word\`, el: null});
 }"
 `;
 
 exports[`static template div with a class attribute with a quote 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div class=\\"a'bc\\">word</div>
+    // Template: \`<div class=\\"a'bc\\">word</div>\`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"class\\":\\"a'bc\\"}, key: 1};
-    vn1.children.push({type: 1, text: \\"word\\", el: null});
+    vn1.children.push({type: 1, text: \`word\`, el: null});
 }"
 `;
 
 exports[`static template div with a empty class attribute 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div class=\\"\\">word</div>
+    // Template: \`<div class=\\"\\">word</div>\`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    vn1.children.push({type: 1, text: \\"word\\", el: null});
+    vn1.children.push({type: 1, text: \`word\`, el: null});
 }"
 `;
 
 exports[`static template div with a span child node 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div><span>word</span></div>
+    // Template: \`<div><span>word</span></div>\`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
     const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
     vn1.children.push(vn2);
-    vn2.children.push({type: 1, text: \\"word\\", el: null});
+    vn2.children.push({type: 1, text: \`word\`, el: null});
 }"
 `;
 
 exports[`static template div with a text node 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div>word</div>
+    // Template: \`<div>word</div>\`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    vn1.children.push({type: 1, text: \\"word\\", el: null});
+    vn1.children.push({type: 1, text: \`word\`, el: null});
 }"
 `;
 
 exports[`static template div with an arbitrary attribute with a quote 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div abc=\\"a'bc\\">word</div>
+    // Template: \`<div abc=\\"a'bc\\">word</div>\`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {\\"abc\\":\\"a'bc\\"}, key: 1};
-    vn1.children.push({type: 1, text: \\"word\\", el: null});
+    vn1.children.push({type: 1, text: \`word\`, el: null});
 }"
 `;
 
 exports[`static template empty div 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div></div>
+    // Template: \`<div></div>\`
     tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
 }"
 `;
 
 exports[`static template no template (*) 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: 
+    // Template: \`\`
     tree.child = {type: 4, children:[]};
 }"
 `;
 
 exports[`static template properly handle comments 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div>hello <!-- comment-->owl</div>
+    // Template: \`<div>hello <!-- comment-->owl</div>\`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    vn1.children.push({type: 1, text: \\"hello \\", el: null});
-    vn1.children.push({type: 2, text: \\" comment\\", el: null});
-    vn1.children.push({type: 1, text: \\"owl\\", el: null});
+    vn1.children.push({type: 1, text: \`hello \`, el: null});
+    vn1.children.push({type: 2, text: \` comment\`, el: null});
+    vn1.children.push({type: 1, text: \`owl\`, el: null});
 }"
 `;
 
 exports[`static template simple dynamic value 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <t><t t-esc=\\"text\\"/></t>
-    tree.child = {type: 1, text: context[\\"text\\"], el: null};
+    // Template: \`<t><t t-esc=\\"text\\"/></t>\`
+    tree.child = {type: 1, text: ctx['text'], el: null};
 }"
 `;
 
 exports[`static template simple string (*) 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: hello vdom
-    tree.child = {type: 1, text: \\"hello vdom\\", el: null};
+    // Template: \`hello vdom\`
+    tree.child = {type: 1, text: \`hello vdom\`, el: null};
 }"
 `;
 
 exports[`static template simple string 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <t>hello vdom</t>
-    tree.child = {type: 1, text: \\"hello vdom\\", el: null};
+    // Template: \`<t>hello vdom</t>\`
+    tree.child = {type: 1, text: \`hello vdom\`, el: null};
 }"
 `;
 
 exports[`static template simple string, with some dynamic value 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <t>hello <t t-esc=\\"text\\"/></t>
+    // Template: \`<t>hello <t t-esc=\\"text\\"/></t>\`
     const vn1 = tree.child = {type: 4, children:[]};
-    vn1.children.push({type: 1, text: \\"hello \\", el: null});
-    vn1.children.push({type: 1, text: context[\\"text\\"], el: null});
+    vn1.children.push({type: 1, text: \`hello \`, el: null});
+    vn1.children.push({type: 1, text: ctx['text'], el: null});
 }"
 `;
 
 exports[`static template two empty divs (*) 1`] = `
-"function anonymous(tree, context
+"function anonymous(tree, ctx
 ) {
-    // Template: <div></div><div></div>
+    // Template: \`<div></div><div></div>\`
     const vn1 = tree.child = {type: 4, children:[]};
     vn1.children.push({type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1});
     vn1.children.push({type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1});
+}"
+`;
+
+exports[`t-if boolean value condition elif 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <t t-if=\\"color == 'black'\\">black pearl</t>        <t t-elif=\\"color == 'yellow'\\">yello\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['color']=='black') {
+        vn1.children.push({type: 1, text: \`black pearl\`, el: null});
+    } else if (ctx['color']=='yellow') {
+        vn1.children.push({type: 1, text: \`yellow submarine\`, el: null});
+    } else if (ctx['color']=='red') {
+        vn1.children.push({type: 1, text: \`red is dead\`, el: null});
+    } else {
+        vn1.children.push({type: 1, text: \`beer\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if boolean value condition else 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <span>begin</span>        <t t-if=\\"condition\\">ok</t>        <t t-else=\\"\\">ok-else</t>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn2);
+    vn2.children.push({type: 1, text: \`begin\`, el: null});
+    if (ctx['condition']) {
+        vn1.children.push({type: 1, text: \`ok\`, el: null});
+    } else {
+        vn1.children.push({type: 1, text: \`ok-else\`, el: null});
+    }
+    const vn6 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn6);
+    vn6.children.push({type: 1, text: \`end\`, el: null});
+}"
+`;
+
+exports[`t-if boolean value condition missing 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-if=\\"condition\\">fail</t></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['condition']) {
+        vn1.children.push({type: 1, text: \`fail\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if boolean value false condition (on a dom node) (*) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><span t-if=\\"condition\\">ok</span></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['condition']) {
+        const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        vn1.children.push(vn2);
+        vn2.children.push({type: 1, text: \`ok\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if boolean value false condition 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-if=\\"condition\\">ok</t></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['condition']) {
+        vn1.children.push({type: 1, text: \`ok\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if boolean value false condition, resulting in empty template (on a dom node) (*) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div t-if=\\"condition\\">ok</div>\`
+    if (ctx['condition']) {
+        const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+        vn1.children.push({type: 1, text: \`ok\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if boolean value true condition (on a dom node) (*) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><span t-if=\\"condition\\">ok</span></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['condition']) {
+        const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        vn1.children.push(vn2);
+        vn2.children.push({type: 1, text: \`ok\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if boolean value true condition 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-if=\\"condition\\">ok</t></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['condition']) {
+        vn1.children.push({type: 1, text: \`ok\`, el: null});
+    }
 }"
 `;

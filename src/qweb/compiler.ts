@@ -1,6 +1,7 @@
-import { AST, ASTNodeType, parse } from "./parser";
+import { AST, parse } from "./parser";
 import { NodeType } from "../vdom";
 import { VTree } from "../core";
+import { compileExpr } from "./expression_parser";
 
 export interface RenderContext {
   [key: string]: any;
@@ -17,14 +18,14 @@ interface CodeContext {
 
 export function compileTemplate(name: string, template: string): CompiledTemplate {
   const ast = parse(template);
-  // console.warn(ast)
+  // console.warn(JSON.stringify(ast, null, 3))
   const ctx: CodeContext = { currentParent: "tree", code: [], nextId: 1, indentLevel: 0 };
-  const descr = template.replace(/`/g, "'").slice(0, 200);
-  addLine(ctx, `// Template: ${descr}`);
+  const descr = template.trim().slice(0, 100).replace(/`/g, "'").replace(/\n/g, "");
+  addLine(ctx, `// Template: \`${descr}\``);
 
   generateCode(ast, ctx);
   // console.warn(ctx.code.join('\n'))
-  const fn = new Function("tree, context", ctx.code.join("\n")) as CompiledTemplate;
+  const fn = new Function("tree, ctx", ctx.code.join("\n")) as CompiledTemplate;
   return fn;
 }
 
@@ -58,7 +59,7 @@ function addLine(ctx: CodeContext, code: string) {
 
 function generateCode(ast: AST, ctx: CodeContext) {
   switch (ast.type) {
-    case ASTNodeType.DOM: {
+    case "DOM": {
       const vnode = `{type: ${NodeType.DOM}, tag: "${
         ast.tag
       }", el: null, children: [], attrs: ${JSON.stringify(ast.attrs)}, key: ${ast.key}}`;
@@ -70,17 +71,57 @@ function generateCode(ast: AST, ctx: CodeContext) {
       });
       break;
     }
-    case ASTNodeType.Text: {
+    case "TEXT": {
       const vnode = `{type: ${NodeType.Text}, text: ${ast.text}, el: null}`;
       addVNode(vnode, ctx, false);
       break;
     }
-    case ASTNodeType.Comment: {
+    case "T-ESC": {
+      const vnode = `{type: ${NodeType.Text}, text: ${compileExpr(ast.expr, {})}, el: null}`;
+      addVNode(vnode, ctx, false);
+      break;
+    }
+    case "T-IF": {
+      addLine(ctx, `if (${compileExpr(ast.condition, {})}) {`);
+      ctx.indentLevel++;
+      generateCode(ast.child, ctx);
+      ctx.indentLevel--;
+      if (ast.next) {
+        generateCode(ast.next, ctx);
+      } else {
+        addLine(ctx, "}");
+      }
+      break;
+    }
+
+    case "T-ELIF": {
+      addLine(ctx, `} else if (${compileExpr(ast.condition, {})}) {`);
+      ctx.indentLevel++;
+      generateCode(ast.child, ctx);
+      ctx.indentLevel--;
+      if (ast.next) {
+        generateCode(ast.next, ctx);
+      } else {
+        addLine(ctx, "}");
+      }
+      break;
+    }
+
+    case "T-ELSE": {
+      addLine(ctx, `} else {`);
+      ctx.indentLevel++;
+      generateCode(ast.child, ctx);
+      ctx.indentLevel--;
+      addLine(ctx, "}");
+      break;
+    }
+
+    case "COMMENT": {
       const vnode = `{type: ${NodeType.Comment}, text: ${ast.text}, el: null}`;
       addVNode(vnode, ctx, false);
       break;
     }
-    case ASTNodeType.Multi: {
+    case "MULTI": {
       const vnode = `{type: ${NodeType.Multi}, children:[]}`;
       const id = addVNode(vnode, ctx, ast.children.length > 0);
       withParent(id, ctx, () => {
@@ -90,8 +131,8 @@ function generateCode(ast: AST, ctx: CodeContext) {
       });
       break;
     }
-    case ASTNodeType.Component: {
-      const vnode = `this.makeComponent(tree, "${ast.name}", context)`;
+    case "COMPONENT": {
+      const vnode = `this.makeComponent(tree, "${ast.name}", ctx)`;
       addVNode(vnode, ctx, false);
       break;
     }

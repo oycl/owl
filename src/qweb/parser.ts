@@ -1,17 +1,11 @@
 // -----------------------------------------------------------------------------
 // AST
 // -----------------------------------------------------------------------------
-
-export const enum ASTNodeType {
-  DOM,
-  Text,
-  Comment,
-  Multi,
-  Component,
-}
+const lineBreakRE = /[\r\n]/;
+const whitespaceRE = /\s+/g;
 
 export interface ASTDOMNode {
-  type: ASTNodeType.DOM;
+  type: "DOM";
   tag: string;
   children: AST[];
   key: string | number;
@@ -19,26 +13,59 @@ export interface ASTDOMNode {
 }
 
 export interface ASTComponentNode {
-  type: ASTNodeType.Component;
+  type: "COMPONENT";
   name: string;
 }
 
 export interface ASTTextNode {
-  type: ASTNodeType.Text;
+  type: "TEXT";
   text: string;
 }
 
+export interface ASTEscNode {
+  type: "T-ESC";
+  expr: string;
+}
+
 export interface ASTCommentNode {
-  type: ASTNodeType.Comment;
+  type: "COMMENT";
   text: string;
 }
 
 export interface ASTMultiNode {
-  type: ASTNodeType.Multi;
+  type: "MULTI";
   children: AST[];
 }
 
-export type AST = ASTDOMNode | ASTTextNode | ASTCommentNode | ASTMultiNode | ASTComponentNode;
+export interface ASTIfNode {
+  type: "T-IF";
+  condition: string;
+  child: AST;
+  next: ASTElifNode | ASTElseNode | null;
+}
+
+export interface ASTElifNode {
+  type: "T-ELIF";
+  condition: string;
+  child: AST;
+  next: ASTElifNode | ASTElseNode | null;
+}
+
+export interface ASTElseNode {
+  type: "T-ELSE";
+  child: AST;
+}
+
+export type AST =
+  | ASTDOMNode
+  | ASTTextNode
+  | ASTEscNode
+  | ASTCommentNode
+  | ASTMultiNode
+  | ASTIfNode
+  | ASTElifNode
+  | ASTElseNode
+  | ASTComponentNode;
 
 // -----------------------------------------------------------------------------
 // Parser
@@ -47,37 +74,100 @@ export type AST = ASTDOMNode | ASTTextNode | ASTCommentNode | ASTMultiNode | AST
 export function parse(xml: string): AST {
   const template = `<t>${xml}</t>`;
   const doc = toXML(template);
-  return parseNode(doc.firstChild!);
+  return parseNode(doc.firstChild!)!;
 }
 
-function parseNode(node: ChildNode): AST {
+function parseNode(node: ChildNode): AST | null {
   if (!(node instanceof Element)) {
-    const type = node.nodeType === 3 ? ASTNodeType.Text : ASTNodeType.Comment;
-    let text = '"' + node.textContent! + '"';
+    const type = node.nodeType === 3 ? "TEXT" : "COMMENT";
+    let text = node.textContent!;
+    if (lineBreakRE.test(text) && !text.trim()) {
+      return null;
+    }
+    text = text.replace(whitespaceRE, " ");
     return {
       type,
-      text,
+      text: "`" + text + "`",
     };
   }
+  // t-if directive
+  const tIf = node.getAttribute("t-if");
+  if (tIf) {
+    node.removeAttribute("t-if");
+    let child = parseNode(node)!;
+
+    let nextElement = node.nextElementSibling;
+    let firstAST: null | ASTElifNode | ASTElseNode = null;
+    let lastAST: null | ASTElifNode | ASTElseNode = null;
+
+    // t-elifs
+    while (nextElement && nextElement.hasAttribute("t-elif")) {
+      const elif: ASTElifNode = {
+        type: "T-ELIF",
+        child: parseNode(nextElement)!,
+        condition: nextElement.getAttribute("t-elif")!,
+        next: null,
+      };
+      firstAST = firstAST || elif;
+      if (lastAST) {
+        lastAST.next = elif;
+        lastAST = elif;
+      } else {
+        lastAST = elif;
+      }
+      const n = nextElement.nextElementSibling;
+      nextElement.remove();
+      nextElement = n;
+    }
+
+    // t-else
+    if (nextElement && nextElement.hasAttribute("t-else")) {
+      const elseAST: ASTElseNode = {
+        type: "T-ELSE",
+        child: parseNode(nextElement)!,
+      };
+      firstAST = firstAST || elseAST;
+      if (lastAST) {
+        lastAST.next = elseAST;
+      }
+      nextElement.remove();
+    }
+
+    return {
+      type: "T-IF",
+      child,
+      condition: tIf,
+      next: firstAST,
+    };
+  }
+
   if (node.tagName === "t") {
     const tEsc = node.getAttribute("t-esc");
     if (tEsc) {
       return {
-        type: ASTNodeType.Text,
-        text: `context["${tEsc}"]`,
+        type: "T-ESC",
+        expr: tEsc,
       };
     }
-    const children = Array.from(node.childNodes).map(parseNode);
+    let children: AST[] = [];
+    while (node.hasChildNodes()) {
+      const child = node.firstChild!;
+      const astnode = parseNode(child);
+      if (astnode) {
+        children.push(astnode);
+      }
+      child.remove();
+    }
     if (children.length === 1) {
       return children[0];
     } else {
-      return { type: ASTNodeType.Multi, children };
+      return { type: "MULTI", children };
     }
   }
   const firstLetter = node.tagName[0];
   if (firstLetter === firstLetter.toUpperCase()) {
     return {
-      type: ASTNodeType.Component,
+      type: "COMPONENT",
       name: node.tagName,
     };
   }
@@ -91,10 +181,18 @@ function parseNode(node: ChildNode): AST {
       attrs[attrName] = attrValue;
     }
   }
-  let children = Array.from(node.childNodes).map(parseNode);
+  let children: AST[] = [];
+  while (node.hasChildNodes()) {
+    const child = node.firstChild!;
+    const astnode = parseNode(child);
+    if (astnode) {
+      children.push(astnode);
+    }
+    child.remove();
+  }
 
   return {
-    type: ASTNodeType.DOM,
+    type: "DOM",
     tag: node.tagName,
     children,
     key: 1,

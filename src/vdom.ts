@@ -84,12 +84,16 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
       el.appendChild(htmlEl);
       return htmlEl;
     case NodeType.Data: {
-      const nodeEl = patch(el, vnode.child!);
-      const createHook = vnode.hooks.create;
-      if (createHook) {
-        createHook(nodeEl);
+      const child = vnode.child;
+      if (child) {
+        const nodeEl = patch(el, child);
+        const createHook = vnode.hooks.create;
+        if (createHook) {
+          createHook(nodeEl);
+        }
+        return nodeEl;
       }
-      return nodeEl;
+      return null;
     }
     case NodeType.Multi: {
       let nodeEl: VNodeEl = null;
