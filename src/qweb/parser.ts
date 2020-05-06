@@ -54,10 +54,18 @@ export interface ASTElseNode {
   child: AST;
 }
 
+export interface ASTSetNode {
+  type: "T-SET";
+  name: string;
+  value: string | null;
+  body: AST[];
+}
+
 export type AST =
   | ASTDOMNode
   | ASTTextNode
   | ASTEscNode
+  | ASTSetNode
   | ASTCommentNode
   | ASTMultiNode
   | ASTIfNode
@@ -83,6 +91,7 @@ function parseNode(node: ChildNode): AST | null {
     parseTIfNode(node) ||
     parseTEscNode(node) ||
     parseComponentNode(node) ||
+    parseTSetNode(node) ||
     parseTNode(node) ||
     parseDOMNode(node)
   );
@@ -200,6 +209,20 @@ function parseComponentNode(node: Element): AST | null {
 }
 
 // -----------------------------------------------------------------------------
+// t-set directive
+// -----------------------------------------------------------------------------
+
+function parseTSetNode(node: Element): AST | null {
+  if (!node.hasAttribute("t-set")) {
+    return null;
+  }
+  const name = node.getAttribute("t-set")!;
+  const value = node.getAttribute("t-value");
+  const body = parseChildren(node);
+  return { type: "T-SET", name, value, body };
+}
+
+// -----------------------------------------------------------------------------
 // <t /> tag
 // -----------------------------------------------------------------------------
 
@@ -242,12 +265,10 @@ function parseDOMNode(node: Element): AST {
       attrs[attrName] = attrValue;
     }
   }
-  let children = parseChildren(node);
-
   return {
     type: "DOM",
     tag: node.tagName,
-    children,
+    children: parseChildren(node),
     key: 1,
     attrs,
   };

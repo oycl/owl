@@ -100,9 +100,9 @@ describe("error handling", () => {
   });
 
   //   test("template with text node and tag", () => {
-  //     qweb.addTemplate("test", `<t>text<span>other node</span></t>`);
+  //     const template = xml`<t>text<span>other node</span></t>`;
 
-  //     expect(() => renderToString(qweb, "test")).toThrow(
+  //     expect(() => render(template)).toThrow(
   //       "A template should not have more than one root node"
   //     );
   //   });
@@ -112,9 +112,9 @@ describe("error handling", () => {
   //   });
 
   //   test("cannot add twice the same template", () => {
-  //     qweb.addTemplate("test", `<t></t>`);
-  //     expect(() => qweb.addTemplate("test", "<div/>", true)).not.toThrow("already defined");
-  //     expect(() => qweb.addTemplate("test", "<div/>")).toThrow("already defined");
+  //     const template = xml`<t></t>`;
+  //     expect(() => const template = xml"<div/>", true)).not.toThrow("already defined";
+  //     expect(() => const template = xml"<div/>")).toThrow("already defined";
   //   });
 
   //   test("addTemplates throw if parser error", () => {
@@ -209,206 +209,185 @@ describe("t-esc", () => {
 
 // describe("t-raw", () => {
 //   test("literal", () => {
-//     qweb.addTemplate("test", `<span><t t-raw="'ok'"/></span>`);
-//     expect(renderToString(qweb, "test")).toBe("<span>ok</span>");
+//     const template = xml`<span><t t-raw="'ok'"/></span>`;
+//     expect(render(template)).toBe("<span>ok</span>");
 //   });
 
 //   test("variable", () => {
-//     qweb.addTemplate("test", `<span><t t-raw="var"/></span>`);
-//     expect(renderToString(qweb, "test", { var: "ok" })).toBe("<span>ok</span>");
+//     const template = xml`<span><t t-raw="var"/></span>`;
+//     expect(render(template, { var: "ok" })).toBe("<span>ok</span>");
 //   });
 
 //   test("not escaping", () => {
-//     qweb.addTemplate("test", `<div><t t-raw="var"/></div>`);
-//     expect(renderToString(qweb, "test", { var: "<ok></ok>" })).toBe("<div><ok></ok></div>");
+//     const template = xml`<div><t t-raw="var"/></div>`;
+//     expect(render(template, { var: "<ok></ok>" })).toBe("<div><ok></ok></div>");
 //   });
 
 //   test("t-raw and another sibling node", () => {
-//     qweb.addTemplate("test", `<span><span>hello</span><t t-raw="var"/></span>`);
-//     expect(renderToString(qweb, "test", { var: "<ok>world</ok>" })).toBe(
+//     const template = xml`<span><span>hello</span><t t-raw="var"/></span>`;
+//     expect(render(template, { var: "<ok>world</ok>" })).toBe(
 //       "<span><span>hello</span><ok>world</ok></span>"
 //     );
 //   });
 // });
 
-// describe("t-set", () => {
-//   test("set from attribute literal", () => {
-//     qweb.addTemplate("test", `<div><t t-set="value" t-value="'ok'"/><t t-esc="value"/></div>`);
-//     expect(renderToString(qweb, "test")).toBe("<div>ok</div>");
-//   });
+describe("t-set", () => {
+  test("set from attribute literal", () => {
+    const template = xml`<div><t t-set="value" t-value="'ok'"/><t t-esc="value"/></div>`;
+    expect(render(template)).toBe("<div>ok</div>");
+  });
 
-//   test("t-set and t-if", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-set="v" t-value="value"/>
-//         <t t-if="v === 'ok'">grimbergen</t>
-//         </div>`
-//     );
-//     expect(renderToString(qweb, "test", { value: "ok" })).toBe("<div>grimbergen</div>");
-//   });
+  test("t-set and t-if", () => {
+    const template = xml`
+        <div>
+          <t t-set="v" t-value="value"/>
+          <t t-if="v === 'ok'">grimbergen</t>
+        </div>`;
+    expect(render(template, { value: "ok" })).toBe("<div>grimbergen</div>");
+  });
 
-//   test("set from body literal", () => {
-//     qweb.addTemplate("test", `<t><t t-set="value">ok</t><t t-esc="value"/></t>`);
-//     expect(renderToString(qweb, "test")).toBe("ok");
-//   });
+  test("set from body literal", () => {
+    const template = xml`<t><t t-set="value">ok</t><t t-esc="value"/></t>`;
+    expect(render(template)).toBe("ok");
+  });
 
-//   test("set from attribute lookup", () => {
-//     qweb.addTemplate("test", `<div><t t-set="stuff" t-value="value"/><t t-esc="stuff"/></div>`);
-//     expect(renderToString(qweb, "test", { value: "ok" })).toBe("<div>ok</div>");
-//   });
+  test("set from attribute lookup", () => {
+    const template = xml`<div><t t-set="stuff" t-value="value"/><t t-esc="stuff"/></div>`;
+    expect(render(template, { value: "ok" })).toBe("<div>ok</div>");
+  });
 
-//   test("t-set evaluates an expression only once", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div >
-//           <t t-set="v" t-value="value + ' artois'"/>
-//           <t t-esc="v"/>
-//           <t t-esc="v"/>
-//         </div>`
-//     );
-//     expect(renderToString(qweb, "test", { value: "stella" })).toBe(
-//       "<div>stella artoisstella artois</div>"
-//     );
-//   });
+  test("t-set evaluates an expression only once", () => {
+    const template = xml`<div >
+            <t t-set="v" t-value="value + ' artois'"/>
+            <t t-esc="v"/>
+            <t t-esc="v"/>
+          </div>`;
+    expect(render(template, { value: "stella" })).toBe("<div>stella artoisstella artois</div>");
+  });
 
-//   test("set from body lookup", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div><t t-set="stuff"><t t-esc="value"/></t><t t-esc="stuff"/></div>`
-//     );
-//     expect(renderToString(qweb, "test", { value: "ok" })).toBe("<div>ok</div>");
-//   });
+  test("set from body lookup", () => {
+    const template = xml`<div><t t-set="stuff"><t t-esc="value"/></t><t t-esc="stuff"/></div>`;
+    expect(render(template, { value: "ok" })).toBe("<div>ok</div>");
+  });
 
-//   test("set from empty body", () => {
-//     qweb.addTemplate("test", `<div><t t-set="stuff"/><t t-esc="stuff"/></div>`);
-//     expect(renderToString(qweb, "test")).toBe("<div></div>");
-//   });
+  test("set from empty body", () => {
+    const template = xml`<div><t t-set="stuff"/><t t-esc="stuff"/></div>`;
+    expect(render(template)).toBe("<div></div>");
+  });
 
-//   test("value priority", () => {
-//     qweb.addTemplate("test", `<div><t t-set="value" t-value="1">2</t><t t-esc="value"/></div>`);
-//     expect(renderToString(qweb, "test")).toBe("<div>1</div>");
-//   });
+  test("value priority", () => {
+    const template = xml`<div><t t-set="value" t-value="1">2</t><t t-esc="value"/></div>`;
+    expect(render(template)).toBe("<div>1</div>");
+  });
 
-//   test("evaluate value expression", () => {
-//     qweb.addTemplate("test", `<div><t t-set="value" t-value="1 + 2"/><t t-esc="value"/></div>`);
-//     expect(renderToString(qweb, "test")).toBe("<div>3</div>");
-//   });
+  test("evaluate value expression", () => {
+    const template = xml`<div><t t-set="value" t-value="1 + 2"/><t t-esc="value"/></div>`;
+    expect(render(template)).toBe("<div>3</div>");
+  });
 
-//   test("t-set should reuse variable if possible", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//           <t t-set="v" t-value="1"/>
-//           <div t-foreach="list" t-as="elem" t-key="elem_index">
-//               <span>v<t t-esc="v"/></span>
-//               <t t-set="v" t-value="elem"/>
-//           </div>
-//         </div>`
-//     );
-//     expect(normalize(renderToString(qweb, "test", { list: ["a", "b"] }))).toBe(
-//       "<div><div><span>v1</span></div><div><span>va</span></div></div>"
-//     );
-//   });
+  // test("t-set should reuse variable if possible", () => {
+  //   const template = xml`<div>
+  //         <t t-set="v" t-value="1"/>
+  //         <div t-foreach="list" t-as="elem" t-key="elem_index">
+  //             <span>v<t t-esc="v"/></span>
+  //             <t t-set="v" t-value="elem"/>
+  //         </div>
+  //       </div>`;
 
-//   test("t-set with content and sub t-esc", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-set="setvar"><t t-esc="beep"/> boop</t>
-//         <t t-esc="setvar"/>
-//       </div>`
-//     );
+  //     expect(render(template, { list: ["a", "b"] })).toBe(
+  //     "<div><div><span>v1</span></div><div><span>va</span></div></div>"
+  //   );
+  // });
 
-//     expect(renderToString(qweb, "test", { beep: "beep" })).toBe("<div>beep boop</div>");
-//   });
+  test("t-set with content and sub t-esc", () => {
+    const template = xml`<div>
+          <t t-set="setvar"><t t-esc="beep"/> boop</t>
+          <t t-esc="setvar"/>
+        </div>`;
 
-//   test("evaluate value expression, part 2", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div><t t-set="value" t-value="somevariable + 2"/><t t-esc="value"/></div>`
-//     );
-//     expect(renderToString(qweb, "test", { somevariable: 43 })).toBe("<div>45</div>");
-//   });
+    expect(render(template, { beep: "beep" })).toBe("<div>beep boop</div>");
+  });
 
-//   test("t-set, t-if, and mix of expression/body lookup, 1", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-if="flag" t-set="ourvar">1</t>
-//         <t t-else="" t-set="ourvar" t-value="0"></t>
-//         <t t-esc="ourvar"/>
-//       </div>`
-//     );
-//     expect(renderToString(qweb, "test", { flag: true })).toBe("<div>1</div>");
-//     expect(renderToString(qweb, "test", { flag: false })).toBe("<div>0</div>");
-//   });
+  test("evaluate value expression, part 2", () => {
+    const template = xml`<div><t t-set="value" t-value="somevariable + 2"/><t t-esc="value"/></div>`;
+    expect(render(template, { somevariable: 43 })).toBe("<div>45</div>");
+  });
 
-//   test("t-set, t-if, and mix of expression/body lookup, 2", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-if="flag" t-set="ourvar" t-value="1"></t>
-//         <t t-else="" t-set="ourvar">0</t>
-//         <t t-esc="ourvar"/>
-//       </div>`
-//     );
-//     expect(renderToString(qweb, "test", { flag: true })).toBe("<div>1</div>");
-//     expect(renderToString(qweb, "test", { flag: false })).toBe("<div>0</div>");
-//   });
+  test("t-set, t-if, and mix of expression/body lookup, 1", () => {
+    const template = xml`<div>
+          <t t-if="flag" t-set="ourvar">1</t>
+          <t t-else="" t-set="ourvar" t-value="0"></t>
+          <t t-esc="ourvar"/>
+        </div>`;
+    expect(render(template, { flag: true })).toBe("<div>1</div>");
+    expect(render(template, { flag: false })).toBe("<div>0</div>");
+  });
 
-//   test("t-set body is evaluated immediately", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-set="v1" t-value="'before'"/>
-//         <t t-set="v2">
-//           <span><t t-esc="v1"/></span>
-//         </t>
-//         <t t-set="v1" t-value="'after'"/>
-//         <t t-raw="v2"/>
-//       </div>`
-//     );
+  //   test("t-set, t-if, and mix of expression/body lookup, 2", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <t t-if="flag" t-set="ourvar" t-value="1"></t>
+  //         <t t-else="" t-set="ourvar">0</t>
+  //         <t t-esc="ourvar"/>
+  //       </div>`
+  //     );
+  //     expect(render(template, { flag: true })).toBe("<div>1</div>");
+  //     expect(render(template, { flag: false })).toBe("<div>0</div>");
+  //   });
 
-//     expect(renderToString(qweb, "test")).toBe("<div><span>before</span></div>");
-//   });
+  //   test("t-set body is evaluated immediately", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <t t-set="v1" t-value="'before'"/>
+  //         <t t-set="v2">
+  //           <span><t t-esc="v1"/></span>
+  //         </t>
+  //         <t t-set="v1" t-value="'after'"/>
+  //         <t t-raw="v2"/>
+  //       </div>`
+  //     );
 
-//   test("t-set with t-value (falsy) and body", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-set="v3" t-value="false"/>
-//         <t t-set="v1" t-value="'before'"/>
-//         <t t-set="v2" t-value="v3">
-//           <span><t t-esc="v1"/></span>
-//         </t>
-//         <t t-set="v1" t-value="'after'"/>
-//         <t t-set="v3" t-value="true"/>
-//         <t t-raw="v2"/>
-//       </div>`
-//     );
+  //     expect(render(template)).toBe("<div><span>before</span></div>");
+  //   });
 
-//     expect(renderToString(qweb, "test")).toBe("<div><span>before</span></div>");
-//   });
+  //   test("t-set with t-value (falsy) and body", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <t t-set="v3" t-value="false"/>
+  //         <t t-set="v1" t-value="'before'"/>
+  //         <t t-set="v2" t-value="v3">
+  //           <span><t t-esc="v1"/></span>
+  //         </t>
+  //         <t t-set="v1" t-value="'after'"/>
+  //         <t t-set="v3" t-value="true"/>
+  //         <t t-raw="v2"/>
+  //       </div>`
+  //     );
 
-//   test("t-set with t-value (truthy) and body", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-set="v3" t-value="'Truthy'"/>
-//         <t t-set="v1" t-value="'before'"/>
-//         <t t-set="v2" t-value="v3">
-//           <span><t t-esc="v1"/></span>
-//         </t>
-//         <t t-set="v1" t-value="'after'"/>
-//         <t t-set="v3" t-value="false"/>
-//         <t t-raw="v2"/>
-//       </div>`
-//     );
+  //     expect(render(template)).toBe("<div><span>before</span></div>");
+  //   });
 
-//     expect(renderToString(qweb, "test")).toBe("<div>Truthy</div>");
-//   });
-// });
+  //   test("t-set with t-value (truthy) and body", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <t t-set="v3" t-value="'Truthy'"/>
+  //         <t t-set="v1" t-value="'before'"/>
+  //         <t t-set="v2" t-value="v3">
+  //           <span><t t-esc="v1"/></span>
+  //         </t>
+  //         <t t-set="v1" t-value="'after'"/>
+  //         <t t-set="v3" t-value="false"/>
+  //         <t t-raw="v2"/>
+  //       </div>`
+  //     );
+
+  //     expect(render(template)).toBe("<div>Truthy</div>");
+  //   });
+});
 
 describe("t-if", () => {
   test("boolean value true condition", () => {
@@ -521,7 +500,7 @@ describe("t-if", () => {
   //         <t t-if="title"><t t-esc="title"/></t>
   //       </div>`
   //     );
-  //     const result = renderToString(qweb, "test");
+  //     const result = render(template);
   //     const expected = `<div>test</div>`;
   //     expect(result).toBe(expected);
   //   });
@@ -536,7 +515,7 @@ describe("t-if", () => {
   //             <span t-if="x">COUCOU</span>
   //         </div>`
   //     );
-  //     const result = renderToString(qweb, "test");
+  //     const result = render(template);
   //     const expected = `<div><span>COUCOU</span></div>`;
   //     expect(result).toBe(expected);
   //   });
@@ -552,7 +531,7 @@ describe("t-if", () => {
   //             <span t-elif="!x">BBB</span>
   //         </div>`
   //     );
-  //     const result = renderToString(qweb, "test");
+  //     const result = render(template);
   //     const expected = `<div><span>BBB</span></div>`;
   //     expect(result).toBe(expected);
   //   });
@@ -560,102 +539,102 @@ describe("t-if", () => {
 
 // describe("attributes", () => {
 //   test("static attributes", () => {
-//     qweb.addTemplate("test", `<div foo="a" bar="b" baz="c"/>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div foo="a" bar="b" baz="c"/>`;
+//     const result = render(template);
 //     const expected = `<div foo="a" bar="b" baz="c"></div>`;
 //     expect(result).toBe(expected);
 //   });
 
 //   test("static attributes with dashes", () => {
-//     qweb.addTemplate("test", `<div aria-label="Close"/>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div aria-label="Close"/>`;
+//     const result = render(template);
 //     const expected = `<div aria-label="Close"></div>`;
 //     expect(result).toBe(expected);
 //   });
 
 //   test("static attributes on void elements", () => {
-//     qweb.addTemplate("test", `<img src="/test.jpg" alt="Test"/>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<img src="/test.jpg" alt="Test"/>`;
+//     const result = render(template);
 //     expect(result).toBe(`<img src="/test.jpg" alt="Test">`);
 //   });
 
 //   test("dynamic attributes", () => {
-//     qweb.addTemplate("test", `<div t-att-foo="'bar'"/>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div t-att-foo="'bar'"/>`;
+//     const result = render(template);
 //     expect(result).toBe(`<div foo="bar"></div>`);
 //   });
 
 //   test("dynamic class attribute", () => {
-//     qweb.addTemplate("test", `<div t-att-class="c"/>`);
-//     const result = renderToString(qweb, "test", { c: "abc" });
+//     const template = xml`<div t-att-class="c"/>`;
+//     const result = render(template, { c: "abc" });
 //     expect(result).toBe(`<div class="abc"></div>`);
 //   });
 
 //   test("dynamic empty class attribute", () => {
-//     qweb.addTemplate("test", `<div t-att-class="c"/>`);
-//     const result = renderToString(qweb, "test", { c: "" });
+//     const template = xml`<div t-att-class="c"/>`;
+//     const result = render(template, { c: "" });
 //     expect(result).toBe(`<div></div>`);
 //   });
 
 //   test("dynamic attribute with a dash", () => {
-//     qweb.addTemplate("test", `<div t-att-data-action-id="id"/>`);
-//     const result = renderToString(qweb, "test", { id: 32 });
+//     const template = xml`<div t-att-data-action-id="id"/>`;
+//     const result = render(template, { id: 32 });
 //     expect(result).toBe(`<div data-action-id="32"></div>`);
 //   });
 
 //   test("dynamic formatted attributes with a dash", () => {
-//     qweb.addTemplate("test", `<div t-attf-aria-label="Some text {{id}}"/>`);
-//     const result = renderToString(qweb, "test", { id: 32 });
+//     const template = xml`<div t-attf-aria-label="Some text {{id}}"/>`;
+//     const result = render(template, { id: 32 });
 //     expect(result).toBe(`<div aria-label="Some text 32"></div>`);
 //   });
 
 //   test("fixed variable", () => {
-//     qweb.addTemplate("test", `<div t-att-foo="value"/>`);
-//     const result = renderToString(qweb, "test", { value: "ok" });
+//     const template = xml`<div t-att-foo="value"/>`;
+//     const result = render(template, { value: "ok" });
 //     expect(result).toBe(`<div foo="ok"></div>`);
 //   });
 
 //   test("dynamic attribute falsy variable ", () => {
-//     qweb.addTemplate("test", `<div t-att-foo="value"/>`);
-//     const result = renderToString(qweb, "test", { value: false });
+//     const template = xml`<div t-att-foo="value"/>`;
+//     const result = render(template, { value: false });
 //     expect(result).toBe(`<div></div>`);
 //   });
 
 //   test("tuple literal", () => {
-//     qweb.addTemplate("test", `<div t-att="['foo', 'bar']"/>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div t-att="['foo', 'bar']"/>`;
+//     const result = render(template);
 //     expect(result).toBe(`<div foo="bar"></div>`);
 //   });
 
 //   test("tuple variable", () => {
-//     qweb.addTemplate("test", `<div t-att="value"/>`);
-//     const result = renderToString(qweb, "test", { value: ["foo", "bar"] });
+//     const template = xml`<div t-att="value"/>`;
+//     const result = render(template, { value: ["foo", "bar"] });
 //     expect(result).toBe(`<div foo="bar"></div>`);
 //   });
 
 //   test("object", () => {
-//     qweb.addTemplate("test", `<div t-att="value"/>`);
-//     const result = renderToString(qweb, "test", {
+//     const template = xml`<div t-att="value"/>`;
+//     const result = render(template, {
 //       value: { a: 1, b: 2, c: 3 },
 //     });
 //     expect(result).toBe(`<div a="1" b="2" c="3"></div>`);
 //   });
 
 //   test("format literal", () => {
-//     qweb.addTemplate("test", `<div t-attf-foo="bar"/>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div t-attf-foo="bar"/>`;
+//     const result = render(template);
 //     expect(result).toBe(`<div foo="bar"></div>`);
 //   });
 
 //   test("t-attf-class should combine with class", () => {
-//     qweb.addTemplate("test", `<div class="hello" t-attf-class="world"/>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div class="hello" t-attf-class="world"/>`;
+//     const result = render(template);
 //     expect(result).toBe(`<div class="hello world"></div>`);
 //   });
 
 //   test("format value", () => {
-//     qweb.addTemplate("test", `<div t-attf-foo="b{{value}}r"/>`);
-//     const result = renderToString(qweb, "test", { value: "a" });
+//     const template = xml`<div t-attf-foo="b{{value}}r"/>`;
+//     const result = render(template, { value: "a" });
 //     expect(result).toBe(`<div foo="bar"></div>`);
 //   });
 
@@ -664,7 +643,7 @@ describe("t-if", () => {
 //       "test",
 //       `<div><t t-set="abc" t-value="'def'"/><span t-att-class="abc"/></div>`
 //     );
-//     const result = renderToString(qweb, "test");
+//     const result = render(template);
 //     expect(result).toBe('<div><span class="def"></span></div>');
 //   });
 
@@ -674,25 +653,25 @@ describe("t-if", () => {
 //       "test",
 //       `<div><t t-set="o" t-value="{a:'b'}"/><span t-att-class="o.a"/></div>`
 //     );
-//     const result = renderToString(qweb, "test");
+//     const result = render(template);
 //     expect(result).toBe('<div><span class="b"></span></div>');
 //   });
 
 //   test("format expression", () => {
-//     qweb.addTemplate("test", `<div t-attf-foo="{{value + 37}}"/>`);
-//     const result = renderToString(qweb, "test", { value: 5 });
+//     const template = xml`<div t-attf-foo="{{value + 37}}"/>`;
+//     const result = render(template, { value: 5 });
 //     expect(result).toBe(`<div foo="42"></div>`);
 //   });
 
 //   test("format expression, other format", () => {
-//     qweb.addTemplate("test", `<div t-attf-foo="{{value + 37}}"/>`);
-//     const result = renderToString(qweb, "test", { value: 5 });
+//     const template = xml`<div t-attf-foo="{{value + 37}}"/>`;
+//     const result = render(template, { value: 5 });
 //     expect(result).toBe(`<div foo="42"></div>`);
 //   });
 
 //   test("format multiple", () => {
-//     qweb.addTemplate("test", `<div t-attf-foo="a {{value1}} is {{value2}} of {{value3}} ]"/>`);
-//     const result = renderToString(qweb, "test", {
+//     const template = xml`<div t-attf-foo="a {{value1}} is {{value2}} of {{value3}} ]"/>`;
+//     const result = render(template, {
 //       value1: 0,
 //       value2: 1,
 //       value3: 2,
@@ -711,7 +690,7 @@ describe("t-if", () => {
 //             t-att="qux"/>
 //         `
 //     );
-//     const result = renderToString(qweb, "test", {
+//     const result = render(template, {
 //       bar: 0,
 //       baz: 1,
 //       qux: { qux: "<>" },
@@ -721,26 +700,26 @@ describe("t-if", () => {
 //   });
 
 //   test("t-att-class and class should combine together", () => {
-//     qweb.addTemplate("test", `<div class="hello" t-att-class="value"/>`);
-//     const result = renderToString(qweb, "test", { value: "world" });
+//     const template = xml`<div class="hello" t-att-class="value"/>`;
+//     const result = render(template, { value: "world" });
 //     expect(result).toBe(`<div class="hello world"></div>`);
 //   });
 
 //   test("class and t-att-class should combine together", () => {
-//     qweb.addTemplate("test", `<div t-att-class="value" class="hello" />`);
-//     const result = renderToString(qweb, "test", { value: "world" });
+//     const template = xml`<div t-att-class="value" class="hello" />`;
+//     const result = render(template, { value: "world" });
 //     expect(result).toBe(`<div class="world hello"></div>`);
 //   });
 
 //   test("class and t-attf-class with ternary operation", () => {
-//     qweb.addTemplate("test", `<div class="hello" t-attf-class="{{value ? 'world' : ''}}"/>`);
-//     const result = renderToString(qweb, "test", { value: true });
+//     const template = xml`<div class="hello" t-attf-class="{{value ? 'world' : ''}}"/>`;
+//     const result = render(template, { value: true });
 //     expect(result).toBe(`<div class="hello world"></div>`);
 //   });
 
 //   test("t-att-class with object", () => {
-//     qweb.addTemplate("test", `<div class="static" t-att-class="{a: b, c: d, e: f}"/>`);
-//     const result = renderToString(qweb, "test", { b: true, d: false, f: true });
+//     const template = xml`<div class="static" t-att-class="{a: b, c: d, e: f}"/>`;
+//     const result = render(template, { b: true, d: false, f: true });
 //     expect(result).toBe(`<div class="static a e"></div>`);
 //   });
 // });
@@ -1074,7 +1053,7 @@ describe("t-if", () => {
 //         </t>
 //     </div>`
 //     );
-//     const result = trim(renderToString(qweb, "test"));
+//     const result = trim(render(template));
 //     const expected = `<div>[0:33][1:22][2:11]</div>`;
 //     expect(result).toBe(expected);
 //   });
@@ -1087,7 +1066,7 @@ describe("t-if", () => {
 //         <span t-foreach="[1, 2]" t-as="item" t-key="item"><t t-esc="item"/></span>
 //     </div>`
 //     );
-//     const result = trim(renderToString(qweb, "test"));
+//     const result = trim(render(template));
 //     const expected = `<div><span>1</span><span>2</span></div>`;
 //     expect(result).toBe(expected);
 //   });
@@ -1102,7 +1081,7 @@ describe("t-if", () => {
 //         </t>
 //       </div>`
 //     );
-//     const result = trim(renderToString(qweb, "test"));
+//     const result = trim(render(template));
 //     const expected = `<div>-first(0)-(1)-(2)-(3)-last(4)</div>`;
 //     expect(result).toBe(expected);
 //   });
@@ -1117,7 +1096,7 @@ describe("t-if", () => {
 //         </t>
 //       </div>`
 //     );
-//     const result = trim(renderToString(qweb, "test", { value: { a: 1, b: 2, c: 3 } }));
+//     const result = trim(render(template, { value: { a: 1, b: 2, c: 3 } }));
 //     const expected = `<div>[0:a1][1:b2][2:c3]</div>`;
 //     expect(result).toBe(expected);
 //   });
@@ -1130,7 +1109,7 @@ describe("t-if", () => {
 //       </div>`
 //     );
 //     const context = { __owl__: {} };
-//     renderToString(qweb, "test", context);
+//     render(template, context);
 //     expect(Object.keys(context)).toEqual(["__owl__"]);
 //   });
 
@@ -1146,7 +1125,7 @@ describe("t-if", () => {
 //       </div>`
 //     );
 //     const context = { numbers: [1, 2, 3], letters: ["a", "b"] };
-//     expect(renderToString(qweb, "test", context)).toBe(
+//     expect(render(template, context)).toBe(
 //       "<div> [1a]  [1b]  [2a]  [2b]  [3a]  [3b] </div>"
 //     );
 //   });
@@ -1172,7 +1151,7 @@ describe("t-if", () => {
 //         </t>
 //     </div>`
 //     );
-//     renderToString(qweb, "test");
+//     render(template);
 //     expect(console.warn).toHaveBeenCalledTimes(1);
 //     expect(console.warn).toHaveBeenCalledWith(
 //       "Directive t-foreach should always be used with a t-key! (in template: 'test')"
@@ -1238,7 +1217,7 @@ describe("t-if", () => {
 
 // describe("t-on", () => {
 //   test("can bind event handler", () => {
-//     qweb.addTemplate("test", `<button t-on-click="add">Click</button>`);
+//     const template = xml`<button t-on-click="add">Click</button>`;
 //     let a = 1;
 //     const node = renderToDOM(
 //       qweb,
@@ -1281,7 +1260,7 @@ describe("t-if", () => {
 //   });
 
 //   test("can bind handlers with arguments", () => {
-//     qweb.addTemplate("test", `<button t-on-click="add(5)">Click</button>`);
+//     const template = xml`<button t-on-click="add(5)">Click</button>`;
 //     let a = 1;
 //     const node = renderToDOM(
 //       qweb,
@@ -1298,7 +1277,7 @@ describe("t-if", () => {
 //   });
 
 //   test("can bind handlers with object arguments", () => {
-//     qweb.addTemplate("test", `<button t-on-click="add({val: 5})">Click</button>`);
+//     const template = xml`<button t-on-click="add({val: 5})">Click</button>`;
 //     let a = 1;
 //     const node = renderToDOM(
 //       qweb,
@@ -1316,7 +1295,7 @@ describe("t-if", () => {
 
 //   test("can bind handlers with empty object", () => {
 //     expect.assertions(2);
-//     qweb.addTemplate("test", `<button t-on-click="doSomething({})">Click</button>`);
+//     const template = xml`<button t-on-click="doSomething({})">Click</button>`;
 //     const node = renderToDOM(
 //       qweb,
 //       "test",
@@ -1332,7 +1311,7 @@ describe("t-if", () => {
 
 //   test("can bind handlers with empty object (with non empty inner string)", () => {
 //     expect.assertions(2);
-//     qweb.addTemplate("test", `<button t-on-click="doSomething({ })">Click</button>`);
+//     const template = xml`<button t-on-click="doSomething({ })">Click</button>`;
 //     const node = renderToDOM(
 //       qweb,
 //       "test",
@@ -1370,7 +1349,7 @@ describe("t-if", () => {
 
 //   test("handler is bound to proper owner", () => {
 //     expect.assertions(2);
-//     qweb.addTemplate("test", `<button t-on-click="add">Click</button>`);
+//     const template = xml`<button t-on-click="add">Click</button>`;
 //     let owner = {
 //       add() {
 //         expect(this).toBe(owner);
@@ -1381,7 +1360,7 @@ describe("t-if", () => {
 //   });
 
 //   test("t-on with inline statement", () => {
-//     qweb.addTemplate("test", `<button t-on-click="state.counter++">Click</button>`);
+//     const template = xml`<button t-on-click="state.counter++">Click</button>`;
 //     let owner = {
 //       state: {
 //         counter: 0,
@@ -1394,7 +1373,7 @@ describe("t-if", () => {
 //   });
 
 //   test("t-on with inline statement (function call)", () => {
-//     qweb.addTemplate("test", `<button t-on-click="state.incrementCounter(2)">Click</button>`);
+//     const template = xml`<button t-on-click="state.incrementCounter(2)">Click</button>`;
 //     let owner = {
 //       state: {
 //         counter: 0,
@@ -1410,7 +1389,7 @@ describe("t-if", () => {
 //   });
 
 //   test("t-on with inline statement, part 2", () => {
-//     qweb.addTemplate("test", `<button t-on-click="state.flag = !state.flag">Toggle</button>`);
+//     const template = xml`<button t-on-click="state.flag = !state.flag">Toggle</button>`;
 //     let owner = {
 //       state: {
 //         flag: true,
@@ -1425,7 +1404,7 @@ describe("t-if", () => {
 //   });
 
 //   test("t-on with inline statement, part 3", () => {
-//     qweb.addTemplate("test", `<button t-on-click="state.n = someFunction(3)">Toggle</button>`);
+//     const template = xml`<button t-on-click="state.n = someFunction(3)">Toggle</button>`;
 //     let owner = {
 //       someFunction(n) {
 //         return n + 1;
@@ -1641,7 +1620,7 @@ describe("t-if", () => {
 
 //   test("t-on combined with t-esc", async () => {
 //     expect.assertions(3);
-//     qweb.addTemplate("test", `<div><button t-on-click="onClick" t-esc="text"/></div>`);
+//     const template = xml`<div><button t-on-click="onClick" t-esc="text"/></div>`;
 //     const steps: string[] = [];
 //     const owner = {
 //       text: "Click here",
@@ -1660,7 +1639,7 @@ describe("t-if", () => {
 
 //   test("t-on combined with t-raw", async () => {
 //     expect.assertions(3);
-//     qweb.addTemplate("test", `<div><button t-on-click="onClick" t-raw="html"/></div>`);
+//     const template = xml`<div><button t-on-click="onClick" t-raw="html"/></div>`;
 //     const steps: string[] = [];
 //     const owner = {
 //       html: "Click <b>here</b>",
@@ -1705,14 +1684,14 @@ describe("t-if", () => {
 
 // describe("t-ref", () => {
 //   test("can get a ref on a node", () => {
-//     qweb.addTemplate("test", `<div><span t-ref="myspan"/></div>`);
+//     const template = xml`<div><span t-ref="myspan"/></div>`;
 //     let refs: any = {};
 //     renderToDOM(qweb, "test", { __owl__: { refs } });
 //     expect(refs.myspan.tagName).toBe("SPAN");
 //   });
 
 //   test("can get a dynamic ref on a node", () => {
-//     qweb.addTemplate("test", `<div><span t-ref="myspan{{id}}"/></div>`);
+//     const template = xml`<div><span t-ref="myspan{{id}}"/></div>`;
 //     let refs: any = {};
 //     renderToDOM(qweb, "test", { id: 3, __owl__: { refs } });
 //     expect(refs.myspan3.tagName).toBe("SPAN");
@@ -1768,8 +1747,8 @@ describe("t-if", () => {
 
 // describe("special cases for some boolean html attributes/properties", () => {
 //   test("input type= checkbox, with t-att-checked", () => {
-//     qweb.addTemplate("test", `<input type="checkbox" t-att-checked="flag"/>`);
-//     const result = renderToString(qweb, "test", { flag: true });
+//     const template = xml`<input type="checkbox" t-att-checked="flag"/>`;
+//     const result = render(template, { flag: true });
 //     expect(result).toBe(`<input type="checkbox" checked="">`);
 //   });
 
@@ -1791,20 +1770,20 @@ describe("t-if", () => {
 //       </div>
 //       `
 //     );
-//     renderToString(qweb, "test", { flag: true });
+//     render(template, { flag: true });
 //   });
 // });
 
 // describe("whitespace handling", () => {
 //   test("white space only text nodes are condensed into a single space", () => {
-//     qweb.addTemplate("test", `<div>  </div>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div>  </div>`;
+//     const result = render(template);
 //     expect(result).toBe(`<div> </div>`);
 //   });
 
 //   test("consecutives whitespaces are condensed into a single space", () => {
-//     qweb.addTemplate("test", `<div>  abc  </div>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<div>  abc  </div>`;
+//     const result = render(template);
 //     expect(result).toBe(`<div> abc </div>`);
 //   });
 
@@ -1815,13 +1794,13 @@ describe("t-if", () => {
 //         <span>abc</span>
 //        </div>`
 //     );
-//     const result = renderToString(qweb, "test");
+//     const result = render(template);
 //     expect(result).toBe(`<div><span>abc</span></div>`);
 //   });
 
 //   test("nothing is done in pre tags", () => {
-//     qweb.addTemplate("test", `<pre>  </pre>`);
-//     const result = renderToString(qweb, "test");
+//     const template = xml`<pre>  </pre>`;
+//     const result = render(template);
 //     expect(result).toBe(`<pre>  </pre>`);
 
 //     const pretagtext = `<pre>
@@ -1842,8 +1821,8 @@ describe("t-if", () => {
 
 // describe("t-key", () => {
 //   test("can use t-key directive on a node", () => {
-//     qweb.addTemplate("test", `<div t-key="beer.id"><t t-esc="beer.name"/></div>`);
-//     expect(renderToString(qweb, "test", { beer: { id: 12, name: "Chimay Rouge" } })).toBe(
+//     const template = xml`<div t-key="beer.id"><t t-esc="beer.name"/></div>`;
+//     expect(render(template, { beer: { id: 12, name: "Chimay Rouge" } })).toBe(
 //       "<div>Chimay Rouge</div>"
 //     );
 //   });
@@ -1856,7 +1835,7 @@ describe("t-if", () => {
 //        </ul>`
 //     );
 //     expect(
-//       renderToString(qweb, "test", {
+//       render(template, {
 //         beers: [{ id: 12, name: "Chimay Rouge" }],
 //       })
 //     ).toMatchSnapshot();
@@ -1950,7 +1929,7 @@ describe("t-if", () => {
 //       "test",
 //       `<svg width="100px" height="90px"><circle cx="50" cy="50" r="4" stroke="green" stroke-width="1" fill="yellow"/> </svg>`
 //     );
-//     expect(renderToString(qweb, "test")).toBe(
+//     expect(render(template)).toBe(
 //       `<svg width=\"100px\" height=\"90px\"><circle cx=\"50\" cy=\"50\" r=\"4\" stroke=\"green\" stroke-width=\"1\" fill=\"yellow\"></circle> </svg>`
 //     );
 //   });
@@ -1961,7 +1940,7 @@ describe("t-if", () => {
 //       "test",
 //       `<g><circle cx="50" cy="50" r="4" stroke="green" stroke-width="1" fill="yellow"/> </g>`
 //     );
-//     expect(renderToString(qweb, "test")).toBe(
+//     expect(render(template)).toBe(
 //       `<g><circle cx=\"50\" cy=\"50\" r=\"4\" stroke=\"green\" stroke-width=\"1\" fill=\"yellow\"></circle> </g>`
 //     );
 //   });
@@ -1974,8 +1953,8 @@ describe("t-if", () => {
 //     };
 //     const translateFn = (expr) => translations[expr] || expr;
 //     const qweb = new QWeb({ translateFn });
-//     qweb.addTemplate("test", "<div>word</div>");
-//     expect(renderToString(qweb, "test")).toBe("<div>mot</div>");
+//     const template = xml"<div>word</div>";
+//     expect(render(template)).toBe("<div>mot</div>");
 //   });
 
 //   test("does not translate node content if disabled", () => {
@@ -1992,7 +1971,7 @@ describe("t-if", () => {
 //         <span t-translation="off">word</span>
 //       </div>`
 //     );
-//     expect(renderToString(qweb, "test")).toBe("<div><span>mot</span><span>word</span></div>");
+//     expect(render(template)).toBe("<div><span>mot</span><span>word</span></div>");
 //   });
 
 //   test("some attributes are translated", () => {
@@ -2012,7 +1991,7 @@ describe("t-if", () => {
 //         <p something="word">word</p>
 //       </div>`
 //     );
-//     expect(renderToString(qweb, "test")).toBe(
+//     expect(render(template)).toBe(
 //       '<div><p label="mot">mot</p><p title="mot">mot</p><p placeholder="mot">mot</p><p alt="mot">mot</p><p something="word">mot</p></div>'
 //     );
 //   });

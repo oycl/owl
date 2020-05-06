@@ -190,9 +190,9 @@ exports[`t-esc escaping on a node with a body 1`] = `
 ) {
     // Template: \`<span t-esc=\\"'ok'\\">nope</span>\`
     const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
-    let expr2 = 'ok'
-    if (expr2 !== undefined) {
-        vn1.children.push({type: 1, text: expr2, el: null});
+    let _2 = 'ok'
+    if (_2 !== undefined) {
+        vn1.children.push({type: 1, text: _2, el: null});
     } else {
         vn1.children.push({type: 1, text: \`nope\`, el: null});
     }
@@ -204,9 +204,9 @@ exports[`t-esc escaping on a node with a body, as a default 1`] = `
 ) {
     // Template: \`<span t-esc=\\"var\\">nope</span>\`
     const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
-    let expr2 = ctx['var']
-    if (expr2 !== undefined) {
-        vn1.children.push({type: 1, text: expr2, el: null});
+    let _2 = ctx['var']
+    if (_2 !== undefined) {
+        vn1.children.push({type: 1, text: _2, el: null});
     } else {
         vn1.children.push({type: 1, text: \`nope\`, el: null});
     }
@@ -418,5 +418,179 @@ exports[`t-if t-esc with t-if 1`] = `
     if (true) {
         vn1.children.push({type: 1, text: 'x', el: null});
     }
+}"
+`;
+
+exports[`t-set evaluate value expression 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"value\\" t-value=\\"1 + 2\\"/><t t-esc=\\"value\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.value = 1+2;
+    vn1.children.push({type: 1, text: ctx['value'], el: null});
+}"
+`;
+
+exports[`t-set evaluate value expression, part 2 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"value\\" t-value=\\"somevariable + 2\\"/><t t-esc=\\"value\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.value = ctx['somevariable']+2;
+    vn1.children.push({type: 1, text: ctx['value'], el: null});
+}"
+`;
+
+exports[`t-set set from attribute literal 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"value\\" t-value=\\"'ok'\\"/><t t-esc=\\"value\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.value = 'ok';
+    vn1.children.push({type: 1, text: ctx['value'], el: null});
+}"
+`;
+
+exports[`t-set set from attribute lookup 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"stuff\\" t-value=\\"value\\"/><t t-esc=\\"stuff\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.stuff = ctx['value'];
+    vn1.children.push({type: 1, text: ctx['stuff'], el: null});
+}"
+`;
+
+exports[`t-set set from body literal 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t><t t-set=\\"value\\">ok</t><t t-esc=\\"value\\"/></t>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 4, children:[]};
+    let _2 = new this.VDomArray();
+    _2.push({type: 1, text: \`ok\`, el: null});
+    ctx.value = _2;
+    let _4 = this.vDomToString(ctx.value);
+    vn1.children.push({type: 1, text: _4, el: null});
+}"
+`;
+
+exports[`t-set set from body lookup 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"stuff\\"><t t-esc=\\"value\\"/></t><t t-esc=\\"stuff\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _2 = new this.VDomArray();
+    _2.push({type: 1, text: ctx['value'], el: null});
+    ctx.stuff = _2;
+    let _4 = this.vDomToString(ctx.stuff);
+    vn1.children.push({type: 1, text: _4, el: null});
+}"
+`;
+
+exports[`t-set set from empty body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"stuff\\"/><t t-esc=\\"stuff\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+}"
+`;
+
+exports[`t-set t-set and t-if 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-set=\\"v\\" t-value=\\"value\\"/>          <t t-if=\\"v === 'ok'\\">grimbergen</t>       \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v = ctx['value'];
+    if (ctx['v']==='ok') {
+        vn1.children.push({type: 1, text: \`grimbergen\`, el: null});
+    }
+}"
+`;
+
+exports[`t-set t-set evaluates an expression only once 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div >            <t t-set=\\"v\\" t-value=\\"value + ' artois'\\"/>            <t t-esc=\\"v\\"/>           \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v = ctx['value']+' artois';
+    vn1.children.push({type: 1, text: ctx['v'], el: null});
+    vn1.children.push({type: 1, text: ctx['v'], el: null});
+}"
+`;
+
+exports[`t-set t-set with content and sub t-esc 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-set=\\"setvar\\"><t t-esc=\\"beep\\"/> boop</t>          <t t-esc=\\"setvar\\"/>        <\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _2 = new this.VDomArray();
+    _2.push({type: 1, text: ctx['beep'], el: null});
+    _2.push({type: 1, text: \` boop\`, el: null});
+    ctx.setvar = _2;
+    let _5 = this.vDomToString(ctx.setvar);
+    vn1.children.push({type: 1, text: _5, el: null});
+}"
+`;
+
+exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-if=\\"flag\\" t-set=\\"ourvar\\">1</t>          <t t-else=\\"\\" t-set=\\"ourvar\\" t-value=\\"0\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['flag']) {
+        let _2 = new this.VDomArray();
+        _2.push({type: 1, text: \`1\`, el: null});
+        ctx.ourvar = _2;
+    } else {
+        ctx.ourvar = 0;
+    }
+    let _4 = ctx.ourvar instanceof this.VDomArray ? this.vDomToString(ctx.ourvar) : ctx.ourvar;
+    vn1.children.push({type: 1, text: _4, el: null});
+}"
+`;
+
+exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 2`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-if=\\"flag\\" t-set=\\"ourvar\\">1</t>          <t t-else=\\"\\" t-set=\\"ourvar\\" t-value=\\"0\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['flag']) {
+        let _2 = new this.VDomArray();
+        _2.push({type: 1, text: \`1\`, el: null});
+        ctx.ourvar = _2;
+    } else {
+        ctx.ourvar = 0;
+    }
+    let _4 = ctx.ourvar instanceof this.VDomArray ? this.vDomToString(ctx.ourvar) : ctx.ourvar;
+    vn1.children.push({type: 1, text: _4, el: null});
+}"
+`;
+
+exports[`t-set value priority 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"value\\" t-value=\\"1\\">2</t><t t-esc=\\"value\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.value = 1;
+    if (!ctx.value) {
+        let _2 = new this.VDomArray();
+        _2.push({type: 1, text: \`2\`, el: null});
+        ctx.value = _2
+    }
+    let _4 = ctx.value instanceof this.VDomArray ? this.vDomToString(ctx.value) : ctx.value;
+    vn1.children.push({type: 1, text: _4, el: null});
 }"
 `;

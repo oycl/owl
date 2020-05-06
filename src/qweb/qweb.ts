@@ -1,4 +1,5 @@
 import { CompiledTemplate, compileTemplate } from "./compiler";
+import { patch, NodeType, VNode } from "../vdom";
 
 // -----------------------------------------------------------------------------
 // Global template Map
@@ -22,7 +23,14 @@ export function xml(strings, ...args) {
 // QWeb
 // -----------------------------------------------------------------------------
 
-export const utils: any = {};
+export const utils: any = {
+  VDomArray: class VDomArray extends Array {},
+  vDomToString: function (vdomArray: VNode<any>[]): string {
+    const div = document.createElement("div");
+    patch(div, { type: NodeType.Multi, children: vdomArray });
+    return div.innerHTML;
+  },
+};
 
 export const compiledTemplates: { [name: string]: CompiledTemplate } = {};
 
