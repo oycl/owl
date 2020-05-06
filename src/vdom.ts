@@ -83,7 +83,10 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
       let htmlEl = makeDOMVNode(vnode);
       const attrs = vnode.attrs;
       for (let name in attrs) {
-        htmlEl.setAttribute(name, attrs[name]);
+        let value = attrs[name];
+        if (value) {
+          htmlEl.setAttribute(name, value);
+        }
       }
       el.appendChild(htmlEl);
       return htmlEl;

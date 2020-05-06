@@ -1,4 +1,4 @@
-import { AST, parse } from "./parser";
+import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode } from "./parser";
 import { NodeType } from "../vdom";
 import { VTree } from "../core";
 import { compileExpr } from "./expression_parser";
@@ -56,13 +56,7 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
   }
   switch (ast.type) {
     case "DOM": {
-      const vnode = `{type: ${NodeType.DOM}, tag: "${
-        ast.tag
-      }", el: null, children: [], attrs: ${JSON.stringify(ast.attrs)}, key: ${ast.key}}`;
-      const id = addVNode(ctx, vnode, ast.children.length > 0);
-      withParent(ctx, id, () => {
-        generateCode(ast.children, ctx);
-      });
+      compileDOMNode(ctx, ast);
       break;
     }
     case "TEXT": {
@@ -71,82 +65,11 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
       break;
     }
     case "T-SET": {
-      ctx.shouldProtectContext = true;
-      if (ast.value !== null) {
-        addLine(ctx, `ctx.${ast.name} = ${compileExpr(ast.value, {})};`);
-      }
-      if (ast.body.length && ast.value === null) {
-        let id = uniqueId(ctx);
-        addLine(ctx, `let ${id} = new this.VDomArray();`);
-        withParent(ctx, id, () => {
-          generateCode(ast.body, ctx);
-        });
-        addLine(ctx, `ctx.${ast.name} = ${id};`);
-      }
-      if (ast.body.length && ast.value !== null) {
-        addIf(ctx, `!ctx.${ast.name}`);
-        let id = uniqueId(ctx);
-        addLine(ctx, `let ${id} = new this.VDomArray();`);
-        withParent(ctx, id, () => {
-          generateCode(ast.body, ctx);
-        });
-        addLine(ctx, `ctx.${ast.name} = ${id}`);
-        closeIf(ctx);
-      }
-
-      const qwebVar = ctx.variables[ast.name];
-      if (qwebVar) {
-        qwebVar.hasBody = qwebVar.hasBody || !!ast.body.length;
-        qwebVar.hasValue = qwebVar.hasBody || ast.value !== null;
-      } else {
-        ctx.variables[ast.name] = {
-          expr: `ctx.${ast.name}`,
-          hasBody: !!ast.body.length,
-          hasValue: ast.value !== null,
-        };
-      }
+      compileSetNode(ctx, ast);
       break;
     }
     case "T-ESC": {
-      const expr = compileExpr(ast.expr, {});
-      if (ast.body.length) {
-        const id = uniqueId(ctx);
-        addLine(ctx, `let ${id} = ${expr}`);
-        addIf(ctx, `${id} !== undefined`);
-        addVNode(ctx, `{type: ${NodeType.Text}, text: ${id}, el: null}`, false);
-        ctx.indentLevel--;
-        addLine(ctx, `} else {`);
-        ctx.indentLevel++;
-        generateCode(ast.body, ctx);
-        closeIf(ctx);
-      } else {
-        if (ast.expr in ctx.variables) {
-          // this is a variable that was already defined, with a body
-          const id = uniqueId(ctx);
-          const qwebVar = ctx.variables[ast.expr];
-          if (!qwebVar.hasBody && !qwebVar.hasValue) {
-            break;
-          }
-          if (qwebVar.hasBody && qwebVar.hasValue) {
-            addLine(
-              ctx,
-              `let ${id} = ${qwebVar.expr} instanceof this.VDomArray ? this.vDomToString(${qwebVar.expr}) : ${qwebVar.expr};`
-            );
-            const vnode = `{type: ${NodeType.Text}, text: ${id}, el: null}`;
-            addVNode(ctx, vnode, false);
-          } else if (qwebVar.hasValue && !qwebVar.hasBody) {
-            const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
-            addVNode(ctx, vnode, false);
-          } else {
-            addLine(ctx, `let ${id} = this.vDomToString(${qwebVar.expr});`);
-            const vnode = `{type: ${NodeType.Text}, text: ${id}, el: null}`;
-            addVNode(ctx, vnode, false);
-          }
-        } else {
-          const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
-          addVNode(ctx, vnode, false);
-        }
-      }
+      compileEscNode(ctx, ast);
       break;
     }
     case "T-IF": {
@@ -253,4 +176,129 @@ function withParent(ctx: CodeContext, parent: string, cb: Function) {
 
 function addLine(ctx: CodeContext, code: string) {
   ctx.code.push(new Array(ctx.indentLevel + 2).join("    ") + code);
+}
+
+// -----------------------------------------------------------------------------
+// Compile DOM node
+// -----------------------------------------------------------------------------
+const letterRegexp = /^[a-zA-Z]+$/;
+
+function objToAttr(obj: { [key: string]: string }): string {
+  const attrs = Object.keys(obj).map((k) => {
+    const attName = k.match(letterRegexp) ? k : '"' + k + '"';
+    return `${attName}:${obj[k]}`;
+  });
+  return "{" + attrs.join(",") + "}";
+}
+
+function addToAttrs(attrs: { [key: string]: string }, key: string, value: string) {
+  attrs[key] = key in attrs ? attrs[key] + ' + " " + ' + value : value;
+}
+
+function compileDOMNode(ctx: CodeContext, ast: ASTDOMNode) {
+  const attrs = {};
+  for (let attr in ast.attrs) {
+    let value = ast.attrs[attr];
+    if (attr.startsWith("t-att-")) {
+      const id = uniqueId(ctx);
+      addLine(ctx, `let ${id} = ${compileExpr(value, {})}`);
+      addToAttrs(attrs, attr.slice(6), id);
+    } else {
+      addToAttrs(attrs, attr, `"${value}"`);
+    }
+  }
+  const vnode = `{type: ${NodeType.DOM}, tag: "${
+    ast.tag
+  }", el: null, children: [], attrs: ${objToAttr(attrs)}, key: ${ast.key}}`;
+  const id = addVNode(ctx, vnode, ast.children.length > 0);
+  withParent(ctx, id, () => {
+    generateCode(ast.children, ctx);
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Compile T-SET node
+// -----------------------------------------------------------------------------
+
+function compileSetNode(ctx: CodeContext, ast: ASTSetNode) {
+  ctx.shouldProtectContext = true;
+  if (ast.value !== null) {
+    addLine(ctx, `ctx.${ast.name} = ${compileExpr(ast.value, {})};`);
+  }
+  if (ast.body.length && ast.value === null) {
+    let id = uniqueId(ctx);
+    addLine(ctx, `let ${id} = new this.VDomArray();`);
+    withParent(ctx, id, () => {
+      generateCode(ast.body, ctx);
+    });
+    addLine(ctx, `ctx.${ast.name} = ${id};`);
+  }
+  if (ast.body.length && ast.value !== null) {
+    addIf(ctx, `!ctx.${ast.name}`);
+    let id = uniqueId(ctx);
+    addLine(ctx, `let ${id} = new this.VDomArray();`);
+    withParent(ctx, id, () => {
+      generateCode(ast.body, ctx);
+    });
+    addLine(ctx, `ctx.${ast.name} = ${id}`);
+    closeIf(ctx);
+  }
+
+  const qwebVar = ctx.variables[ast.name];
+  if (qwebVar) {
+    qwebVar.hasBody = qwebVar.hasBody || !!ast.body.length;
+    qwebVar.hasValue = qwebVar.hasBody || ast.value !== null;
+  } else {
+    ctx.variables[ast.name] = {
+      expr: `ctx.${ast.name}`,
+      hasBody: !!ast.body.length,
+      hasValue: ast.value !== null,
+    };
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Compile T-ESC node
+// -----------------------------------------------------------------------------
+
+function compileEscNode(ctx: CodeContext, ast: ASTEscNode) {
+  const expr = compileExpr(ast.expr, {});
+  if (ast.body.length) {
+    const id = uniqueId(ctx);
+    addLine(ctx, `let ${id} = ${expr}`);
+    addIf(ctx, `${id} !== undefined`);
+    addVNode(ctx, `{type: ${NodeType.Text}, text: ${id}, el: null}`, false);
+    ctx.indentLevel--;
+    addLine(ctx, `} else {`);
+    ctx.indentLevel++;
+    generateCode(ast.body, ctx);
+    closeIf(ctx);
+  } else {
+    if (ast.expr in ctx.variables) {
+      // this is a variable that was already defined, with a body
+      const id = uniqueId(ctx);
+      const qwebVar = ctx.variables[ast.expr];
+      if (!qwebVar.hasBody && !qwebVar.hasValue) {
+        return;
+      }
+      if (qwebVar.hasBody && qwebVar.hasValue) {
+        addLine(
+          ctx,
+          `let ${id} = ${qwebVar.expr} instanceof this.VDomArray ? this.vDomToString(${qwebVar.expr}) : ${qwebVar.expr};`
+        );
+        const vnode = `{type: ${NodeType.Text}, text: ${id}, el: null}`;
+        addVNode(ctx, vnode, false);
+      } else if (qwebVar.hasValue && !qwebVar.hasBody) {
+        const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
+        addVNode(ctx, vnode, false);
+      } else {
+        addLine(ctx, `let ${id} = this.vDomToString(${qwebVar.expr});`);
+        const vnode = `{type: ${NodeType.Text}, text: ${id}, el: null}`;
+        addVNode(ctx, vnode, false);
+      }
+    } else {
+      const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
+      addVNode(ctx, vnode, false);
+    }
+  }
 }

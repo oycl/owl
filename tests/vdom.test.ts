@@ -181,6 +181,12 @@ describe("patch function", () => {
       patch(fixture, vnode);
       expect(fixture.innerHTML).toBe(`<div a="b"></div>`);
     });
+
+    test("an empty attribute is not actually added", () => {
+      const vnode = domNode("div", { a: "b", c: "" }, []);
+      patch(fixture, vnode);
+      expect(fixture.innerHTML).toBe(`<div a="b"></div>`);
+    });
   });
 });
 

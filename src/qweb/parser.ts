@@ -135,10 +135,12 @@ function parseTIfNode(node: Element): ASTIfNode | null {
 
   // t-elifs
   while (nextElement && nextElement.hasAttribute("t-elif")) {
+    const condition = nextElement.getAttribute("t-elif")!;
+    nextElement.removeAttribute("t-elif");
     const elif: ASTElifNode = {
       type: "T-ELIF",
       child: parseNode(nextElement)!,
-      condition: nextElement.getAttribute("t-elif")!,
+      condition,
       next: null,
     };
     firstAST = firstAST || elif;

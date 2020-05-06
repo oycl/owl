@@ -323,18 +323,15 @@ describe("t-set", () => {
     expect(render(template, { flag: false })).toBe("<div>0</div>");
   });
 
-  //   test("t-set, t-if, and mix of expression/body lookup, 2", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `<div>
-  //         <t t-if="flag" t-set="ourvar" t-value="1"></t>
-  //         <t t-else="" t-set="ourvar">0</t>
-  //         <t t-esc="ourvar"/>
-  //       </div>`
-  //     );
-  //     expect(render(template, { flag: true })).toBe("<div>1</div>");
-  //     expect(render(template, { flag: false })).toBe("<div>0</div>");
-  //   });
+  test("t-set, t-if, and mix of expression/body lookup, 2", () => {
+    const template = xml`<div>
+          <t t-if="flag" t-set="ourvar" t-value="1"></t>
+          <t t-else="" t-set="ourvar">0</t>
+          <t t-esc="ourvar"/>
+        </div>`;
+    expect(render(template, { flag: true })).toBe("<div>1</div>");
+    expect(render(template, { flag: false })).toBe("<div>0</div>");
+  });
 
   //   test("t-set body is evaluated immediately", () => {
   //     qweb.addTemplate(
@@ -491,238 +488,223 @@ describe("t-if", () => {
     expect(render(template)).toBe("<div>x</div>");
   });
 
-  //   test("t-set, then t-if", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `
-  //       <div>
-  //         <t t-set="title" t-value="'test'"/>
-  //         <t t-if="title"><t t-esc="title"/></t>
-  //       </div>`
-  //     );
-  //     const result = render(template);
-  //     const expected = `<div>test</div>`;
-  //     expect(result).toBe(expected);
-  //   });
+  test("t-set, then t-if", () => {
+    const template = xml`
+        <div>
+          <t t-set="title" t-value="'test'"/>
+          <t t-if="title"><t t-esc="title"/></t>
+        </div>`;
+    const result = render(template);
+    const expected = `<div>test</div>`;
+    expect(result).toBe(expected);
+  });
 
-  //   test("t-set, then t-if, part 2", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `
-  //         <div>
-  //             <t t-set="y" t-value="true"/>
-  //             <t t-set="x" t-value="y"/>
-  //             <span t-if="x">COUCOU</span>
-  //         </div>`
-  //     );
-  //     const result = render(template);
-  //     const expected = `<div><span>COUCOU</span></div>`;
-  //     expect(result).toBe(expected);
-  //   });
+  test("t-set, then t-if, part 2", () => {
+    const template = xml`
+          <div>
+              <t t-set="y" t-value="true"/>
+              <t t-set="x" t-value="y"/>
+              <span t-if="x">COUCOU</span>
+          </div>`;
+    const result = render(template);
+    const expected = `<div><span>COUCOU</span></div>`;
+    expect(result).toBe(expected);
+  });
 
-  //   test("t-set, then t-elif, part 3", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `
-  //         <div>
-  //             <t t-set="y" t-value="false"/>
-  //             <t t-set="x" t-value="y"/>
-  //             <span t-if="x">AAA</span>
-  //             <span t-elif="!x">BBB</span>
-  //         </div>`
-  //     );
-  //     const result = render(template);
-  //     const expected = `<div><span>BBB</span></div>`;
-  //     expect(result).toBe(expected);
-  //   });
+  test("t-set, then t-elif, part 3", () => {
+    const template = xml`
+          <div>
+              <t t-set="y" t-value="false"/>
+              <t t-set="x" t-value="y"/>
+              <span t-if="x">AAA</span>
+              <span t-elif="!x">BBB</span>
+          </div>`;
+    const result = render(template);
+    const expected = `<div><span>BBB</span></div>`;
+    expect(result).toBe(expected);
+  });
 });
 
-// describe("attributes", () => {
-//   test("static attributes", () => {
-//     const template = xml`<div foo="a" bar="b" baz="c"/>`;
-//     const result = render(template);
-//     const expected = `<div foo="a" bar="b" baz="c"></div>`;
-//     expect(result).toBe(expected);
-//   });
+describe("attributes", () => {
+  test("static attributes", () => {
+    const template = xml`<div foo="a" bar="b" baz="c"/>`;
+    const result = render(template);
+    const expected = `<div foo="a" bar="b" baz="c"></div>`;
+    expect(result).toBe(expected);
+  });
 
-//   test("static attributes with dashes", () => {
-//     const template = xml`<div aria-label="Close"/>`;
-//     const result = render(template);
-//     const expected = `<div aria-label="Close"></div>`;
-//     expect(result).toBe(expected);
-//   });
+  test("static attributes with dashes", () => {
+    const template = xml`<div aria-label="Close"/>`;
+    const result = render(template);
+    const expected = `<div aria-label="Close"></div>`;
+    expect(result).toBe(expected);
+  });
 
-//   test("static attributes on void elements", () => {
-//     const template = xml`<img src="/test.jpg" alt="Test"/>`;
-//     const result = render(template);
-//     expect(result).toBe(`<img src="/test.jpg" alt="Test">`);
-//   });
+  test("static attributes on void elements", () => {
+    const template = xml`<img src="/test.jpg" alt="Test"/>`;
+    const result = render(template);
+    expect(result).toBe(`<img src="/test.jpg" alt="Test">`);
+  });
 
-//   test("dynamic attributes", () => {
-//     const template = xml`<div t-att-foo="'bar'"/>`;
-//     const result = render(template);
-//     expect(result).toBe(`<div foo="bar"></div>`);
-//   });
+  test("dynamic attributes", () => {
+    const template = xml`<div t-att-foo="'bar'"/>`;
+    const result = render(template);
+    expect(result).toBe(`<div foo="bar"></div>`);
+  });
 
-//   test("dynamic class attribute", () => {
-//     const template = xml`<div t-att-class="c"/>`;
-//     const result = render(template, { c: "abc" });
-//     expect(result).toBe(`<div class="abc"></div>`);
-//   });
+  test("dynamic class attribute", () => {
+    const template = xml`<div t-att-class="c"/>`;
+    const result = render(template, { c: "abc" });
+    expect(result).toBe(`<div class="abc"></div>`);
+  });
 
-//   test("dynamic empty class attribute", () => {
-//     const template = xml`<div t-att-class="c"/>`;
-//     const result = render(template, { c: "" });
-//     expect(result).toBe(`<div></div>`);
-//   });
+  test("dynamic empty class attribute", () => {
+    const template = xml`<div t-att-class="c"/>`;
+    const result = render(template, { c: "" });
+    expect(result).toBe(`<div></div>`);
+  });
 
-//   test("dynamic attribute with a dash", () => {
-//     const template = xml`<div t-att-data-action-id="id"/>`;
-//     const result = render(template, { id: 32 });
-//     expect(result).toBe(`<div data-action-id="32"></div>`);
-//   });
+  test("dynamic attribute with a dash", () => {
+    const template = xml`<div t-att-data-action-id="id"/>`;
+    const result = render(template, { id: 32 });
+    expect(result).toBe(`<div data-action-id="32"></div>`);
+  });
 
-//   test("dynamic formatted attributes with a dash", () => {
-//     const template = xml`<div t-attf-aria-label="Some text {{id}}"/>`;
-//     const result = render(template, { id: 32 });
-//     expect(result).toBe(`<div aria-label="Some text 32"></div>`);
-//   });
+  //   test("dynamic formatted attributes with a dash", () => {
+  //     const template = xml`<div t-attf-aria-label="Some text {{id}}"/>`;
+  //     const result = render(template, { id: 32 });
+  //     expect(result).toBe(`<div aria-label="Some text 32"></div>`);
+  //   });
 
-//   test("fixed variable", () => {
-//     const template = xml`<div t-att-foo="value"/>`;
-//     const result = render(template, { value: "ok" });
-//     expect(result).toBe(`<div foo="ok"></div>`);
-//   });
+  test("fixed variable", () => {
+    const template = xml`<div t-att-foo="value"/>`;
+    const result = render(template, { value: "ok" });
+    expect(result).toBe(`<div foo="ok"></div>`);
+  });
 
-//   test("dynamic attribute falsy variable ", () => {
-//     const template = xml`<div t-att-foo="value"/>`;
-//     const result = render(template, { value: false });
-//     expect(result).toBe(`<div></div>`);
-//   });
+  test("dynamic attribute falsy variable ", () => {
+    const template = xml`<div t-att-foo="value"/>`;
+    const result = render(template, { value: false });
+    expect(result).toBe(`<div></div>`);
+  });
 
-//   test("tuple literal", () => {
-//     const template = xml`<div t-att="['foo', 'bar']"/>`;
-//     const result = render(template);
-//     expect(result).toBe(`<div foo="bar"></div>`);
-//   });
+  //   test("tuple literal", () => {
+  //     const template = xml`<div t-att="['foo', 'bar']"/>`;
+  //     const result = render(template);
+  //     expect(result).toBe(`<div foo="bar"></div>`);
+  //   });
 
-//   test("tuple variable", () => {
-//     const template = xml`<div t-att="value"/>`;
-//     const result = render(template, { value: ["foo", "bar"] });
-//     expect(result).toBe(`<div foo="bar"></div>`);
-//   });
+  //   test("tuple variable", () => {
+  //     const template = xml`<div t-att="value"/>`;
+  //     const result = render(template, { value: ["foo", "bar"] });
+  //     expect(result).toBe(`<div foo="bar"></div>`);
+  //   });
 
-//   test("object", () => {
-//     const template = xml`<div t-att="value"/>`;
-//     const result = render(template, {
-//       value: { a: 1, b: 2, c: 3 },
-//     });
-//     expect(result).toBe(`<div a="1" b="2" c="3"></div>`);
-//   });
+  //   test("object", () => {
+  //     const template = xml`<div t-att="value"/>`;
+  //     const result = render(template, {
+  //       value: { a: 1, b: 2, c: 3 },
+  //     });
+  //     expect(result).toBe(`<div a="1" b="2" c="3"></div>`);
+  //   });
 
-//   test("format literal", () => {
-//     const template = xml`<div t-attf-foo="bar"/>`;
-//     const result = render(template);
-//     expect(result).toBe(`<div foo="bar"></div>`);
-//   });
+  //   test("format literal", () => {
+  //     const template = xml`<div t-attf-foo="bar"/>`;
+  //     const result = render(template);
+  //     expect(result).toBe(`<div foo="bar"></div>`);
+  //   });
 
-//   test("t-attf-class should combine with class", () => {
-//     const template = xml`<div class="hello" t-attf-class="world"/>`;
-//     const result = render(template);
-//     expect(result).toBe(`<div class="hello world"></div>`);
-//   });
+  //   test("t-attf-class should combine with class", () => {
+  //     const template = xml`<div class="hello" t-attf-class="world"/>`;
+  //     const result = render(template);
+  //     expect(result).toBe(`<div class="hello world"></div>`);
+  //   });
 
-//   test("format value", () => {
-//     const template = xml`<div t-attf-foo="b{{value}}r"/>`;
-//     const result = render(template, { value: "a" });
-//     expect(result).toBe(`<div foo="bar"></div>`);
-//   });
+  //   test("format value", () => {
+  //     const template = xml`<div t-attf-foo="b{{value}}r"/>`;
+  //     const result = render(template, { value: "a" });
+  //     expect(result).toBe(`<div foo="bar"></div>`);
+  //   });
 
-//   test("from variables set previously", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div><t t-set="abc" t-value="'def'"/><span t-att-class="abc"/></div>`
-//     );
-//     const result = render(template);
-//     expect(result).toBe('<div><span class="def"></span></div>');
-//   });
+  test("from variables set previously", () => {
+    const template = xml`
+        <div><t t-set="abc" t-value="'def'"/><span t-att-class="abc"/></div>`;
+    expect(render(template)).toBe('<div><span class="def"></span></div>');
+  });
 
-//   test("from object variables set previously", () => {
-//     // Note: standard qweb does not allow this...
-//     qweb.addTemplate(
-//       "test",
-//       `<div><t t-set="o" t-value="{a:'b'}"/><span t-att-class="o.a"/></div>`
-//     );
-//     const result = render(template);
-//     expect(result).toBe('<div><span class="b"></span></div>');
-//   });
+  test("from object variables set previously", () => {
+    // Note: standard qweb does not allow this...
+    const template = xml`
+        <div><t t-set="o" t-value="{a:'b'}"/><span t-att-class="o.a"/></div>`;
+    expect(render(template)).toBe('<div><span class="b"></span></div>');
+  });
 
-//   test("format expression", () => {
-//     const template = xml`<div t-attf-foo="{{value + 37}}"/>`;
-//     const result = render(template, { value: 5 });
-//     expect(result).toBe(`<div foo="42"></div>`);
-//   });
+  //   test("format expression", () => {
+  //     const template = xml`<div t-attf-foo="{{value + 37}}"/>`;
+  //     const result = render(template, { value: 5 });
+  //     expect(result).toBe(`<div foo="42"></div>`);
+  //   });
 
-//   test("format expression, other format", () => {
-//     const template = xml`<div t-attf-foo="{{value + 37}}"/>`;
-//     const result = render(template, { value: 5 });
-//     expect(result).toBe(`<div foo="42"></div>`);
-//   });
+  //   test("format expression, other format", () => {
+  //     const template = xml`<div t-attf-foo="{{value + 37}}"/>`;
+  //     const result = render(template, { value: 5 });
+  //     expect(result).toBe(`<div foo="42"></div>`);
+  //   });
 
-//   test("format multiple", () => {
-//     const template = xml`<div t-attf-foo="a {{value1}} is {{value2}} of {{value3}} ]"/>`;
-//     const result = render(template, {
-//       value1: 0,
-//       value2: 1,
-//       value3: 2,
-//     });
-//     expect(result).toBe(`<div foo="a 0 is 1 of 2 ]"></div>`);
-//   });
+  //   test("format multiple", () => {
+  //     const template = xml`<div t-attf-foo="a {{value1}} is {{value2}} of {{value3}} ]"/>`;
+  //     const result = render(template, {
+  //       value1: 0,
+  //       value2: 1,
+  //       value3: 2,
+  //     });
+  //     expect(result).toBe(`<div foo="a 0 is 1 of 2 ]"></div>`);
+  //   });
 
-//   test("various escapes", () => {
-//     // not needed??
-//     qweb.addTemplate(
-//       "test",
-//       `
-//          <div foo="&lt;foo"
-//             t-att-bar="bar"
-//             t-attf-baz="&lt;{{baz}}&gt;"
-//             t-att="qux"/>
-//         `
-//     );
-//     const result = render(template, {
-//       bar: 0,
-//       baz: 1,
-//       qux: { qux: "<>" },
-//     });
-//     const expected = '<div foo="<foo" bar="0" baz="<1>" qux="<>"></div>';
-//     expect(result).toBe(expected);
-//   });
+  //   test("various escapes", () => {
+  //     // not needed??
+  //     qweb.addTemplate(
+  //       "test",
+  //       `
+  //          <div foo="&lt;foo"
+  //             t-att-bar="bar"
+  //             t-attf-baz="&lt;{{baz}}&gt;"
+  //             t-att="qux"/>
+  //         `
+  //     );
+  //     const result = render(template, {
+  //       bar: 0,
+  //       baz: 1,
+  //       qux: { qux: "<>" },
+  //     });
+  //     const expected = '<div foo="<foo" bar="0" baz="<1>" qux="<>"></div>';
+  //     expect(result).toBe(expected);
+  //   });
 
-//   test("t-att-class and class should combine together", () => {
-//     const template = xml`<div class="hello" t-att-class="value"/>`;
-//     const result = render(template, { value: "world" });
-//     expect(result).toBe(`<div class="hello world"></div>`);
-//   });
+  test("t-att-class and class should combine together", () => {
+    const template = xml`<div class="hello" t-att-class="value"/>`;
+    const result = render(template, { value: "world" });
+    expect(result).toBe(`<div class="hello world"></div>`);
+  });
 
-//   test("class and t-att-class should combine together", () => {
-//     const template = xml`<div t-att-class="value" class="hello" />`;
-//     const result = render(template, { value: "world" });
-//     expect(result).toBe(`<div class="world hello"></div>`);
-//   });
+  //   test("class and t-att-class should combine together", () => {
+  //     const template = xml`<div t-att-class="value" class="hello" />`;
+  //     const result = render(template, { value: "world" });
+  //     expect(result).toBe(`<div class="world hello"></div>`);
+  //   });
 
-//   test("class and t-attf-class with ternary operation", () => {
-//     const template = xml`<div class="hello" t-attf-class="{{value ? 'world' : ''}}"/>`;
-//     const result = render(template, { value: true });
-//     expect(result).toBe(`<div class="hello world"></div>`);
-//   });
+  //   test("class and t-attf-class with ternary operation", () => {
+  //     const template = xml`<div class="hello" t-attf-class="{{value ? 'world' : ''}}"/>`;
+  //     const result = render(template, { value: true });
+  //     expect(result).toBe(`<div class="hello world"></div>`);
+  //   });
 
-//   test("t-att-class with object", () => {
-//     const template = xml`<div class="static" t-att-class="{a: b, c: d, e: f}"/>`;
-//     const result = render(template, { b: true, d: false, f: true });
-//     expect(result).toBe(`<div class="static a e"></div>`);
-//   });
-// });
+  //   test("t-att-class with object", () => {
+  //     const template = xml`<div class="static" t-att-class="{a: b, c: d, e: f}"/>`;
+  //     const result = render(template, { b: true, d: false, f: true });
+  //     expect(result).toBe(`<div class="static a e"></div>`);
+  //   });
+});
 
 // describe("t-call (template calling", () => {
 //   test("basic caller", () => {
