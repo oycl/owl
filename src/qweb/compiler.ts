@@ -42,7 +42,7 @@ export function compileTemplate(name: string, template: string): CompiledTemplat
   if (ctx.shouldProtectContext) {
     ctx.code.splice(1, 0, `    ctx = Object.create(ctx);`);
   }
-  // console.warn(ctx.code.join('\n'))
+  // console.warn(ctx.code.join("\n"));
   const fn = new Function("tree, ctx", ctx.code.join("\n")) as CompiledTemplate;
   return fn;
 }
@@ -116,6 +116,24 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
       withParent(ctx, id, () => {
         generateCode(ast.children, ctx);
       });
+      break;
+    }
+    case "T-CALL": {
+      if (ast.children.length) {
+        addLine(ctx, `ctx = Object.create(ctx);`);
+        const id = uniqueId(ctx, "vn");
+        addLine(ctx, `const ${id} = {type: ${NodeType.Multi}, children: []};`);
+        withParent(ctx, id, () => {
+          generateCode(ast.children, ctx);
+        });
+        addLine(ctx, `ctx[this.zero] = ${id}.children;`);
+      }
+      const vnode = `this.callTemplate(tree, "${ast.template}", ctx)`;
+
+      addVNode(ctx, vnode, false);
+      if (ast.children.length) {
+        addLine(ctx, `ctx = ctx.__proto__;`);
+      }
       break;
     }
     case "COMPONENT": {
@@ -262,6 +280,15 @@ function compileSetNode(ctx: CodeContext, ast: ASTSetNode) {
 // -----------------------------------------------------------------------------
 
 function compileEscNode(ctx: CodeContext, ast: ASTEscNode) {
+  if (ast.expr === "0") {
+    addVNode(
+      ctx,
+      `{type: ${NodeType.Text}, text: this.vDomToString(ctx[this.zero]), el: null}`,
+      false
+    );
+
+    return;
+  }
   const expr = compileExpr(ast.expr, {});
   if (ast.body.length) {
     const id = uniqueId(ctx);

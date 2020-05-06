@@ -255,6 +255,130 @@ exports[`static templates two empty divs (*) 1`] = `
 }"
 `;
 
+exports[`t-call (template calling basic caller 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-call=\\"__template__1\\"/></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+}"
+`;
+
+exports[`t-call (template calling basic caller, no parent node 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t t-call=\\"__template__1\\"/>\`
+    tree.child = this.callTemplate(tree, \\"__template__1\\", ctx);
+}"
+`;
+
+exports[`t-call (template calling inherit context 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"foo\\" t-value=\\"1\\"/><t t-call=\\"__template__1\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.foo = 1;
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+}"
+`;
+
+exports[`t-call (template calling recursive template, part 1 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>            <span>hey</span>            <t t-if=\\"false\\">              <t t-call=\\"recursive\\"/\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn2);
+    vn2.children.push({type: 1, text: \`hey\`, el: null});
+    if (false) {
+        vn1.children.push(this.callTemplate(tree, \\"recursive\\", ctx));
+    }
+}"
+`;
+
+exports[`t-call (template calling scoped parameters 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>              <t t-call=\\"__template__1\\">                  <t t-set=\\"foo\\" t-value=\\"42\\"/>     \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    ctx.foo = 42;
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+    ctx = ctx.__proto__;
+    vn1.children.push({type: 1, text: ctx['foo'], el: null});
+}"
+`;
+
+exports[`t-call (template calling t-call with t-if 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-if=\\"flag\\" t-call=\\"__template__1\\"/></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['flag']) {
+        vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+    }
+}"
+`;
+
+exports[`t-call (template calling with unused body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t t-call=\\"__template__1\\">WHEEE</t>\`
+    ctx = Object.create(ctx);
+    const vn1 = {type: 4, children: []};
+    vn1.children.push({type: 1, text: \`WHEEE\`, el: null});
+    ctx[this.zero] = vn1.children;
+    tree.child = this.callTemplate(tree, \\"__template__1\\", ctx);
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`t-call (template calling with unused setbody 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t t-call=\\"__template__1\\"><t t-set=\\"qux\\" t-value=\\"3\\"/></t>\`
+    ctx = Object.create(ctx);
+    ctx = Object.create(ctx);
+    const vn1 = {type: 4, children: []};
+    ctx.qux = 3;
+    ctx[this.zero] = vn1.children;
+    tree.child = this.callTemplate(tree, \\"__template__1\\", ctx);
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`t-call (template calling with used body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t t-call=\\"__template__1\\">ok</t>\`
+    ctx = Object.create(ctx);
+    const vn1 = {type: 4, children: []};
+    vn1.children.push({type: 1, text: \`ok\`, el: null});
+    ctx[this.zero] = vn1.children;
+    tree.child = this.callTemplate(tree, \\"__template__1\\", ctx);
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`t-call (template calling with used set body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-call=\\"__template__1\\"><t t-set=\\"foo\\" t-value=\\"'ok'\\"/></t></span>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    ctx.foo = 'ok';
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+    ctx = ctx.__proto__;
+}"
+`;
+
 exports[`t-esc div with falsy values 1`] = `
 "function anonymous(tree, ctx
 ) {

@@ -61,6 +61,12 @@ export interface ASTSetNode {
   body: AST[];
 }
 
+export interface ASTCallNode {
+  type: "T-CALL";
+  template: string;
+  children: AST[];
+}
+
 export type AST =
   | ASTDOMNode
   | ASTTextNode
@@ -71,7 +77,8 @@ export type AST =
   | ASTIfNode
   | ASTElifNode
   | ASTElseNode
-  | ASTComponentNode;
+  | ASTComponentNode
+  | ASTCallNode;
 
 // -----------------------------------------------------------------------------
 // Parser
@@ -92,6 +99,7 @@ function parseNode(node: ChildNode): AST | null {
     parseTEscNode(node) ||
     parseComponentNode(node) ||
     parseTSetNode(node) ||
+    parseTCallNode(node) ||
     parseTNode(node) ||
     parseDOMNode(node)
   );
@@ -250,6 +258,9 @@ function parseChildren(node: Element): AST[] {
     }
     child.remove();
   }
+  while (children.length === 1 && children[0].type === "MULTI") {
+    children = children[0].children;
+  }
   return children;
 }
 
@@ -347,4 +358,23 @@ function parseXML(xml: string): Document {
   }
 
   return doc;
+}
+
+// -----------------------------------------------------------------------------
+// t-call directive
+// -----------------------------------------------------------------------------
+
+function parseTCallNode(node: Element): AST | null {
+  if (!node.hasAttribute("t-call")) {
+    return null;
+  }
+  if (node.tagName !== "t") {
+    throw new Error("Invalid tag for t-call directive (should be 't')");
+  }
+
+  return {
+    type: "T-CALL",
+    template: node.getAttribute("t-call")!,
+    children: parseChildren(node),
+  };
 }

@@ -64,6 +64,7 @@ export type VNode<T> = VDOMNode<T> | VTextNode | VDataNode<T> | VMultiNode<T> | 
 // -----------------------------------------------------------------------------
 
 export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): VNodeEl {
+  // console.warn(JSON.stringify(vnode))
   switch (vnode.type) {
     case NodeType.Text:
       let text = vnode.text; // === undefined ? "" : vnode.text;

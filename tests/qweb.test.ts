@@ -1,5 +1,5 @@
 import { renderToString, xml } from "../src/index";
-import { compiledTemplates } from "../src/qweb/qweb";
+import { compiledTemplates, clearQWeb, addTemplate } from "../src/qweb/qweb";
 
 function render(template: string, context?: any): string {
   const str = renderToString(template, context);
@@ -7,6 +7,9 @@ function render(template: string, context?: any): string {
   return str;
 }
 
+beforeEach(() => {
+  clearQWeb();
+});
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
@@ -706,323 +709,298 @@ describe("attributes", () => {
   //   });
 });
 
-// describe("t-call (template calling", () => {
-//   test("basic caller", () => {
-//     qweb.addTemplate("_basic-callee", "<span>ok</span>");
-//     qweb.addTemplate("caller", '<div><t t-call="_basic-callee"/></div>');
-//     const expected = "<div><span>ok</span></div>";
-//     expect(renderToString(qweb, "caller")).toBe(expected);
-//     expect(qweb.subTemplates["_basic-callee"].toString()).toMatchSnapshot();
-//   });
+describe("t-call (template calling", () => {
+  test("basic caller", () => {
+    const callee = xml`<span>ok</span>`;
+    const caller = xml`<div><t t-call="${callee}"/></div>`;
+    const expected = "<div><span>ok</span></div>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//   test("basic caller, no parent node", () => {
-//     qweb.addTemplate("_basic-callee", "<div>ok</div>");
-//     qweb.addTemplate("caller", '<t t-call="_basic-callee"/>');
-//     const expected = "<div>ok</div>";
-//     expect(renderToString(qweb, "caller")).toBe(expected);
-//     expect(qweb.subTemplates["_basic-callee"].toString()).toMatchSnapshot();
-//   });
+  test("basic caller, no parent node", () => {
+    const callee = xml`<div>ok</div>`;
+    const caller = xml`<t t-call="${callee}"/>`;
+    const expected = "<div>ok</div>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//   test("t-call with t-if", () => {
-//     qweb.addTemplate("sub", "<span>ok</span>");
-//     qweb.addTemplate("caller", '<div><t t-if="flag" t-call="sub"/></div>');
-//     const expected = "<div><span>ok</span></div>";
-//     expect(renderToString(qweb, "caller", { flag: true })).toBe(expected);
-//     expect(qweb.subTemplates["sub"].toString()).toMatchSnapshot();
-//   });
+  test("t-call with t-if", () => {
+    const sub = xml`<span>ok</span>`;
+    const caller = xml`<div><t t-if="flag" t-call="${sub}"/></div>`;
+    const expected = "<div><span>ok</span></div>";
+    expect(render(caller, { flag: true })).toBe(expected);
+  });
 
-//   test("t-call not allowed on a non t node", () => {
-//     qweb.addTemplate("_basic-callee", "<t>ok</t>");
-//     qweb.addTemplate("caller", '<div t-call="_basic-callee"/>');
-//     expect(() => renderToString(qweb, "caller")).toThrow("Invalid tag");
-//   });
+  test("t-call not allowed on a non t node", () => {
+    const sub = xml`<t>ok</t>`;
+    const caller = xml`<div t-call="${sub}"/>`;
+    expect(() => render(caller)).toThrow("Invalid tag");
+  });
 
-//   test("with unused body", () => {
-//     qweb.addTemplate("_basic-callee", "<div>ok</div>");
-//     qweb.addTemplate("caller", '<t t-call="_basic-callee">WHEEE</t>');
-//     const expected = "<div>ok</div>";
-//     expect(renderToString(qweb, "caller")).toBe(expected);
-//   });
+  test("with unused body", () => {
+    const sub = xml`<div>ok</div>`;
+    const caller = xml`<t t-call="${sub}">WHEEE</t>`;
+    const expected = "<div>ok</div>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//   test("with unused setbody", () => {
-//     qweb.addTemplate("_basic-callee", "<div>ok</div>");
-//     qweb.addTemplate("caller", '<t t-call="_basic-callee"><t t-set="qux" t-value="3"/></t>');
-//     const expected = "<div>ok</div>";
-//     expect(renderToString(qweb, "caller")).toBe(expected);
-//   });
+  test("with unused setbody", () => {
+    const sub = xml`<div>ok</div>`;
+    const caller = xml`<t t-call="${sub}"><t t-set="qux" t-value="3"/></t>`;
+    const expected = "<div>ok</div>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//   test("with used body", () => {
-//     qweb.addTemplate("_callee-printsbody", '<h1><t t-esc="0"/></h1>');
-//     qweb.addTemplate("caller", '<t t-call="_callee-printsbody">ok</t>');
-//     const expected = "<h1>ok</h1>";
-//     expect(renderToString(qweb, "caller")).toBe(expected);
-//   });
+  test("with used body", () => {
+    const sub = xml`<h1><t t-esc="0"/></h1>`;
+    const caller = xml`<t t-call="${sub}">ok</t>`;
+    const expected = "<h1>ok</h1>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//   test("with used set body", () => {
-//     qweb.addTemplate("_callee-uses-foo", '<t t-esc="foo"/>');
-//     qweb.addTemplate(
-//       "caller",
-//       `
-//         <span><t t-call="_callee-uses-foo"><t t-set="foo" t-value="'ok'"/></t></span>`
-//     );
-//     const expected = "<span>ok</span>";
-//     expect(renderToString(qweb, "caller")).toBe(expected);
-//   });
+  test("with used set body", () => {
+    const foo = xml`<t t-esc="foo"/>`;
+    const caller = xml`<span><t t-call="${foo}"><t t-set="foo" t-value="'ok'"/></t></span>`;
 
-//   test("inherit context", () => {
-//     qweb.addTemplate("_callee-uses-foo", '<t t-esc="foo"/>');
-//     qweb.addTemplate(
-//       "caller",
-//       `
-//         <div><t t-set="foo" t-value="1"/><t t-call="_callee-uses-foo"/></div>`
-//     );
-//     const expected = "<div>1</div>";
-//     expect(renderToString(qweb, "caller")).toBe(expected);
-//   });
+    const expected = "<span>ok</span>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//   test("scoped parameters", () => {
-//     qweb.addTemplate("_basic-callee", `<t>ok</t>`);
-//     qweb.addTemplate(
-//       "caller",
-//       `
-//         <div>
-//             <t t-call="_basic-callee">
-//                 <t t-set="foo" t-value="42"/>
-//             </t>
-//             <t t-esc="foo"/>
-//         </div>
-//       `
-//     );
-//     const expected = "<div>ok</div>";
-//     expect(trim(renderToString(qweb, "caller"))).toBe(expected);
-//   });
+  test("inherit context", () => {
+    const foo = xml`<t t-esc="foo"/>`;
+    const caller = xml`<div><t t-set="foo" t-value="1"/><t t-call="${foo}"/></div>`;
+    const expected = "<div>1</div>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//   test("call with several sub nodes on same line", () => {
-//     qweb.addTemplates(`
-//         <templates>
-//             <div t-name="SubTemplate">
-//                 <t t-raw="0"/>
-//             </div>
+  test("scoped parameters", () => {
+    const callee = xml`<t>ok</t>`;
+    const caller = xml`
+          <div>
+              <t t-call="${callee}">
+                  <t t-set="foo" t-value="42"/>
+              </t>
+              <t t-esc="foo"/>
+          </div>`;
+    const expected = "<div>ok</div>";
+    expect(render(caller)).toBe(expected);
+  });
 
-//             <div t-name="main">
-//                 <t t-call="SubTemplate">
-//                     <span>hey</span> <span>yay</span>
-//                 </t>
-//             </div>
-//         </templates>
-//     `);
-//     const expected = "<div><div><span>hey</span> <span>yay</span></div></div>";
-//     expect(renderToString(qweb, "main")).toBe(expected);
-//     expect(qweb.subTemplates["SubTemplate"].toString()).toMatchSnapshot();
-//   });
+  // test("call with several sub nodes on same line", () => {
+  //   const sub = xml`
+  //     <div t-name="SubTemplate">
+  //         <t t-raw="0"/>
+  //     </div>`;
+  //   const main = xml`
+  //     <div>
+  //       <t t-call="${sub}">
+  //         <span>hey</span> <span>yay</span>
+  //       </t>
+  //     </div>`;
+  //   const expected = "<div><div><span>hey</span> <span>yay</span></div></div>";
+  //   expect(render(main)).toBe(expected);
+  // });
 
-//   test("cascading t-call t-raw='0'", () => {
-//     qweb.addTemplates(`
-//         <templates>
-//             <div t-name="finalTemplate">
-//               <span>cascade 2</span>
-//               <t t-raw="0"/>
-//             </div>
+  //   test("cascading t-call t-raw='0'", () => {
+  //     qweb.addTemplates(`
+  //         <templates>
+  //             <div t-name="finalTemplate">
+  //               <span>cascade 2</span>
+  //               <t t-raw="0"/>
+  //             </div>
 
-//             <div t-name="subSubTemplate">
-//               <t t-call="finalTemplate">
-//                 <span>cascade 1</span>
-//                 <t t-raw="0"/>
-//               </t>
-//             </div>
+  //             <div t-name="subSubTemplate">
+  //               <t t-call="finalTemplate">
+  //                 <span>cascade 1</span>
+  //                 <t t-raw="0"/>
+  //               </t>
+  //             </div>
 
-//             <div t-name="SubTemplate">
-//               <t t-call="subSubTemplate">
-//                 <span>cascade 0</span>
-//                 <t t-raw="0"/>
-//               </t>
-//             </div>
+  //             <div t-name="SubTemplate">
+  //               <t t-call="subSubTemplate">
+  //                 <span>cascade 0</span>
+  //                 <t t-raw="0"/>
+  //               </t>
+  //             </div>
 
-//             <div t-name="main">
-//               <t t-call="SubTemplate">
-//                 <span>hey</span> <span>yay</span>
-//               </t>
-//             </div>
-//         </templates>
-//     `);
-//     const expected =
-//       "<div><div><div><div><span>cascade 2</span><span>cascade 1</span><span>cascade 0</span><span>hey</span> <span>yay</span></div></div></div></div>";
-//     expect(renderToString(qweb, "main")).toBe(expected);
-//   });
+  //             <div t-name="main">
+  //               <t t-call="SubTemplate">
+  //                 <span>hey</span> <span>yay</span>
+  //               </t>
+  //             </div>
+  //         </templates>
+  //     `);
+  //     const expected =
+  //       "<div><div><div><div><span>cascade 2</span><span>cascade 1</span><span>cascade 0</span><span>hey</span> <span>yay</span></div></div></div></div>";
+  //     expect(renderToString(qweb, "main")).toBe(expected);
+  //   });
 
-//   test("recursive template, part 1", () => {
-//     qweb.addTemplates(`
-//         <templates>
-//             <div t-name="recursive">
-//                 <span>hey</span>
-//                 <t t-if="false">
-//                     <t t-call="recursive"/>
-//                 </t>
-//             </div>
-//         </templates>
-//     `);
-//     const expected = "<div><span>hey</span></div>";
-//     expect(renderToString(qweb, "recursive")).toBe(expected);
-//     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
-//     expect(recursiveFn.toString()).toMatchSnapshot();
-//   });
+  test("recursive template, part 1", () => {
+    addTemplate(
+      "recursive",
+      `
+        <div>
+          <span>hey</span>
+          <t t-if="false">
+            <t t-call="recursive"/>
+          </t>
+        </div>`
+    );
+    const expected = "<div><span>hey</span></div>";
+    expect(render("recursive")).toBe(expected);
+  });
 
-//   test("recursive template, part 2", () => {
-//     qweb.addTemplates(`
-//         <templates>
-//             <div t-name="Parent">
-//                 <t t-call="nodeTemplate">
-//                     <t t-set="node" t-value="root"/>
-//                 </t>
-//             </div>
-//             <div t-name="nodeTemplate">
-//                 <p><t t-esc="node.val"/></p>
-//                 <t t-foreach="node.children or []" t-as="subtree">
-//                     <t t-call="nodeTemplate">
-//                         <t t-set="node" t-value="subtree"/>
-//                     </t>
-//                 </t>
-//             </div>
+  // test("recursive template, part 2", () => {
+  //   addTemplate('Parent', `
+  //     <div>
+  //       <t t-call="nodeTemplate">
+  //         <t t-set="node" t-value="root"/>
+  //       </t>
+  //     </div>`);
 
-//         </templates>
-//     `);
-//     const root = { val: "a", children: [{ val: "b" }, { val: "c" }] };
-//     const expected = "<div><div><p>a</p><div><p>b</p></div><div><p>c</p></div></div></div>";
-//     expect(renderToString(qweb, "Parent", { root }, { fiber: { vars: {}, scope: {} } })).toBe(
-//       expected
-//     );
-//     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
-//     expect(recursiveFn.toString()).toMatchSnapshot();
-//   });
+  //   addTemplate('nodeTemplate', `
+  //       <div>
+  //         <p><t t-esc="node.val"/></p>
+  //         <t t-foreach="node.children or []" t-as="subtree">
+  //           <t t-call="nodeTemplate">
+  //             <t t-set="node" t-value="subtree"/>
+  //           </t>
+  //         </t>
+  //       </div>`
+  //   );
+  //   const root = { val: "a", children: [{ val: "b" }, { val: "c" }] };
+  //   const expected = "<div><div><p>a</p><div><p>b</p></div><div><p>c</p></div></div></div>";
+  //   expect(render("Parent", { root })).toBe(expected);
+  // });
 
-//   test("recursive template, part 3", () => {
-//     qweb.addTemplates(`
-//         <templates>
-//             <div t-name="Parent">
-//                 <t t-call="nodeTemplate">
-//                     <t t-set="node" t-value="root"/>
-//                 </t>
-//             </div>
-//             <div t-name="nodeTemplate">
-//                 <p><t t-esc="node.val"/></p>
-//                 <t t-foreach="node.children or []" t-as="subtree">
-//                     <t t-call="nodeTemplate">
-//                         <t t-set="node" t-value="subtree"/>
-//                     </t>
-//                 </t>
-//             </div>
+  //   test("recursive template, part 3", () => {
+  //     qweb.addTemplates(`
+  //         <templates>
+  //             <div t-name="Parent">
+  //                 <t t-call="nodeTemplate">
+  //                     <t t-set="node" t-value="root"/>
+  //                 </t>
+  //             </div>
+  //             <div t-name="nodeTemplate">
+  //                 <p><t t-esc="node.val"/></p>
+  //                 <t t-foreach="node.children or []" t-as="subtree">
+  //                     <t t-call="nodeTemplate">
+  //                         <t t-set="node" t-value="subtree"/>
+  //                     </t>
+  //                 </t>
+  //             </div>
 
-//         </templates>
-//     `);
-//     const root = { val: "a", children: [{ val: "b", children: [{ val: "d" }] }, { val: "c" }] };
-//     const expected =
-//       "<div><div><p>a</p><div><p>b</p><div><p>d</p></div></div><div><p>c</p></div></div></div>";
-//     expect(renderToString(qweb, "Parent", { root }, { fiber: {} })).toBe(expected);
-//     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
-//     expect(recursiveFn.toString()).toMatchSnapshot();
-//   });
+  //         </templates>
+  //     `);
+  //     const root = { val: "a", children: [{ val: "b", children: [{ val: "d" }] }, { val: "c" }] };
+  //     const expected =
+  //       "<div><div><p>a</p><div><p>b</p><div><p>d</p></div></div><div><p>c</p></div></div></div>";
+  //     expect(renderToString(qweb, "Parent", { root }, { fiber: {} })).toBe(expected);
+  //     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
+  //     expect(recursiveFn.toString()).toMatchSnapshot();
+  //   });
 
-//   test("recursive template, part 4: with t-set recursive index", () => {
-//     qweb.addTemplates(`
-//         <templates>
-//             <div t-name="Parent">
-//                 <t t-call="nodeTemplate">
-//                     <t t-set="recursive_idx" t-value="1"/>
-//                     <t t-set="node" t-value="root"/>
-//                 </t>
-//             </div>
-//             <div t-name="nodeTemplate">
-//                 <t t-set="recursive_idx" t-value="recursive_idx + 1"/>
-//                 <p><t t-esc="node.val"/> <t t-esc="recursive_idx"/></p>
-//                 <t t-foreach="node.children or []" t-as="subtree">
-//                     <t t-call="nodeTemplate">
-//                         <t t-set="node" t-value="subtree"/>
-//                     </t>
-//                 </t>
-//             </div>
+  //   test("recursive template, part 4: with t-set recursive index", () => {
+  //     qweb.addTemplates(`
+  //         <templates>
+  //             <div t-name="Parent">
+  //                 <t t-call="nodeTemplate">
+  //                     <t t-set="recursive_idx" t-value="1"/>
+  //                     <t t-set="node" t-value="root"/>
+  //                 </t>
+  //             </div>
+  //             <div t-name="nodeTemplate">
+  //                 <t t-set="recursive_idx" t-value="recursive_idx + 1"/>
+  //                 <p><t t-esc="node.val"/> <t t-esc="recursive_idx"/></p>
+  //                 <t t-foreach="node.children or []" t-as="subtree">
+  //                     <t t-call="nodeTemplate">
+  //                         <t t-set="node" t-value="subtree"/>
+  //                     </t>
+  //                 </t>
+  //             </div>
 
-//         </templates>
-//     `);
-//     const root = {
-//       val: "a",
-//       children: [{ val: "b", children: [{ val: "c", children: [{ val: "d" }] }] }],
-//     };
-//     const expected =
-//       "<div><div><p>a 2</p><div><p>b 3</p><div><p>c 4</p><div><p>d 5</p></div></div></div></div></div>";
-//     expect(renderToString(qweb, "Parent", { root })).toBe(expected);
-//     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
-//     expect(recursiveFn.toString()).toMatchSnapshot();
-//   });
+  //         </templates>
+  //     `);
+  //     const root = {
+  //       val: "a",
+  //       children: [{ val: "b", children: [{ val: "c", children: [{ val: "d" }] }] }],
+  //     };
+  //     const expected =
+  //       "<div><div><p>a 2</p><div><p>b 3</p><div><p>c 4</p><div><p>d 5</p></div></div></div></div></div>";
+  //     expect(renderToString(qweb, "Parent", { root })).toBe(expected);
+  //     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
+  //     expect(recursiveFn.toString()).toMatchSnapshot();
+  //   });
 
-//   test("t-call, global templates", () => {
-//     QWeb.registerTemplate("abcd", '<div><t t-call="john"/></div>');
-//     qweb.addTemplate("john", `<span>desk</span>`);
-//     const expected = "<div><span>desk</span></div>";
-//     expect(trim(renderToString(qweb, "abcd"))).toBe(expected);
-//   });
+  //   test("t-call, global templates", () => {
+  //     QWeb.registerTemplate("abcd", '<div><t t-call="john"/></div>');
+  //     qweb.addTemplate("john", `<span>desk</span>`);
+  //     const expected = "<div><span>desk</span></div>";
+  //     expect(trim(renderToString(qweb, "abcd"))).toBe(expected);
+  //   });
 
-//   test("t-call, conditional and t-set in t-call body", () => {
-//     QWeb.registerTemplate("callee1", "<div>callee1</div>");
-//     QWeb.registerTemplate("callee2", '<div>callee2 <t t-esc="v"/></div>');
-//     QWeb.registerTemplate(
-//       "caller",
-//       `<div>
-//         <t t-set="v1" t-value="'elif'"/>
-//         <t t-if="v1 === 'if'" t-call="callee1" />
-//         <t t-elif="v1 === 'elif'" t-call="callee2" >
-//           <t t-set="v" t-value="'success'" />
-//         </t>
-//        </div>`
-//     );
-//     const rendered = renderToString(qweb, "caller");
-//     expect(rendered).toBe(`<div><div>callee2 success</div></div>`);
-//   });
+  //   test("t-call, conditional and t-set in t-call body", () => {
+  //     QWeb.registerTemplate("callee1", "<div>callee1</div>");
+  //     QWeb.registerTemplate("callee2", '<div>callee2 <t t-esc="v"/></div>');
+  //     QWeb.registerTemplate(
+  //       "caller",
+  //       `<div>
+  //         <t t-set="v1" t-value="'elif'"/>
+  //         <t t-if="v1 === 'if'" t-call="callee1" />
+  //         <t t-elif="v1 === 'elif'" t-call="callee2" >
+  //           <t t-set="v" t-value="'success'" />
+  //         </t>
+  //        </div>`
+  //     );
+  //     const rendered = renderToString(qweb, "caller");
+  //     expect(rendered).toBe(`<div><div>callee2 success</div></div>`);
+  //   });
 
-//   test("t-call with t-set inside and outside", () => {
-//     qweb.addTemplates(`
-//       <templates>
-//         <div t-name="main">
-//           <t t-foreach="list" t-as="v">
-//             <t t-set="val" t-value="v.val"/>
-//             <t t-call="sub">
-//               <t t-set="val3" t-value="val*3"/>
-//             </t>
-//           </t>
-//         </div>
-//         <t t-name="sub">
-//           <span t-esc="val3"/>
-//         </t>
-//       </templates>
-//     `);
-//     const expected = "<div><span>3</span><span>6</span><span>9</span></div>";
-//     const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
-//     expect(trim(renderToString(qweb, "main", context))).toBe(expected);
-//   });
+  //   test("t-call with t-set inside and outside", () => {
+  //     qweb.addTemplates(`
+  //       <templates>
+  //         <div t-name="main">
+  //           <t t-foreach="list" t-as="v">
+  //             <t t-set="val" t-value="v.val"/>
+  //             <t t-call="sub">
+  //               <t t-set="val3" t-value="val*3"/>
+  //             </t>
+  //           </t>
+  //         </div>
+  //         <t t-name="sub">
+  //           <span t-esc="val3"/>
+  //         </t>
+  //       </templates>
+  //     `);
+  //     const expected = "<div><span>3</span><span>6</span><span>9</span></div>";
+  //     const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
+  //     expect(trim(renderToString(qweb, "main", context))).toBe(expected);
+  //   });
 
-//   test("t-call with t-set inside and outside. 2", () => {
-//     qweb.addTemplates(`
-//       <templates>
-//         <div t-name="main">
-//           <t t-foreach="list" t-as="v">
-//             <t t-set="val" t-value="v.val"/>
-//             <t t-call="sub">
-//               <t t-set="val3" t-value="val*3"/>
-//             </t>
-//           </t>
-//         </div>
-//         <t t-name="sub">
-//           <span t-esc="val3"/>
-//           <t t-esc="w"/>
-//         </t>
-//         <p t-name="wrapper"><t t-set="w" t-value="'fromwrapper'"/><t t-call="main"/></p>
-//       </templates>
-//     `);
-//     const expected =
-//       "<p><div><span>3</span>fromwrapper<span>6</span>fromwrapper<span>9</span>fromwrapper</div></p>";
-//     const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
-//     expect(trim(renderToString(qweb, "wrapper", context))).toBe(expected);
-//   });
-// });
+  //   test("t-call with t-set inside and outside. 2", () => {
+  //     qweb.addTemplates(`
+  //       <templates>
+  //         <div t-name="main">
+  //           <t t-foreach="list" t-as="v">
+  //             <t t-set="val" t-value="v.val"/>
+  //             <t t-call="sub">
+  //               <t t-set="val3" t-value="val*3"/>
+  //             </t>
+  //           </t>
+  //         </div>
+  //         <t t-name="sub">
+  //           <span t-esc="val3"/>
+  //           <t t-esc="w"/>
+  //         </t>
+  //         <p t-name="wrapper"><t t-set="w" t-value="'fromwrapper'"/><t t-call="main"/></p>
+  //       </templates>
+  //     `);
+  //     const expected =
+  //       "<p><div><span>3</span>fromwrapper<span>6</span>fromwrapper<span>9</span>fromwrapper</div></p>";
+  //     const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
+  //     expect(trim(renderToString(qweb, "wrapper", context))).toBe(expected);
+  //   });
+});
 
 // describe("foreach", () => {
 //   test("iterate on items", () => {
