@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`static template div with a class attribute 1`] = `
+exports[`static templates div with a class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div class=\\"abc\\">word</div>\`
@@ -9,7 +9,7 @@ exports[`static template div with a class attribute 1`] = `
 }"
 `;
 
-exports[`static template div with a class attribute with a quote 1`] = `
+exports[`static templates div with a class attribute with a quote 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div class=\\"a'bc\\">word</div>\`
@@ -18,7 +18,7 @@ exports[`static template div with a class attribute with a quote 1`] = `
 }"
 `;
 
-exports[`static template div with a empty class attribute 1`] = `
+exports[`static templates div with a empty class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div class=\\"\\">word</div>\`
@@ -27,7 +27,7 @@ exports[`static template div with a empty class attribute 1`] = `
 }"
 `;
 
-exports[`static template div with a span child node 1`] = `
+exports[`static templates div with a span child node 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div><span>word</span></div>\`
@@ -38,7 +38,7 @@ exports[`static template div with a span child node 1`] = `
 }"
 `;
 
-exports[`static template div with a text node 1`] = `
+exports[`static templates div with a text node 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div>word</div>\`
@@ -47,7 +47,7 @@ exports[`static template div with a text node 1`] = `
 }"
 `;
 
-exports[`static template div with an arbitrary attribute with a quote 1`] = `
+exports[`static templates div with an arbitrary attribute with a quote 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div abc=\\"a'bc\\">word</div>\`
@@ -56,7 +56,7 @@ exports[`static template div with an arbitrary attribute with a quote 1`] = `
 }"
 `;
 
-exports[`static template empty div 1`] = `
+exports[`static templates empty div 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div></div>\`
@@ -64,7 +64,7 @@ exports[`static template empty div 1`] = `
 }"
 `;
 
-exports[`static template no template (*) 1`] = `
+exports[`static templates no template (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`\`
@@ -72,7 +72,7 @@ exports[`static template no template (*) 1`] = `
 }"
 `;
 
-exports[`static template properly handle comments 1`] = `
+exports[`static templates properly handle comments 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div>hello <!-- comment-->owl</div>\`
@@ -83,7 +83,24 @@ exports[`static template properly handle comments 1`] = `
 }"
 `;
 
-exports[`static template simple dynamic value 1`] = `
+exports[`static templates properly handle comments between t-if/t-else 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <span t-if=\\"true\\">true</span>        <!-- comment-->        <span t-else=\\"\\">owl</spa\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (true) {
+        const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        vn1.children.push(vn2);
+        vn2.children.push({type: 1, text: \`true\`, el: null});
+    } else {
+        const vn4 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        vn1.children.push(vn4);
+        vn4.children.push({type: 1, text: \`owl\`, el: null});
+    }
+}"
+`;
+
+exports[`static templates simple dynamic value 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<t><t t-esc=\\"text\\"/></t>\`
@@ -91,7 +108,7 @@ exports[`static template simple dynamic value 1`] = `
 }"
 `;
 
-exports[`static template simple string (*) 1`] = `
+exports[`static templates simple string (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`hello vdom\`
@@ -99,7 +116,7 @@ exports[`static template simple string (*) 1`] = `
 }"
 `;
 
-exports[`static template simple string 1`] = `
+exports[`static templates simple string 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<t>hello vdom</t>\`
@@ -107,7 +124,7 @@ exports[`static template simple string 1`] = `
 }"
 `;
 
-exports[`static template simple string, with some dynamic value 1`] = `
+exports[`static templates simple string, with some dynamic value 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<t>hello <t t-esc=\\"text\\"/></t>\`
@@ -117,13 +134,109 @@ exports[`static template simple string, with some dynamic value 1`] = `
 }"
 `;
 
-exports[`static template two empty divs (*) 1`] = `
+exports[`static templates two empty divs (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<div></div><div></div>\`
     const vn1 = tree.child = {type: 4, children:[]};
     vn1.children.push({type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1});
     vn1.children.push({type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1});
+}"
+`;
+
+exports[`t-esc div with falsy values 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <p t-esc=\\"v1\\"/>          <p t-esc=\\"v2\\"/>          <p t-esc=\\"v3\\"/>          <p t-e\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn2 = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn2);
+    vn2.children.push({type: 1, text: ctx['v1'], el: null});
+    const vn4 = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn4);
+    vn4.children.push({type: 1, text: ctx['v2'], el: null});
+    const vn6 = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn6);
+    vn6.children.push({type: 1, text: ctx['v3'], el: null});
+    const vn8 = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn8);
+    vn8.children.push({type: 1, text: ctx['v4'], el: null});
+    const vn10 = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn10);
+    vn10.children.push({type: 1, text: ctx['v5'], el: null});
+}"
+`;
+
+exports[`t-esc escaping 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-esc=\\"var\\"/></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: ctx['var'], el: null});
+}"
+`;
+
+exports[`t-esc escaping on a node 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span t-esc=\\"'ok'\\"/>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: 'ok', el: null});
+}"
+`;
+
+exports[`t-esc escaping on a node with a body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span t-esc=\\"'ok'\\">nope</span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    let expr2 = 'ok'
+    if (expr2 !== undefined) {
+        vn1.children.push({type: 1, text: expr2, el: null});
+    } else {
+        vn1.children.push({type: 1, text: \`nope\`, el: null});
+    }
+}"
+`;
+
+exports[`t-esc escaping on a node with a body, as a default 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span t-esc=\\"var\\">nope</span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    let expr2 = ctx['var']
+    if (expr2 !== undefined) {
+        vn1.children.push({type: 1, text: expr2, el: null});
+    } else {
+        vn1.children.push({type: 1, text: \`nope\`, el: null});
+    }
+}"
+`;
+
+exports[`t-esc literal 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-esc=\\"'ok'\\"/></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: 'ok', el: null});
+}"
+`;
+
+exports[`t-esc t-esc work with spread operator 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-esc=\\"[...state.list]\\"/></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: [...ctx['state'].list], el: null});
+}"
+`;
+
+exports[`t-esc variable 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-esc=\\"var\\"/></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push({type: 1, text: ctx['var'], el: null});
 }"
 `;
 
@@ -156,6 +269,25 @@ exports[`t-if boolean value condition else 1`] = `
         vn1.children.push({type: 1, text: \`ok\`, el: null});
     } else {
         vn1.children.push({type: 1, text: \`ok-else\`, el: null});
+    }
+    const vn6 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn6);
+    vn6.children.push({type: 1, text: \`end\`, el: null});
+}"
+`;
+
+exports[`t-if boolean value condition false else 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><span>begin</span><t t-if=\\"condition\\">fail</t>          <t t-else=\\"\\">fail-else</t><span>end</s\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn2);
+    vn2.children.push({type: 1, text: \`begin\`, el: null});
+    if (ctx['condition']) {
+        vn1.children.push({type: 1, text: \`fail\`, el: null});
+    } else {
+        vn1.children.push({type: 1, text: \`fail-else\`, el: null});
     }
     const vn6 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
     vn1.children.push(vn6);
@@ -229,6 +361,62 @@ exports[`t-if boolean value true condition 1`] = `
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
     if (ctx['condition']) {
         vn1.children.push({type: 1, text: \`ok\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if can use some boolean operators in expressions 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <t t-if=\\"cond1 and cond2\\">and</t>        <t t-if=\\"cond1 and cond3\\">nope</t>        <\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (ctx['cond1']&&ctx['cond2']) {
+        vn1.children.push({type: 1, text: \`and\`, el: null});
+    }
+    if (ctx['cond1']&&ctx['cond3']) {
+        vn1.children.push({type: 1, text: \`nope\`, el: null});
+    }
+    if (ctx['cond1']||ctx['cond3']) {
+        vn1.children.push({type: 1, text: \`or\`, el: null});
+    }
+    if (ctx['cond3']||ctx['cond4']) {
+        vn1.children.push({type: 1, text: \`nope\`, el: null});
+    }
+    if (ctx['m']>3) {
+        vn1.children.push({type: 1, text: \`mgt\`, el: null});
+    }
+    if (ctx['n']>3) {
+        vn1.children.push({type: 1, text: \`ngt\`, el: null});
+    }
+    if (ctx['m']<3) {
+        vn1.children.push({type: 1, text: \`mlt\`, el: null});
+    }
+    if (ctx['n']<3) {
+        vn1.children.push({type: 1, text: \`nlt\`, el: null});
+    }
+}"
+`;
+
+exports[`t-if t-esc with t-elif 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-if=\\"false\\">abc</t><t t-else=\\"\\" t-esc=\\"'x'\\"/></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (false) {
+        vn1.children.push({type: 1, text: \`abc\`, el: null});
+    } else {
+        vn1.children.push({type: 1, text: 'x', el: null});
+    }
+}"
+`;
+
+exports[`t-if t-esc with t-if 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-if=\\"true\\" t-esc=\\"'x'\\"/></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    if (true) {
+        vn1.children.push({type: 1, text: 'x', el: null});
     }
 }"
 `;

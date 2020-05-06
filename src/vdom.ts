@@ -34,7 +34,7 @@ export interface VDOMNode<T> {
 
 export interface VTextNode {
   type: NodeType.Text;
-  text: string;
+  text: any;
   el: Text | null;
 }
 
@@ -66,7 +66,11 @@ export type VNode<T> = VDOMNode<T> | VTextNode | VDataNode<T> | VMultiNode<T> | 
 export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): VNodeEl {
   switch (vnode.type) {
     case NodeType.Text:
-      const textEl = document.createTextNode(vnode.text);
+      let text = vnode.text; // === undefined ? "" : vnode.text;
+      if (text === undefined || text === null) {
+        text = "";
+      }
+      const textEl = document.createTextNode(text);
       vnode.el = textEl;
       el.appendChild(textEl);
       return textEl;

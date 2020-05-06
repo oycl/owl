@@ -77,8 +77,25 @@ function generateCode(ast: AST, ctx: CodeContext) {
       break;
     }
     case "T-ESC": {
-      const vnode = `{type: ${NodeType.Text}, text: ${compileExpr(ast.expr, {})}, el: null}`;
-      addVNode(vnode, ctx, false);
+      const expr = compileExpr(ast.expr, {});
+      if (ast.body.length) {
+        const id = ctx.nextId++;
+        addLine(ctx, `let expr${id} = ${expr}`);
+        addLine(ctx, `if (expr${id} !== undefined) {`);
+        ctx.indentLevel++;
+        addVNode(`{type: ${NodeType.Text}, text: expr${id}, el: null}`, ctx, false);
+        ctx.indentLevel--;
+        addLine(ctx, `} else {`);
+        ctx.indentLevel++;
+        for (let child of ast.body) {
+          generateCode(child, ctx);
+        }
+        ctx.indentLevel--;
+        addLine(ctx, `}`);
+      } else {
+        const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
+        addVNode(vnode, ctx, false);
+      }
       break;
     }
     case "T-IF": {

@@ -11,7 +11,7 @@ import {
 } from "../src/vdom";
 
 let nextId = 1;
-function textNode(text: string): VTextNode {
+function textNode(text: any): VTextNode {
   return {
     type: NodeType.Text,
     text,
@@ -137,6 +137,18 @@ describe("patch function", () => {
     const vnode = dataNode(textNode("abc"));
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("abc");
+  });
+
+  test("falsy text values", () => {
+    const vnode = multiNode([
+      domNode("p", [textNode(false)]),
+      domNode("p", [textNode(undefined)]),
+      domNode("p", [textNode(null)]),
+      domNode("p", [textNode(0)]),
+      domNode("p", [textNode("")]),
+    ]);
+    patch(fixture, vnode);
+    expect(fixture.innerHTML).toBe("<p>false</p><p></p><p></p><p>0</p><p></p>");
   });
 
   test("can patch a data node with dom node", () => {

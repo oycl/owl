@@ -1,9 +1,6 @@
 // -----------------------------------------------------------------------------
-// AST
+// AST Type definition
 // -----------------------------------------------------------------------------
-const lineBreakRE = /[\r\n]/;
-const whitespaceRE = /\s+/g;
-
 export interface ASTDOMNode {
   type: "DOM";
   tag: string;
@@ -25,6 +22,7 @@ export interface ASTTextNode {
 export interface ASTEscNode {
   type: "T-ESC";
   expr: string;
+  body: AST[];
 }
 
 export interface ASTCommentNode {
@@ -73,114 +71,151 @@ export type AST =
 
 export function parse(xml: string): AST {
   const template = `<t>${xml}</t>`;
-  const doc = toXML(template);
+  const doc = parseXML(template);
   return parseNode(doc.firstChild!)!;
 }
 
 function parseNode(node: ChildNode): AST | null {
   if (!(node instanceof Element)) {
-    const type = node.nodeType === 3 ? "TEXT" : "COMMENT";
-    let text = node.textContent!;
-    if (lineBreakRE.test(text) && !text.trim()) {
-      return null;
-    }
-    text = text.replace(whitespaceRE, " ");
-    return {
-      type,
-      text: "`" + text + "`",
-    };
+    return parseTextCommentNode(node);
   }
-  // t-if directive
-  const tIf = node.getAttribute("t-if");
-  if (tIf) {
-    node.removeAttribute("t-if");
-    let child = parseNode(node)!;
+  return (
+    parseTIfNode(node) ||
+    parseTEscNode(node) ||
+    parseComponentNode(node) ||
+    parseTNode(node) ||
+    parseDOMNode(node)
+  );
+}
 
-    let nextElement = node.nextElementSibling;
-    let firstAST: null | ASTElifNode | ASTElseNode = null;
-    let lastAST: null | ASTElifNode | ASTElseNode = null;
+// -----------------------------------------------------------------------------
+// Text and Comment Nodes
+// -----------------------------------------------------------------------------
+const lineBreakRE = /[\r\n]/;
+const whitespaceRE = /\s+/g;
 
-    // t-elifs
-    while (nextElement && nextElement.hasAttribute("t-elif")) {
-      const elif: ASTElifNode = {
-        type: "T-ELIF",
-        child: parseNode(nextElement)!,
-        condition: nextElement.getAttribute("t-elif")!,
-        next: null,
-      };
-      firstAST = firstAST || elif;
-      if (lastAST) {
-        lastAST.next = elif;
-        lastAST = elif;
-      } else {
-        lastAST = elif;
-      }
-      const n = nextElement.nextElementSibling;
-      nextElement.remove();
-      nextElement = n;
-    }
+function parseTextCommentNode(node: ChildNode): AST | null {
+  const type = node.nodeType === 3 ? "TEXT" : "COMMENT";
+  let text = node.textContent!;
+  if (lineBreakRE.test(text) && !text.trim()) {
+    return null;
+  }
+  text = text.replace(whitespaceRE, " ");
+  return {
+    type,
+    text: "`" + text + "`",
+  };
+}
 
-    // t-else
-    if (nextElement && nextElement.hasAttribute("t-else")) {
-      const elseAST: ASTElseNode = {
-        type: "T-ELSE",
-        child: parseNode(nextElement)!,
-      };
-      firstAST = firstAST || elseAST;
-      if (lastAST) {
-        lastAST.next = elseAST;
-      }
-      nextElement.remove();
-    }
+// -----------------------------------------------------------------------------
+// t-if directive
+// -----------------------------------------------------------------------------
 
-    return {
-      type: "T-IF",
-      child,
-      condition: tIf,
-      next: firstAST,
-    };
+function parseTIfNode(node: Element): ASTIfNode | null {
+  if (!node.hasAttribute("t-if")) {
+    return null;
   }
 
-  if (node.tagName === "t") {
-    const tEsc = node.getAttribute("t-esc");
-    if (tEsc) {
-      return {
-        type: "T-ESC",
-        expr: tEsc,
-      };
-    }
-    let children: AST[] = [];
-    while (node.hasChildNodes()) {
-      const child = node.firstChild!;
-      const astnode = parseNode(child);
-      if (astnode) {
-        children.push(astnode);
-      }
-      child.remove();
-    }
-    if (children.length === 1) {
-      return children[0];
+  const condition = node.getAttribute("t-if")!;
+  node.removeAttribute("t-if");
+  let child = parseNode(node)!;
+
+  let nextElement = node.nextElementSibling;
+  let firstAST: null | ASTElifNode | ASTElseNode = null;
+  let lastAST: null | ASTElifNode | ASTElseNode = null;
+
+  // t-elifs
+  while (nextElement && nextElement.hasAttribute("t-elif")) {
+    const elif: ASTElifNode = {
+      type: "T-ELIF",
+      child: parseNode(nextElement)!,
+      condition: nextElement.getAttribute("t-elif")!,
+      next: null,
+    };
+    firstAST = firstAST || elif;
+    if (lastAST) {
+      lastAST.next = elif;
+      lastAST = elif;
     } else {
-      return { type: "MULTI", children };
+      lastAST = elif;
     }
-  }
-  const firstLetter = node.tagName[0];
-  if (firstLetter === firstLetter.toUpperCase()) {
-    return {
-      type: "COMPONENT",
-      name: node.tagName,
-    };
+    const n = nextElement.nextElementSibling;
+    nextElement.remove();
+    nextElement = n;
   }
 
-  const attributes = (<Element>node).attributes;
-  const attrs: { [name: string]: string } = {};
-  for (let i = 0; i < attributes.length; i++) {
-    let attrName = attributes[i].name;
-    let attrValue = attributes[i].textContent;
-    if (attrValue) {
-      attrs[attrName] = attrValue;
+  // t-else
+  if (nextElement && nextElement.hasAttribute("t-else")) {
+    const elseAST: ASTElseNode = {
+      type: "T-ELSE",
+      child: parseNode(nextElement)!,
+    };
+    firstAST = firstAST || elseAST;
+    if (lastAST) {
+      lastAST.next = elseAST;
     }
+    nextElement.remove();
   }
+
+  return {
+    type: "T-IF",
+    child,
+    condition,
+    next: firstAST,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// t-esc directive
+// -----------------------------------------------------------------------------
+
+function parseTEscNode(node: Element): AST | null {
+  if (!node.hasAttribute("t-esc")) {
+    return null;
+  }
+  const expr = node.getAttribute("t-esc")!;
+  node.removeAttribute("t-esc");
+  const ast = parseNode(node);
+  if (ast && ast.type === "DOM") {
+    const body = ast.children;
+    ast.children = [{ type: "T-ESC", expr, body }];
+    return ast;
+  }
+  return { type: "T-ESC", expr, body: [] };
+}
+
+// -----------------------------------------------------------------------------
+// Components: <t t-component /> and <Component />
+// -----------------------------------------------------------------------------
+
+function parseComponentNode(node: Element): AST | null {
+  const firstLetter = node.tagName[0];
+  if (firstLetter !== firstLetter.toUpperCase()) {
+    return null;
+  }
+  return {
+    type: "COMPONENT",
+    name: node.tagName,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// <t /> tag
+// -----------------------------------------------------------------------------
+
+function parseTNode(node: Element): AST | null {
+  if (node.tagName !== "t") {
+    return null;
+  }
+  let children = parseChildren(node);
+  if (children.length === 1) {
+    return children[0];
+  } else {
+    return { type: "MULTI", children };
+  }
+}
+
+function parseChildren(node: Element): AST[] {
   let children: AST[] = [];
   while (node.hasChildNodes()) {
     const child = node.firstChild!;
@@ -190,6 +225,24 @@ function parseNode(node: ChildNode): AST | null {
     }
     child.remove();
   }
+  return children;
+}
+
+// -----------------------------------------------------------------------------
+// Regular dom node
+// -----------------------------------------------------------------------------
+
+function parseDOMNode(node: Element): AST {
+  const attributes = (<Element>node).attributes;
+  const attrs: { [name: string]: string } = {};
+  for (let i = 0; i < attributes.length; i++) {
+    let attrName = attributes[i].name;
+    let attrValue = attributes[i].textContent;
+    if (attrValue) {
+      attrs[attrName] = attrValue;
+    }
+  }
+  let children = parseChildren(node);
 
   return {
     type: "DOM",
@@ -200,7 +253,11 @@ function parseNode(node: ChildNode): AST | null {
   };
 }
 
-function toXML(xml: string): Document {
+// -----------------------------------------------------------------------------
+// parse XML
+// -----------------------------------------------------------------------------
+
+function parseXML(xml: string): Document {
   const parser = new DOMParser();
 
   const doc = parser.parseFromString(xml, "text/xml");
