@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`attributes class and t-att-class should combine together 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div t-att-class=\\"value\\" class=\\"hello\\" />\`
+    let _1 = ctx['value']
+    tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {class:_1 + \\" \\" + \\"hello\\"}, key: 1};
+}"
+`;
+
 exports[`attributes dynamic attribute falsy variable  1`] = `
 "function anonymous(tree, ctx
 ) {
@@ -277,6 +286,78 @@ exports[`misc global 1`] = `
     }
     ctx = ctx.__proto__;
     vn1.children.push(this.callTemplate(tree, \\"__template__3\\", ctx));
+}"
+`;
+
+exports[`misc mix of t-foreach and t-set/t-value 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t>        <div>          <t t-foreach=\\"[1, 2, 3]\\" t-as=\\"a\\" t-key=\\"a\\">            <t t-foreach=\\"[\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = [1,2,3];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.a_first = i === 0;
+        ctx.a_last = i === length2 - 1;
+        ctx.a = _3[i];
+        ctx.a_index = i;
+        ctx.a_value = _3[i];
+        let _5 = [4,5,6];
+        let length4 = _5.length;
+        ctx = Object.create(ctx);
+        for (let i = 0; i < length4; i++) {
+            ctx.b_first = i === 0;
+            ctx.b_last = i === length4 - 1;
+            ctx.b = _5[i];
+            ctx.b_index = i;
+            ctx.b_value = _5[i];
+            ctx = Object.create(ctx);
+            const vn6 = {type: 4, children: []};
+            ctx.c = 'x ';
+            ctx[this.zero] = vn6.children;
+            vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+            ctx = ctx.__proto__;
+        }
+        ctx = ctx.__proto__;
+    }
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`misc mix of t-foreach and t-set/t-value, 2 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t>        <div>          <t t-foreach=\\"[1, 2, 3]\\" t-as=\\"a\\" t-key=\\"a\\">            <t t-foreach=\\"[\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = [1,2,3];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.a_first = i === 0;
+        ctx.a_last = i === length2 - 1;
+        ctx.a = _3[i];
+        ctx.a_index = i;
+        ctx.a_value = _3[i];
+        let _5 = [4,5,6];
+        let length4 = _5.length;
+        ctx = Object.create(ctx);
+        for (let i = 0; i < length4; i++) {
+            ctx.b_first = i === 0;
+            ctx.b_last = i === length4 - 1;
+            ctx.b = _5[i];
+            ctx.b_index = i;
+            ctx.b_value = _5[i];
+            ctx.c = 'x ';
+            vn1.children.push({type: 1, text: ctx['a'], el: null});
+            vn1.children.push({type: 1, text: ctx['b'], el: null});
+            vn1.children.push({type: 1, text: ctx['c'], el: null});
+        }
+        ctx = ctx.__proto__;
+    }
+    ctx = ctx.__proto__;
 }"
 `;
 
@@ -1221,6 +1302,17 @@ exports[`t-set t-set body is evaluated immediately 1`] = `
     ctx.v2 = _2;
     ctx.v1 = 'after';
     vn1.children.push({type: 4, children: ctx.v2});
+}"
+`;
+
+exports[`t-set t-set does not modify main context 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"value\\" t-value=\\"'ok'\\"/><t t-esc=\\"value\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.value = 'ok';
+    vn1.children.push({type: 1, text: ctx['value'], el: null});
 }"
 `;
 

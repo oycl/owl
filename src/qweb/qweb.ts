@@ -64,7 +64,13 @@ export function getTemplateFn(template: string): CompiledTemplate {
   if (!fn) {
     const rawTemplate = templateMap[template];
     if (rawTemplate === undefined) {
-      throw new Error("qweb not implemented yet...");
+      let descr = template.slice(0, 100);
+      if (template.length > 100) {
+        descr = descr + "...";
+      }
+      throw new Error(
+        `Cannot find template with name "${descr}". Maybe you should register it with "xml" helper.`
+      );
     }
 
     fn = compileTemplate(template, rawTemplate);

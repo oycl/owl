@@ -27,18 +27,46 @@ export type VTree = VDataNode<ComponentData>;
 // mount
 // -----------------------------------------------------------------------------
 
-type MountTarget = HTMLElement;
+type MountTarget = HTMLElement | DocumentFragment;
 
-export function mount<Ctx>(target: MountTarget, fn: FunctionComponent): Promise<Ctx>;
+interface MountOptions {
+  props?: Object;
+}
+
+export function mount<Ctx>(
+  target: MountTarget,
+  fn: FunctionComponent,
+  options?: MountOptions
+): Promise<Ctx>;
 export function mount<C extends typeof Component>(
   target: MountTarget,
-  Comp: C
+  Comp: C,
+  options?: MountOptions
 ): Promise<InstanceType<C>>;
-export async function mount(target: MountTarget, elem: any): Promise<any> {
+export function mount(
+  target: MountTarget,
+  comp: Component,
+  options?: MountOptions
+): Promise<Component>;
+export async function mount(
+  target: MountTarget,
+  elem: any,
+  options: MountOptions = {}
+): Promise<any> {
   let tree: VTree;
-
-  if (elem.prototype instanceof Component) {
-    tree = makeClassComponent(elem);
+  if (!(target instanceof HTMLElement || target instanceof DocumentFragment)) {
+    const name = elem instanceof Component ? elem.constructor.name : elem.name || "Undefined";
+    let message = `Component '${name}' cannot be mounted: the target is not a valid DOM node.`;
+    message += `\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)`;
+    throw new Error(message);
+  }
+  if (elem instanceof Component) {
+    return scheduler.addFiber(elem.__vtree!.data.fiber).then(() => {
+      target.appendChild(elem.el!);
+    });
+  }
+  if (elem.prototype instanceof Component || elem === Component) {
+    tree = makeClassComponent(elem, options);
   } else {
     tree = makeFnComponent(elem);
   }
@@ -73,9 +101,14 @@ function makeFnComponent(fn: FunctionComponent): VTree {
   });
   return tree;
 }
-function makeClassComponent(C: typeof Component): VTree {
+
+function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
   let template: string = C.template;
-  const c = new C();
+  if (!template) {
+    throw new Error(`Component "${C.name}" does not have a template defined!`);
+  }
+  const props = options.props || {};
+  const c = new C(props);
   const fiber = new Fiber(null);
   fiber.counter++;
   const data: ComponentData = {
@@ -90,6 +123,7 @@ function makeClassComponent(C: typeof Component): VTree {
     key: 1,
     hooks: {},
   };
+  c.__vtree = tree;
   tree.hooks.create = (el) => (c.el = el);
   new Promise((resolve) => {
     tree.data.templateFn.call(qwebUtils, tree, c);

@@ -277,6 +277,13 @@ describe("t-set", () => {
     expect(render(template)).toBe("<div>ok</div>");
   });
 
+  test("t-set does not modify main context", () => {
+    const template = xml`<div><t t-set="value" t-value="'ok'"/><t t-esc="value"/></div>`;
+    const context = {};
+    expect(render(template, context)).toBe("<div>ok</div>");
+    expect(context).toEqual({});
+  });
+
   test("t-set and t-if", () => {
     const template = xml`
         <div>
@@ -721,11 +728,11 @@ describe("attributes", () => {
     expect(result).toBe(`<div class="hello world"></div>`);
   });
 
-  //   test("class and t-att-class should combine together", () => {
-  //     const template = xml`<div t-att-class="value" class="hello" />`;
-  //     const result = render(template, { value: "world" });
-  //     expect(result).toBe(`<div class="world hello"></div>`);
-  //   });
+  test("class and t-att-class should combine together", () => {
+    const template = xml`<div t-att-class="value" class="hello" />`;
+    const result = render(template, { value: "world" });
+    expect(result).toBe(`<div class="world hello"></div>`);
+  });
 
   //   test("class and t-attf-class with ternary operation", () => {
   //     const template = xml`<div class="hello" t-attf-class="{{value ? 'world' : ''}}"/>`;
@@ -1183,6 +1190,69 @@ describe("misc", () => {
     `.replace(/ |\n/g, "");
     expect(render(caller).replace(/ /g, "")).toBe(expected);
   });
+
+  test("mix of t-foreach and t-set/t-value", () => {
+    const called = xml`
+        <t>
+          <t t-esc="a"/>
+          <t t-esc="b"/>
+          <t t-esc="c"/>
+        </t>`;
+
+    const parent = xml`
+      <t>
+        <div>
+          <t t-foreach="[1, 2, 3]" t-as="a" t-key="a">
+            <t t-foreach="[4, 5, 6]" t-as="b" t-key="b">
+              <t t-call="${called}">
+                <t t-set="c" t-value="'x '"/>
+              </t>
+            </t>
+          </t>
+        </div>
+      </t>`;
+
+    expect(render(parent)).toBe("<div>14x 15x 16x 24x 25x 26x 34x 35x 36x </div>");
+  });
+
+  test("mix of t-foreach and t-set/t-value, 2", () => {
+    const parent = xml`
+      <t>
+        <div>
+          <t t-foreach="[1, 2, 3]" t-as="a" t-key="a">
+            <t t-foreach="[4, 5, 6]" t-as="b" t-key="b">
+              <t t-set="c" t-value="'x '"/>
+              <t t-esc="a"/>
+              <t t-esc="b"/>
+              <t t-esc="c"/>
+            </t>
+          </t>
+        </div>
+      </t>`;
+
+    expect(render(parent)).toBe("<div>14x 15x 16x 24x 25x 26x 34x 35x 36x </div>");
+  });
+  //   <templates>j
+  //   <!-- With t-call -->
+  //   <t t-name="called">
+  //     <t t-esc="a"/>
+  //     <t t-esc="b"/>
+  //     <t t-esc="c"/>
+  //   </t>
+  //   <!-- Without t-call -->
+  //   <t t-name="AppFlat">
+  //     <div>
+  //       <t t-foreach="[1, 2, 3]" t-as="a" t-key="a">
+  //         <t t-foreach="[4, 5, 6]" t-as="b" t-key="b">
+  //           <t t-set="c" t-value="'x '"/>
+  //           <t t-esc="a"/>
+  //           <t t-esc="b"/>
+  //           <t t-esc="c"/>
+  //         </t>
+  //       </t>
+  //     </div>
+  //   </t>
+  // </templates>
 });
 
 describe("t-on", () => {
@@ -1198,31 +1268,25 @@ describe("t-on", () => {
     expect(a).toBe(3);
   });
 
-  //   test("can bind two event handlers", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `<button t-on-click="handleClick" t-on-dblclick="handleDblClick">Click</button>`
-  //     );
-  //     let steps: string[] = [];
-  //     const node = renderToDOM(
-  //       qweb,
-  //       "test",
-  //       {
-  //         handleClick() {
-  //           steps.push("click");
-  //         },
-  //         handleDblClick() {
-  //           steps.push("dblclick");
-  //         },
-  //       },
-  //       { handlers: [] }
-  //     );
-  //     expect(steps).toEqual([]);
-  //     (<HTMLElement>node).click();
-  //     expect(steps).toEqual(["click"]);
-  //     (<HTMLElement>node).dispatchEvent(new Event("dblclick"));
-  //     expect(steps).toEqual(["click", "dblclick"]);
-  //   });
+  test("can bind two event handlers", () => {
+    const template = xml`
+        <button t-on-click="handleClick" t-on-dblclick="handleDblClick">Click</button>`;
+
+    let steps: string[] = [];
+    const node = renderToDOM(template, {
+      handleClick() {
+        steps.push("click");
+      },
+      handleDblClick() {
+        steps.push("dblclick");
+      },
+    });
+    expect(steps).toEqual([]);
+    node.querySelector("button")!.click();
+    expect(steps).toEqual(["click"]);
+    node.querySelector("button")!.dispatchEvent(new Event("dblclick"));
+    expect(steps).toEqual(["click", "dblclick"]);
+  });
 
   //   test("can bind handlers with arguments", () => {
   //     const template = xml`<button t-on-click="add(5)">Click</button>`;
