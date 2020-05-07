@@ -288,19 +288,19 @@ describe("t-set", () => {
     expect(render(template)).toBe("<div>3</div>");
   });
 
-  // test("t-set should reuse variable if possible", () => {
-  //   const template = xml`<div>
-  //         <t t-set="v" t-value="1"/>
-  //         <div t-foreach="list" t-as="elem" t-key="elem_index">
-  //             <span>v<t t-esc="v"/></span>
-  //             <t t-set="v" t-value="elem"/>
-  //         </div>
-  //       </div>`;
+  test("t-set should reuse variable if possible", () => {
+    const template = xml`<div>
+          <t t-set="v" t-value="1"/>
+          <div t-foreach="list" t-as="elem" t-key="elem_index">
+              <span>v<t t-esc="v"/></span>
+              <t t-set="v" t-value="elem"/>
+          </div>
+        </div>`;
 
-  //     expect(render(template, { list: ["a", "b"] })).toBe(
-  //     "<div><div><span>v1</span></div><div><span>va</span></div></div>"
-  //   );
-  // });
+    expect(render(template, { list: ["a", "b"] })).toBe(
+      "<div><div><span>v1</span></div><div><span>va</span></div></div>"
+    );
+  });
 
   test("t-set with content and sub t-esc", () => {
     const template = xml`<div>
@@ -850,87 +850,94 @@ describe("t-call (template calling", () => {
     expect(render("recursive")).toBe(expected);
   });
 
-  // test("recursive template, part 2", () => {
-  //   addTemplate('Parent', `
-  //     <div>
-  //       <t t-call="nodeTemplate">
-  //         <t t-set="node" t-value="root"/>
-  //       </t>
-  //     </div>`);
+  test("recursive template, part 2", () => {
+    addTemplate(
+      "Parent",
+      `
+      <div>
+        <t t-call="nodeTemplate">
+          <t t-set="node" t-value="root"/>
+        </t>
+      </div>`
+    );
 
-  //   addTemplate('nodeTemplate', `
-  //       <div>
-  //         <p><t t-esc="node.val"/></p>
-  //         <t t-foreach="node.children or []" t-as="subtree">
-  //           <t t-call="nodeTemplate">
-  //             <t t-set="node" t-value="subtree"/>
-  //           </t>
-  //         </t>
-  //       </div>`
-  //   );
-  //   const root = { val: "a", children: [{ val: "b" }, { val: "c" }] };
-  //   const expected = "<div><div><p>a</p><div><p>b</p></div><div><p>c</p></div></div></div>";
-  //   expect(render("Parent", { root })).toBe(expected);
-  // });
+    addTemplate(
+      "nodeTemplate",
+      `
+        <div>
+          <p><t t-esc="node.val"/></p>
+          <t t-foreach="node.children or []" t-as="subtree">
+            <t t-call="nodeTemplate">
+              <t t-set="node" t-value="subtree"/>
+            </t>
+          </t>
+        </div>`
+    );
+    const root = { val: "a", children: [{ val: "b" }, { val: "c" }] };
+    const expected = "<div><div><p>a</p><div><p>b</p></div><div><p>c</p></div></div></div>";
+    expect(render("Parent", { root })).toBe(expected);
+  });
 
-  //   test("recursive template, part 3", () => {
-  //     qweb.addTemplates(`
-  //         <templates>
-  //             <div t-name="Parent">
-  //                 <t t-call="nodeTemplate">
-  //                     <t t-set="node" t-value="root"/>
-  //                 </t>
-  //             </div>
-  //             <div t-name="nodeTemplate">
-  //                 <p><t t-esc="node.val"/></p>
-  //                 <t t-foreach="node.children or []" t-as="subtree">
-  //                     <t t-call="nodeTemplate">
-  //                         <t t-set="node" t-value="subtree"/>
-  //                     </t>
-  //                 </t>
-  //             </div>
+  test("recursive template, part 3", () => {
+    addTemplate(
+      "Parent",
+      `
+          <div>
+            <t t-call="nodeTemplate">
+              <t t-set="node" t-value="root"/>
+            </t>
+          </div>`
+    );
+    addTemplate(
+      "nodeTemplate",
+      `
+          <div>
+            <p><t t-esc="node.val"/></p>
+            <t t-foreach="node.children or []" t-as="subtree">
+              <t t-call="nodeTemplate">
+                <t t-set="node" t-value="subtree"/>
+              </t>
+            </t>
+          </div>`
+    );
+    const root = { val: "a", children: [{ val: "b", children: [{ val: "d" }] }, { val: "c" }] };
+    const expected =
+      "<div><div><p>a</p><div><p>b</p><div><p>d</p></div></div><div><p>c</p></div></div></div>";
+    expect(render("Parent", { root })).toBe(expected);
+  });
 
-  //         </templates>
-  //     `);
-  //     const root = { val: "a", children: [{ val: "b", children: [{ val: "d" }] }, { val: "c" }] };
-  //     const expected =
-  //       "<div><div><p>a</p><div><p>b</p><div><p>d</p></div></div><div><p>c</p></div></div></div>";
-  //     expect(renderToString(qweb, "Parent", { root }, { fiber: {} })).toBe(expected);
-  //     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
-  //     expect(recursiveFn.toString()).toMatchSnapshot();
-  //   });
-
-  //   test("recursive template, part 4: with t-set recursive index", () => {
-  //     qweb.addTemplates(`
-  //         <templates>
-  //             <div t-name="Parent">
-  //                 <t t-call="nodeTemplate">
-  //                     <t t-set="recursive_idx" t-value="1"/>
-  //                     <t t-set="node" t-value="root"/>
-  //                 </t>
-  //             </div>
-  //             <div t-name="nodeTemplate">
-  //                 <t t-set="recursive_idx" t-value="recursive_idx + 1"/>
-  //                 <p><t t-esc="node.val"/> <t t-esc="recursive_idx"/></p>
-  //                 <t t-foreach="node.children or []" t-as="subtree">
-  //                     <t t-call="nodeTemplate">
-  //                         <t t-set="node" t-value="subtree"/>
-  //                     </t>
-  //                 </t>
-  //             </div>
-
-  //         </templates>
-  //     `);
-  //     const root = {
-  //       val: "a",
-  //       children: [{ val: "b", children: [{ val: "c", children: [{ val: "d" }] }] }],
-  //     };
-  //     const expected =
-  //       "<div><div><p>a 2</p><div><p>b 3</p><div><p>c 4</p><div><p>d 5</p></div></div></div></div></div>";
-  //     expect(renderToString(qweb, "Parent", { root })).toBe(expected);
-  //     const recursiveFn = Object.values(qweb.subTemplates)[0] as any;
-  //     expect(recursiveFn.toString()).toMatchSnapshot();
-  //   });
+  test("recursive template, part 4: with t-set recursive index", () => {
+    addTemplate(
+      "Parent",
+      `
+          <div>
+            <t t-call="nodeTemplate">
+                <t t-set="recursive_idx" t-value="1"/>
+                <t t-set="node" t-value="root"/>
+            </t>
+          </div>`
+    );
+    addTemplate(
+      "nodeTemplate",
+      `
+          <div>
+            <t t-set="recursive_idx" t-value="recursive_idx + 1"/>
+            <p><t t-esc="node.val"/> <t t-esc="recursive_idx"/></p>
+            <t t-foreach="node.children or []" t-as="subtree">
+                <t t-call="nodeTemplate">
+                    <t t-set="node" t-value="subtree"/>
+                </t>
+            </t>
+          </div>`
+    );
+    const root = {
+      val: "a",
+      children: [{ val: "b", children: [{ val: "c", children: [{ val: "d" }] }] }],
+    };
+    const expected =
+      "<div><div><p>a 2</p><div><p>b 3</p><div><p>c 4</p><div><p>d 5</p></div></div></div></div></div>";
+    expect(render("Parent", { root })).toBe(expected);
+  });
 
   //   test("t-call, global templates", () => {
   //     QWeb.registerTemplate("abcd", '<div><t t-call="john"/></div>');
@@ -939,186 +946,170 @@ describe("t-call (template calling", () => {
   //     expect(trim(renderToString(qweb, "abcd"))).toBe(expected);
   //   });
 
-  //   test("t-call, conditional and t-set in t-call body", () => {
-  //     QWeb.registerTemplate("callee1", "<div>callee1</div>");
-  //     QWeb.registerTemplate("callee2", '<div>callee2 <t t-esc="v"/></div>');
-  //     QWeb.registerTemplate(
-  //       "caller",
-  //       `<div>
-  //         <t t-set="v1" t-value="'elif'"/>
-  //         <t t-if="v1 === 'if'" t-call="callee1" />
-  //         <t t-elif="v1 === 'elif'" t-call="callee2" >
-  //           <t t-set="v" t-value="'success'" />
-  //         </t>
-  //        </div>`
-  //     );
-  //     const rendered = renderToString(qweb, "caller");
-  //     expect(rendered).toBe(`<div><div>callee2 success</div></div>`);
-  //   });
+  test("t-call, conditional and t-set in t-call body", () => {
+    const callee1 = xml`<div>callee1</div>`;
+    const callee2 = xml`<div>callee2 <t t-esc="v"/></div>`;
+    const caller = xml`
+        <div>
+          <t t-set="v1" t-value="'elif'"/>
+          <t t-if="v1 === 'if'" t-call="${callee1}" />
+          <t t-elif="v1 === 'elif'" t-call="${callee2}" >
+            <t t-set="v" t-value="'success'" />
+          </t>
+        </div>`;
+    expect(render(caller)).toBe(`<div><div>callee2 success</div></div>`);
+  });
 
-  //   test("t-call with t-set inside and outside", () => {
-  //     qweb.addTemplates(`
-  //       <templates>
-  //         <div t-name="main">
-  //           <t t-foreach="list" t-as="v">
-  //             <t t-set="val" t-value="v.val"/>
-  //             <t t-call="sub">
-  //               <t t-set="val3" t-value="val*3"/>
-  //             </t>
-  //           </t>
-  //         </div>
-  //         <t t-name="sub">
-  //           <span t-esc="val3"/>
-  //         </t>
-  //       </templates>
-  //     `);
-  //     const expected = "<div><span>3</span><span>6</span><span>9</span></div>";
-  //     const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
-  //     expect(trim(renderToString(qweb, "main", context))).toBe(expected);
-  //   });
+  test("t-call with t-set inside and outside", () => {
+    const sub = xml`
+          <t>
+            <span t-esc="val3"/>
+          </t>`;
+    const main = xml`
+          <div>
+            <t t-foreach="list" t-as="v">
+              <t t-set="val" t-value="v.val"/>
+              <t t-call="${sub}">
+                <t t-set="val3" t-value="val*3"/>
+              </t>
+            </t>
+          </div>`;
+    const expected = "<div><span>3</span><span>6</span><span>9</span></div>";
+    const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
+    expect(render(main, context).replace(/ /g, "")).toBe(expected);
+  });
 
-  //   test("t-call with t-set inside and outside. 2", () => {
-  //     qweb.addTemplates(`
-  //       <templates>
-  //         <div t-name="main">
-  //           <t t-foreach="list" t-as="v">
-  //             <t t-set="val" t-value="v.val"/>
-  //             <t t-call="sub">
-  //               <t t-set="val3" t-value="val*3"/>
-  //             </t>
-  //           </t>
-  //         </div>
-  //         <t t-name="sub">
-  //           <span t-esc="val3"/>
-  //           <t t-esc="w"/>
-  //         </t>
-  //         <p t-name="wrapper"><t t-set="w" t-value="'fromwrapper'"/><t t-call="main"/></p>
-  //       </templates>
-  //     `);
-  //     const expected =
-  //       "<p><div><span>3</span>fromwrapper<span>6</span>fromwrapper<span>9</span>fromwrapper</div></p>";
-  //     const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
-  //     expect(trim(renderToString(qweb, "wrapper", context))).toBe(expected);
-  //   });
+  test("t-call with t-set inside and outside. 2", () => {
+    const sub = xml`
+        <t>
+          <span t-esc="val3"/>
+          <t t-esc="w"/>
+        </t>`;
+    const main = xml`
+          <div>
+            <t t-foreach="list" t-as="v">
+              <t t-set="val" t-value="v.val"/>
+              <t t-call="${sub}">
+                <t t-set="val3" t-value="val*3"/>
+              </t>
+            </t>
+          </div>`;
+    const wrapper = xml`
+        <p><t t-set="w" t-value="'fromwrapper'"/><t t-call="${main}"/></p>
+        `;
+    const expected =
+      "<p><div><span>3</span>fromwrapper<span>6</span>fromwrapper<span>9</span>fromwrapper</div></p>";
+    const context = { list: [{ val: 1 }, { val: 2 }, { val: 3 }] };
+    expect(render(wrapper, context).replace(/ /g, "")).toBe(expected);
+  });
 });
 
-// describe("foreach", () => {
-//   test("iterate on items", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `
-//       <div>
-//         <t t-foreach="[3, 2, 1]" t-as="item">
-//           [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]
-//         </t>
-//     </div>`
-//     );
-//     const result = trim(render(template));
-//     const expected = `<div>[0:33][1:22][2:11]</div>`;
-//     expect(result).toBe(expected);
-//   });
+describe("foreach", () => {
+  test("iterate on items", () => {
+    const template = xml`
+      <div>
+        <t t-foreach="[3, 2, 1]" t-as="item">
+          [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]
+        </t>
+    </div>`;
+    const expected = `<div> [0: 3 3]  [1: 2 2]  [2: 1 1] </div>`;
+    expect(render(template)).toBe(expected);
+  });
 
-//   test("iterate on items (on a element node)", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `
-//       <div>
-//         <span t-foreach="[1, 2]" t-as="item" t-key="item"><t t-esc="item"/></span>
-//     </div>`
-//     );
-//     const result = trim(render(template));
-//     const expected = `<div><span>1</span><span>2</span></div>`;
-//     expect(result).toBe(expected);
-//   });
+  test("iterate on items (on a element node)", () => {
+    const template = xml`
+        <div>
+          <span t-foreach="[1, 2]" t-as="item" t-key="item"><t t-esc="item"/></span>
+      </div>`;
+    const result = render(template);
+    const expected = `<div><span>1</span><span>2</span></div>`;
+    expect(result).toBe(expected);
+  });
 
-//   test("iterate, position", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `
-//       <div>
-//         <t t-foreach="Array(5)" t-as="elem">
-//           -<t t-if="elem_first"> first</t><t t-if="elem_last"> last</t> (<t t-esc="elem_index"/>)
-//         </t>
-//       </div>`
-//     );
-//     const result = trim(render(template));
-//     const expected = `<div>-first(0)-(1)-(2)-(3)-last(4)</div>`;
-//     expect(result).toBe(expected);
-//   });
+  test("iterate, position", () => {
+    const template = xml`
+        <div>
+          <t t-foreach="Array(5)" t-as="elem">
+            -<t t-if="elem_first">first </t><t t-if="elem_last"> last</t>(<t t-esc="elem_index"/>)
+          </t>
+        </div>`;
+    const result = render(template);
+    const expected = `<div> -first (0)  -(1)  -(2)  -(3)  - last(4) </div>`;
+    expect(result).toBe(expected);
+  });
 
-//   test("iterate, dict param", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `
-//       <div>
-//         <t t-foreach="value" t-as="item">
-//           [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]
-//         </t>
-//       </div>`
-//     );
-//     const result = trim(render(template, { value: { a: 1, b: 2, c: 3 } }));
-//     const expected = `<div>[0:a1][1:b2][2:c3]</div>`;
-//     expect(result).toBe(expected);
-//   });
+  //   test("iterate, dict param", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `
+  //       <div>
+  //         <t t-foreach="value" t-as="item">
+  //           [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]
+  //         </t>
+  //       </div>`
+  //     );
+  //     const result = trim(render(template, { value: { a: 1, b: 2, c: 3 } }));
+  //     const expected = `<div>[0:a1][1:b2][2:c3]</div>`;
+  //     expect(result).toBe(expected);
+  //   });
 
-//   test("does not pollute the rendering context", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-foreach="[1]" t-as="item"><t t-esc="item"/></t>
-//       </div>`
-//     );
-//     const context = { __owl__: {} };
-//     render(template, context);
-//     expect(Object.keys(context)).toEqual(["__owl__"]);
-//   });
+  test("does not pollute the rendering context", () => {
+    const template = xml`
+        <div>
+          <t t-foreach="[1]" t-as="item"><t t-esc="item"/></t>
+        </div>`;
 
-//   test("t-foreach in t-forach", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-foreach="numbers" t-as="number">
-//           <t t-foreach="letters" t-as="letter">
-//             [<t t-esc="number"/><t t-esc="letter"/>]
-//           </t>
-//         </t>
-//       </div>`
-//     );
-//     const context = { numbers: [1, 2, 3], letters: ["a", "b"] };
-//     expect(render(template, context)).toBe(
-//       "<div> [1a]  [1b]  [2a]  [2b]  [3a]  [3b] </div>"
-//     );
-//   });
+    const context = {};
+    render(template, context);
+    expect(context).toEqual({});
+  });
 
-//   test("throws error if invalid loop expression", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div><t t-foreach="abc" t-as="item"><span t-key="item_index"/></t></div>`
-//     );
-//     expect(() => qweb.render("test")).toThrow("Invalid loop expression");
-//   });
+  //   test("t-foreach in t-forach", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <t t-foreach="numbers" t-as="number">
+  //           <t t-foreach="letters" t-as="letter">
+  //             [<t t-esc="number"/><t t-esc="letter"/>]
+  //           </t>
+  //         </t>
+  //       </div>`
+  //     );
+  //     const context = { numbers: [1, 2, 3], letters: ["a", "b"] };
+  //     expect(render(template, context)).toBe(
+  //       "<div> [1a]  [1b]  [2a]  [2b]  [3a]  [3b] </div>"
+  //     );
+  //   });
 
-//   test("warn if no key in some case", () => {
-//     const consoleWarn = console.warn;
-//     console.warn = jest.fn();
+  //   test("throws error if invalid loop expression", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div><t t-foreach="abc" t-as="item"><span t-key="item_index"/></t></div>`
+  //     );
+  //     expect(() => qweb.render("test")).toThrow("Invalid loop expression");
+  //   });
 
-//     qweb.addTemplate(
-//       "test",
-//       `
-//       <div>
-//         <t t-foreach="[1, 2]" t-as="item">
-//           <span><t t-esc="item"/></span>
-//         </t>
-//     </div>`
-//     );
-//     render(template);
-//     expect(console.warn).toHaveBeenCalledTimes(1);
-//     expect(console.warn).toHaveBeenCalledWith(
-//       "Directive t-foreach should always be used with a t-key! (in template: 'test')"
-//     );
-//     console.warn = consoleWarn;
-//   });
-// });
+  //   test("warn if no key in some case", () => {
+  //     const consoleWarn = console.warn;
+  //     console.warn = jest.fn();
+
+  //     qweb.addTemplate(
+  //       "test",
+  //       `
+  //       <div>
+  //         <t t-foreach="[1, 2]" t-as="item">
+  //           <span><t t-esc="item"/></span>
+  //         </t>
+  //     </div>`
+  //     );
+  //     render(template);
+  //     expect(console.warn).toHaveBeenCalledTimes(1);
+  //     expect(console.warn).toHaveBeenCalledWith(
+  //       "Directive t-foreach should always be used with a t-key! (in template: 'test')"
+  //     );
+  //     console.warn = consoleWarn;
+  //   });
+});
 
 // describe("misc", () => {
 //   test("global", () => {

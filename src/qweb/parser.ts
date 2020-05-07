@@ -1,5 +1,8 @@
 // -----------------------------------------------------------------------------
 // AST Type definition
+
+import { compileExpr } from "./expression_parser";
+
 // -----------------------------------------------------------------------------
 export interface ASTDOMNode {
   type: "DOM";
@@ -61,6 +64,13 @@ export interface ASTSetNode {
   body: AST[];
 }
 
+export interface ASTForeachNode {
+  type: "T-FOREACH";
+  collection: string;
+  varName: string;
+  children: AST[];
+}
+
 export interface ASTCallNode {
   type: "T-CALL";
   template: string;
@@ -78,6 +88,7 @@ export type AST =
   | ASTElifNode
   | ASTElseNode
   | ASTComponentNode
+  | ASTForeachNode
   | ASTCallNode;
 
 // -----------------------------------------------------------------------------
@@ -100,6 +111,7 @@ function parseNode(node: ChildNode): AST | null {
     parseComponentNode(node) ||
     parseTSetNode(node) ||
     parseTCallNode(node) ||
+    parseTForeachNode(node) ||
     parseTNode(node) ||
     parseDOMNode(node)
   );
@@ -269,6 +281,9 @@ function parseChildren(node: Element): AST[] {
 // -----------------------------------------------------------------------------
 
 function parseDOMNode(node: Element): AST {
+  const keyExpr = node.getAttribute("t-key");
+  const key = keyExpr ? compileExpr(keyExpr, {}) : "1";
+  node.removeAttribute("t-key");
   const attributes = (<Element>node).attributes;
   const attrs: { [name: string]: string } = {};
   for (let i = 0; i < attributes.length; i++) {
@@ -282,7 +297,7 @@ function parseDOMNode(node: Element): AST {
     type: "DOM",
     tag: node.tagName,
     children: parseChildren(node),
-    key: 1,
+    key,
     attrs,
   };
 }
@@ -376,5 +391,26 @@ function parseTCallNode(node: Element): AST | null {
     type: "T-CALL",
     template: node.getAttribute("t-call")!,
     children: parseChildren(node),
+  };
+}
+
+// -----------------------------------------------------------------------------
+// t-foreach directive
+// -----------------------------------------------------------------------------
+
+function parseTForeachNode(node: Element): AST | null {
+  if (!node.hasAttribute("t-foreach")) {
+    return null;
+  }
+  const collection = node.getAttribute("t-foreach")!;
+  const varName = node.getAttribute("t-as")!;
+  node.removeAttribute("t-foreach");
+  node.removeAttribute("t-as");
+  const children = node.tagName === "t" ? parseChildren(node) : [parseDOMNode(node)];
+  return {
+    type: "T-FOREACH",
+    children,
+    collection,
+    varName,
   };
 }

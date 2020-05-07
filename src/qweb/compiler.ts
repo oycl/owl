@@ -1,4 +1,4 @@
-import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode } from "./parser";
+import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode, ASTCallNode } from "./parser";
 import { NodeType } from "../vdom";
 import { VTree } from "../core";
 import { compileExpr } from "./expression_parser";
@@ -55,23 +55,20 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
     return;
   }
   switch (ast.type) {
-    case "DOM": {
+    case "DOM":
       compileDOMNode(ctx, ast);
       break;
-    }
     case "TEXT": {
       const vnode = `{type: ${NodeType.Text}, text: ${ast.text}, el: null}`;
       addVNode(ctx, vnode, false);
       break;
     }
-    case "T-SET": {
+    case "T-SET":
       compileSetNode(ctx, ast);
       break;
-    }
-    case "T-ESC": {
+    case "T-ESC":
       compileEscNode(ctx, ast);
       break;
-    }
     case "T-IF": {
       addIf(ctx, compileExpr(ast.condition, {}));
       generateCode(ast.child, ctx);
@@ -118,24 +115,29 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
       });
       break;
     }
-    case "T-CALL": {
-      if (ast.children.length) {
+    case "T-CALL":
+      compileCallNode(ctx, ast);
+      break;
+    case "T-FOREACH":
+      {
+        const colLength = uniqueId(ctx, "length");
+        const colId = uniqueId(ctx);
+        addLine(ctx, `let ${colId} = ${compileExpr(ast.collection, {})};`);
+        addLine(ctx, `let ${colLength} = ${colId}.length;`);
         addLine(ctx, `ctx = Object.create(ctx);`);
-        const id = uniqueId(ctx, "vn");
-        addLine(ctx, `const ${id} = {type: ${NodeType.Multi}, children: []};`);
-        withParent(ctx, id, () => {
-          generateCode(ast.children, ctx);
-        });
-        addLine(ctx, `ctx[this.zero] = ${id}.children;`);
-      }
-      const vnode = `this.callTemplate(tree, "${ast.template}", ctx)`;
-
-      addVNode(ctx, vnode, false);
-      if (ast.children.length) {
+        addLine(ctx, `for (let i = 0; i < ${colLength}; i++) {`);
+        ctx.indentLevel++;
+        addLine(ctx, `ctx.${ast.varName}_first = i === 0;`);
+        addLine(ctx, `ctx.${ast.varName}_last = i === ${colLength} - 1;`);
+        addLine(ctx, `ctx.${ast.varName} = ${colId}[i];`);
+        addLine(ctx, `ctx.${ast.varName}_index = i;`);
+        addLine(ctx, `ctx.${ast.varName}_value = ${colId}[i];`);
+        generateCode(ast.children, ctx);
+        ctx.indentLevel--;
+        addLine(ctx, "}");
         addLine(ctx, `ctx = ctx.__proto__;`);
       }
       break;
-    }
     case "COMPONENT": {
       const vnode = `this.makeComponent(tree, "${ast.name}", ctx)`;
       addVNode(ctx, vnode, false);
@@ -327,5 +329,27 @@ function compileEscNode(ctx: CodeContext, ast: ASTEscNode) {
       const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
       addVNode(ctx, vnode, false);
     }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Compile T-CALL node
+// -----------------------------------------------------------------------------
+
+function compileCallNode(ctx: CodeContext, ast: ASTCallNode) {
+  if (ast.children.length) {
+    addLine(ctx, `ctx = Object.create(ctx);`);
+    const id = uniqueId(ctx, "vn");
+    addLine(ctx, `const ${id} = {type: ${NodeType.Multi}, children: []};`);
+    withParent(ctx, id, () => {
+      generateCode(ast.children, ctx);
+    });
+    addLine(ctx, `ctx[this.zero] = ${id}.children;`);
+  }
+  const vnode = `this.callTemplate(tree, "${ast.template}", ctx)`;
+
+  addVNode(ctx, vnode, false);
+  if (ast.children.length) {
+    addLine(ctx, `ctx = ctx.__proto__;`);
   }
 }

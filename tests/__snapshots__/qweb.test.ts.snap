@@ -111,6 +111,103 @@ exports[`attributes t-att-class and class should combine together 1`] = `
 }"
 `;
 
+exports[`foreach does not pollute the rendering context 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-foreach=\\"[1]\\" t-as=\\"item\\"><t t-esc=\\"item\\"/></t>        </div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = [1];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.item_first = i === 0;
+        ctx.item_last = i === length2 - 1;
+        ctx.item = _3[i];
+        ctx.item_index = i;
+        ctx.item_value = _3[i];
+        vn1.children.push({type: 1, text: ctx['item'], el: null});
+    }
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`foreach iterate on items (on a element node) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <span t-foreach=\\"[1, 2]\\" t-as=\\"item\\" t-key=\\"item\\"><t t-esc=\\"item\\"/></span>      </d\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = [1,2];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.item_first = i === 0;
+        ctx.item_last = i === length2 - 1;
+        ctx.item = _3[i];
+        ctx.item_index = i;
+        ctx.item_value = _3[i];
+        const vn4 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: ctx['item']};
+        vn1.children.push(vn4);
+        vn4.children.push({type: 1, text: ctx['item'], el: null});
+    }
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`foreach iterate on items 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <t t-foreach=\\"[3, 2, 1]\\" t-as=\\"item\\">          [<t t-esc=\\"item_index\\"/>: <t t-esc=\\"it\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = [3,2,1];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.item_first = i === 0;
+        ctx.item_last = i === length2 - 1;
+        ctx.item = _3[i];
+        ctx.item_index = i;
+        ctx.item_value = _3[i];
+        vn1.children.push({type: 1, text: \` [\`, el: null});
+        vn1.children.push({type: 1, text: ctx['item_index'], el: null});
+        vn1.children.push({type: 1, text: \`: \`, el: null});
+        vn1.children.push({type: 1, text: ctx['item'], el: null});
+        vn1.children.push({type: 1, text: \` \`, el: null});
+        vn1.children.push({type: 1, text: ctx['item_value'], el: null});
+        vn1.children.push({type: 1, text: \`] \`, el: null});
+    }
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`foreach iterate, position 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-foreach=\\"Array(5)\\" t-as=\\"elem\\">            -<t t-if=\\"elem_first\\">first </t><t \`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = Array(5);
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.elem_first = i === 0;
+        ctx.elem_last = i === length2 - 1;
+        ctx.elem = _3[i];
+        ctx.elem_index = i;
+        ctx.elem_value = _3[i];
+        vn1.children.push({type: 1, text: \` -\`, el: null});
+        if (ctx['elem_first']) {
+            vn1.children.push({type: 1, text: \`first \`, el: null});
+        }
+        if (ctx['elem_last']) {
+            vn1.children.push({type: 1, text: \` last\`, el: null});
+        }
+        vn1.children.push({type: 1, text: \`(\`, el: null});
+        vn1.children.push({type: 1, text: ctx['elem_index'], el: null});
+        vn1.children.push({type: 1, text: \`) \`, el: null});
+    }
+    ctx = ctx.__proto__;
+}"
+`;
+
 exports[`static templates div with a class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
@@ -286,7 +383,7 @@ exports[`t-call (template calling inherit context 1`] = `
 exports[`t-call (template calling recursive template, part 1 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>            <span>hey</span>            <t t-if=\\"false\\">              <t t-call=\\"recursive\\"/\`
+    // Template: \`<div>          <span>hey</span>          <t t-if=\\"false\\">            <t t-call=\\"recursive\\"/>    \`
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
     const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
     vn1.children.push(vn2);
@@ -294,6 +391,52 @@ exports[`t-call (template calling recursive template, part 1 1`] = `
     if (false) {
         vn1.children.push(this.callTemplate(tree, \\"recursive\\", ctx));
     }
+}"
+`;
+
+exports[`t-call (template calling recursive template, part 2 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <t t-call=\\"nodeTemplate\\">          <t t-set=\\"node\\" t-value=\\"root\\"/>        </t>    \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    ctx.node = ctx['root'];
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"nodeTemplate\\", ctx));
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`t-call (template calling recursive template, part 3 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>            <t t-call=\\"nodeTemplate\\">              <t t-set=\\"node\\" t-value=\\"root\\"/>         \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    ctx.node = ctx['root'];
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"nodeTemplate\\", ctx));
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`t-call (template calling recursive template, part 4: with t-set recursive index 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>            <t t-call=\\"nodeTemplate\\">                <t t-set=\\"recursive_idx\\" t-value=\\"1\\"/> \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    ctx.recursive_idx = 1;
+    ctx.node = ctx['root'];
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"nodeTemplate\\", ctx));
+    ctx = ctx.__proto__;
 }"
 `;
 
@@ -320,6 +463,64 @@ exports[`t-call (template calling t-call with t-if 1`] = `
     const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
     if (ctx['flag']) {
         vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+    }
+}"
+`;
+
+exports[`t-call (template calling t-call with t-set inside and outside 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>            <t t-foreach=\\"list\\" t-as=\\"v\\">              <t t-set=\\"val\\" t-value=\\"v.val\\"/>     \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = ctx['list'];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.v_first = i === 0;
+        ctx.v_last = i === length2 - 1;
+        ctx.v = _3[i];
+        ctx.v_index = i;
+        ctx.v_value = _3[i];
+        ctx.val = ctx['v'].val;
+        ctx = Object.create(ctx);
+        const vn4 = {type: 4, children: []};
+        ctx.val3 = ctx['val']*3;
+        ctx[this.zero] = vn4.children;
+        vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+        ctx = ctx.__proto__;
+    }
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`t-call (template calling t-call with t-set inside and outside. 2 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<p><t t-set=\\"w\\" t-value=\\"'fromwrapper'\\"/><t t-call=\\"__template__2\\"/></p>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.w = 'fromwrapper';
+    vn1.children.push(this.callTemplate(tree, \\"__template__2\\", ctx));
+}"
+`;
+
+exports[`t-call (template calling t-call, conditional and t-set in t-call body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-set=\\"v1\\" t-value=\\"'elif'\\"/>          <t t-if=\\"v1 === 'if'\\" t-call=\\"__template_\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v1 = 'elif';
+    if (ctx['v1']==='if') {
+        vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+    } else if (ctx['v1']==='elif') {
+        ctx = Object.create(ctx);
+        const vn3 = {type: 4, children: []};
+        ctx.v = 'success';
+        ctx[this.zero] = vn3.children;
+        vn1.children.push(this.callTemplate(tree, \\"__template__2\\", ctx));
+        ctx = ctx.__proto__;
     }
 }"
 `;
@@ -808,6 +1009,34 @@ exports[`t-set t-set evaluates an expression only once 1`] = `
     ctx.v = ctx['value']+' artois';
     vn1.children.push({type: 1, text: ctx['v'], el: null});
     vn1.children.push({type: 1, text: ctx['v'], el: null});
+}"
+`;
+
+exports[`t-set t-set should reuse variable if possible 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-set=\\"v\\" t-value=\\"1\\"/>          <div t-foreach=\\"list\\" t-as=\\"elem\\" t-key=\\"elem_i\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v = 1;
+    let _3 = ctx['list'];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.elem_first = i === 0;
+        ctx.elem_last = i === length2 - 1;
+        ctx.elem = _3[i];
+        ctx.elem_index = i;
+        ctx.elem_value = _3[i];
+        const vn4 = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: ctx['elem_index']};
+        vn1.children.push(vn4);
+        const vn5 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        vn4.children.push(vn5);
+        vn5.children.push({type: 1, text: \`v\`, el: null});
+        vn5.children.push({type: 1, text: ctx['v'], el: null});
+        ctx.v = ctx['elem'];
+    }
+    ctx = ctx.__proto__;
 }"
 `;
 
