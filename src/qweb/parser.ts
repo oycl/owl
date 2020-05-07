@@ -4,12 +4,18 @@
 import { compileExpr } from "./expression_parser";
 
 // -----------------------------------------------------------------------------
+
+interface Handler {
+  expr: string;
+}
+
 export interface ASTDOMNode {
   type: "DOM";
   tag: string;
   children: AST[];
   key: string | number;
   attrs: { [name: string]: string };
+  on: { [event: string]: Handler };
 }
 
 export interface ASTComponentNode {
@@ -305,11 +311,15 @@ function parseDOMNode(node: Element): ASTDOMNode {
   const key = keyExpr ? compileExpr(keyExpr, {}) : "1";
   node.removeAttribute("t-key");
   const attributes = (<Element>node).attributes;
+  const handlers: ASTDOMNode["on"] = {};
+
   const attrs: { [name: string]: string } = {};
   for (let i = 0; i < attributes.length; i++) {
     let attrName = attributes[i].name;
-    let attrValue = attributes[i].textContent;
-    if (attrValue) {
+    let attrValue = attributes[i].textContent!;
+    if (attrName.startsWith("t-on-")) {
+      handlers[attrName.slice(5)] = { expr: attrValue };
+    } else if (attrValue) {
       attrs[attrName] = attrValue;
     }
   }
@@ -319,6 +329,7 @@ function parseDOMNode(node: Element): ASTDOMNode {
     children: parseChildren(node),
     key,
     attrs,
+    on: handlers,
   };
 }
 

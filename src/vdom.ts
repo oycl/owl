@@ -23,6 +23,9 @@ export const enum NodeType {
   Multi,
 }
 
+export interface Handler {
+  cb: (this: HTMLElement, ev: any) => any;
+}
 export interface VDOMNode<T> {
   type: NodeType.DOM;
   tag: string;
@@ -30,6 +33,7 @@ export interface VDOMNode<T> {
   children: VNode<T>[];
   attrs: { [name: string]: string };
   key: Key;
+  on?: { [event: string]: Handler };
 }
 
 export interface VTextNode {
@@ -87,6 +91,12 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
         let value = attrs[name];
         if (value) {
           htmlEl.setAttribute(name, value);
+        }
+      }
+      if (vnode.on) {
+        for (let ev in vnode.on) {
+          const handler = vnode.on[ev];
+          htmlEl.addEventListener(ev as any, handler.cb);
         }
       }
       el.appendChild(htmlEl);

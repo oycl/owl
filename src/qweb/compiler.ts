@@ -230,9 +230,17 @@ function compileDOMNode(ctx: CodeContext, ast: ASTDOMNode) {
       addToAttrs(attrs, attr, `"${value}"`);
     }
   }
+  let handlers = "";
+  if (Object.keys(ast.on).length) {
+    let h: string[] = [];
+    for (let ev in ast.on) {
+      h.push(`${ev}: {cb: ${compileExpr(ast.on[ev].expr, {})}}`);
+    }
+    handlers = `, on: {` + h.join(", ") + "}";
+  }
   const vnode = `{type: ${NodeType.DOM}, tag: "${
     ast.tag
-  }", el: null, children: [], attrs: ${objToAttr(attrs)}, key: ${ast.key}}`;
+  }", el: null, children: [], attrs: ${objToAttr(attrs)}, key: ${ast.key}${handlers}}`;
   const id = addVNode(ctx, vnode, ast.children.length > 0);
   withParent(ctx, id, () => {
     generateCode(ast.children, ctx);

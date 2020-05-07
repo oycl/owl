@@ -325,6 +325,18 @@ describe("update function", () => {
   });
 });
 
+describe("event handling", () => {
+  test("can bind an event handler", () => {
+    const vnode = domNode("button", [textNode("abc")]);
+    let clicked = false;
+    vnode.on = { click: { cb: () => (clicked = true) } };
+
+    patch(fixture, vnode);
+    fixture.querySelector("button")!.click();
+    expect(clicked).toBe(true);
+  });
+});
+
 describe("hooks", () => {
   test("create hook on a  data node, 1 text node", () => {
     const vnode = dataNode(textNode("abc"));

@@ -208,6 +208,40 @@ exports[`foreach iterate, position 1`] = `
 }"
 `;
 
+exports[`foreach t-foreach in t-forach 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-foreach=\\"numbers\\" t-as=\\"number\\">            <t t-foreach=\\"letters\\" t-as=\\"lette\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = ctx['numbers'];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.number_first = i === 0;
+        ctx.number_last = i === length2 - 1;
+        ctx.number = _3[i];
+        ctx.number_index = i;
+        ctx.number_value = _3[i];
+        let _5 = ctx['letters'];
+        let length4 = _5.length;
+        ctx = Object.create(ctx);
+        for (let i = 0; i < length4; i++) {
+            ctx.letter_first = i === 0;
+            ctx.letter_last = i === length4 - 1;
+            ctx.letter = _5[i];
+            ctx.letter_index = i;
+            ctx.letter_value = _5[i];
+            vn1.children.push({type: 1, text: \` [\`, el: null});
+            vn1.children.push({type: 1, text: ctx['number'], el: null});
+            vn1.children.push({type: 1, text: ctx['letter'], el: null});
+            vn1.children.push({type: 1, text: \`] \`, el: null});
+        }
+        ctx = ctx.__proto__;
+    }
+    ctx = ctx.__proto__;
+}"
+`;
+
 exports[`misc global 1`] = `
 "function anonymous(tree, ctx
 ) {

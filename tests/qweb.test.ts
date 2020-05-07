@@ -1092,22 +1092,18 @@ describe("foreach", () => {
     expect(context).toEqual({});
   });
 
-  //   test("t-foreach in t-forach", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `<div>
-  //         <t t-foreach="numbers" t-as="number">
-  //           <t t-foreach="letters" t-as="letter">
-  //             [<t t-esc="number"/><t t-esc="letter"/>]
-  //           </t>
-  //         </t>
-  //       </div>`
-  //     );
-  //     const context = { numbers: [1, 2, 3], letters: ["a", "b"] };
-  //     expect(render(template, context)).toBe(
-  //       "<div> [1a]  [1b]  [2a]  [2b]  [3a]  [3b] </div>"
-  //     );
-  //   });
+  test("t-foreach in t-forach", () => {
+    const template = xml`
+        <div>
+          <t t-foreach="numbers" t-as="number">
+            <t t-foreach="letters" t-as="letter">
+              [<t t-esc="number"/><t t-esc="letter"/>]
+            </t>
+          </t>
+        </div>`;
+    const context = { numbers: [1, 2, 3], letters: ["a", "b"] };
+    expect(render(template, context)).toBe("<div> [1a]  [1b]  [2a]  [2b]  [3a]  [3b] </div>");
+  });
 
   //   test("throws error if invalid loop expression", () => {
   //     qweb.addTemplate(
@@ -1189,472 +1185,467 @@ describe("misc", () => {
   });
 });
 
-// describe("t-on", () => {
-//   test("can bind event handler", () => {
-//     const template = xml`<button t-on-click="add">Click</button>`;
-//     let a = 1;
-//     const node = renderToDOM(
-//       qweb,
-//       "test",
-//       {
-//         add() {
-//           a = 3;
-//         },
-//       },
-//       { handlers: [] }
-//     );
-//     (<HTMLElement>node).click();
-//     expect(a).toBe(3);
-//   });
+describe("t-on", () => {
+  test("can bind event handler", () => {
+    const template = xml`<button t-on-click="add">Click</button>`;
+    let a = 1;
+    const div = renderToDOM(template, {
+      add() {
+        a = 3;
+      },
+    });
+    div.querySelector("button")!.click();
+    expect(a).toBe(3);
+  });
 
-//   test("can bind two event handlers", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<button t-on-click="handleClick" t-on-dblclick="handleDblClick">Click</button>`
-//     );
-//     let steps: string[] = [];
-//     const node = renderToDOM(
-//       qweb,
-//       "test",
-//       {
-//         handleClick() {
-//           steps.push("click");
-//         },
-//         handleDblClick() {
-//           steps.push("dblclick");
-//         },
-//       },
-//       { handlers: [] }
-//     );
-//     expect(steps).toEqual([]);
-//     (<HTMLElement>node).click();
-//     expect(steps).toEqual(["click"]);
-//     (<HTMLElement>node).dispatchEvent(new Event("dblclick"));
-//     expect(steps).toEqual(["click", "dblclick"]);
-//   });
+  //   test("can bind two event handlers", () => {
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<button t-on-click="handleClick" t-on-dblclick="handleDblClick">Click</button>`
+  //     );
+  //     let steps: string[] = [];
+  //     const node = renderToDOM(
+  //       qweb,
+  //       "test",
+  //       {
+  //         handleClick() {
+  //           steps.push("click");
+  //         },
+  //         handleDblClick() {
+  //           steps.push("dblclick");
+  //         },
+  //       },
+  //       { handlers: [] }
+  //     );
+  //     expect(steps).toEqual([]);
+  //     (<HTMLElement>node).click();
+  //     expect(steps).toEqual(["click"]);
+  //     (<HTMLElement>node).dispatchEvent(new Event("dblclick"));
+  //     expect(steps).toEqual(["click", "dblclick"]);
+  //   });
 
-//   test("can bind handlers with arguments", () => {
-//     const template = xml`<button t-on-click="add(5)">Click</button>`;
-//     let a = 1;
-//     const node = renderToDOM(
-//       qweb,
-//       "test",
-//       {
-//         add(n) {
-//           a = a + n;
-//         },
-//       },
-//       { handlers: [] }
-//     );
-//     (<HTMLElement>node).click();
-//     expect(a).toBe(6);
-//   });
+  //   test("can bind handlers with arguments", () => {
+  //     const template = xml`<button t-on-click="add(5)">Click</button>`;
+  //     let a = 1;
+  //     const node = renderToDOM(
+  //       qweb,
+  //       "test",
+  //       {
+  //         add(n) {
+  //           a = a + n;
+  //         },
+  //       },
+  //       { handlers: [] }
+  //     );
+  //     (<HTMLElement>node).click();
+  //     expect(a).toBe(6);
+  //   });
 
-//   test("can bind handlers with object arguments", () => {
-//     const template = xml`<button t-on-click="add({val: 5})">Click</button>`;
-//     let a = 1;
-//     const node = renderToDOM(
-//       qweb,
-//       "test",
-//       {
-//         add({ val }) {
-//           a = a + val;
-//         },
-//       },
-//       { handlers: [] }
-//     );
-//     (<HTMLElement>node).click();
-//     expect(a).toBe(6);
-//   });
+  //   test("can bind handlers with object arguments", () => {
+  //     const template = xml`<button t-on-click="add({val: 5})">Click</button>`;
+  //     let a = 1;
+  //     const node = renderToDOM(
+  //       qweb,
+  //       "test",
+  //       {
+  //         add({ val }) {
+  //           a = a + val;
+  //         },
+  //       },
+  //       { handlers: [] }
+  //     );
+  //     (<HTMLElement>node).click();
+  //     expect(a).toBe(6);
+  //   });
 
-//   test("can bind handlers with empty object", () => {
-//     expect.assertions(2);
-//     const template = xml`<button t-on-click="doSomething({})">Click</button>`;
-//     const node = renderToDOM(
-//       qweb,
-//       "test",
-//       {
-//         doSomething(arg) {
-//           expect(arg).toEqual({});
-//         },
-//       },
-//       { handlers: [] }
-//     );
-//     (<HTMLElement>node).click();
-//   });
+  //   test("can bind handlers with empty object", () => {
+  //     expect.assertions(2);
+  //     const template = xml`<button t-on-click="doSomething({})">Click</button>`;
+  //     const node = renderToDOM(
+  //       qweb,
+  //       "test",
+  //       {
+  //         doSomething(arg) {
+  //           expect(arg).toEqual({});
+  //         },
+  //       },
+  //       { handlers: [] }
+  //     );
+  //     (<HTMLElement>node).click();
+  //   });
 
-//   test("can bind handlers with empty object (with non empty inner string)", () => {
-//     expect.assertions(2);
-//     const template = xml`<button t-on-click="doSomething({ })">Click</button>`;
-//     const node = renderToDOM(
-//       qweb,
-//       "test",
-//       {
-//         doSomething(arg) {
-//           expect(arg).toEqual({});
-//         },
-//       },
-//       { handlers: [] }
-//     );
-//     (<HTMLElement>node).click();
-//   });
+  //   test("can bind handlers with empty object (with non empty inner string)", () => {
+  //     expect.assertions(2);
+  //     const template = xml`<button t-on-click="doSomething({ })">Click</button>`;
+  //     const node = renderToDOM(
+  //       qweb,
+  //       "test",
+  //       {
+  //         doSomething(arg) {
+  //           expect(arg).toEqual({});
+  //         },
+  //       },
+  //       { handlers: [] }
+  //     );
+  //     (<HTMLElement>node).click();
+  //   });
 
-//   test("can bind handlers with loop variable as argument", () => {
-//     expect.assertions(2);
-//     qweb.addTemplate(
-//       "test",
-//       `
-//       <ul>
-//         <li t-foreach="['someval']" t-as="action" t-key="action_index"><a t-on-click="activate(action)">link</a></li>
-//       </ul>`
-//     );
-//     const node = renderToDOM(
-//       qweb,
-//       "test",
-//       {
-//         activate(action) {
-//           expect(action).toBe("someval");
-//         },
-//       },
-//       { handlers: [] }
-//     );
-//     (<HTMLElement>node).getElementsByTagName("a")[0].click();
-//   });
+  //   test("can bind handlers with loop variable as argument", () => {
+  //     expect.assertions(2);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `
+  //       <ul>
+  //         <li t-foreach="['someval']" t-as="action" t-key="action_index"><a t-on-click="activate(action)">link</a></li>
+  //       </ul>`
+  //     );
+  //     const node = renderToDOM(
+  //       qweb,
+  //       "test",
+  //       {
+  //         activate(action) {
+  //           expect(action).toBe("someval");
+  //         },
+  //       },
+  //       { handlers: [] }
+  //     );
+  //     (<HTMLElement>node).getElementsByTagName("a")[0].click();
+  //   });
 
-//   test("handler is bound to proper owner", () => {
-//     expect.assertions(2);
-//     const template = xml`<button t-on-click="add">Click</button>`;
-//     let owner = {
-//       add() {
-//         expect(this).toBe(owner);
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-//     (<HTMLElement>node).click();
-//   });
+  //   test("handler is bound to proper owner", () => {
+  //     expect.assertions(2);
+  //     const template = xml`<button t-on-click="add">Click</button>`;
+  //     let owner = {
+  //       add() {
+  //         expect(this).toBe(owner);
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     (<HTMLElement>node).click();
+  //   });
 
-//   test("t-on with inline statement", () => {
-//     const template = xml`<button t-on-click="state.counter++">Click</button>`;
-//     let owner = {
-//       state: {
-//         counter: 0,
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-//     expect(owner.state.counter).toBe(0);
-//     (<HTMLElement>node).click();
-//     expect(owner.state.counter).toBe(1);
-//   });
+  //   test("t-on with inline statement", () => {
+  //     const template = xml`<button t-on-click="state.counter++">Click</button>`;
+  //     let owner = {
+  //       state: {
+  //         counter: 0,
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     expect(owner.state.counter).toBe(0);
+  //     (<HTMLElement>node).click();
+  //     expect(owner.state.counter).toBe(1);
+  //   });
 
-//   test("t-on with inline statement (function call)", () => {
-//     const template = xml`<button t-on-click="state.incrementCounter(2)">Click</button>`;
-//     let owner = {
-//       state: {
-//         counter: 0,
-//         incrementCounter: (inc) => {
-//           owner.state.counter += inc;
-//         },
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-//     expect(owner.state.counter).toBe(0);
-//     (<HTMLElement>node).click();
-//     expect(owner.state.counter).toBe(2);
-//   });
+  //   test("t-on with inline statement (function call)", () => {
+  //     const template = xml`<button t-on-click="state.incrementCounter(2)">Click</button>`;
+  //     let owner = {
+  //       state: {
+  //         counter: 0,
+  //         incrementCounter: (inc) => {
+  //           owner.state.counter += inc;
+  //         },
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     expect(owner.state.counter).toBe(0);
+  //     (<HTMLElement>node).click();
+  //     expect(owner.state.counter).toBe(2);
+  //   });
 
-//   test("t-on with inline statement, part 2", () => {
-//     const template = xml`<button t-on-click="state.flag = !state.flag">Toggle</button>`;
-//     let owner = {
-//       state: {
-//         flag: true,
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-//     expect(owner.state.flag).toBe(true);
-//     (<HTMLElement>node).click();
-//     expect(owner.state.flag).toBe(false);
-//     (<HTMLElement>node).click();
-//     expect(owner.state.flag).toBe(true);
-//   });
+  //   test("t-on with inline statement, part 2", () => {
+  //     const template = xml`<button t-on-click="state.flag = !state.flag">Toggle</button>`;
+  //     let owner = {
+  //       state: {
+  //         flag: true,
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     expect(owner.state.flag).toBe(true);
+  //     (<HTMLElement>node).click();
+  //     expect(owner.state.flag).toBe(false);
+  //     (<HTMLElement>node).click();
+  //     expect(owner.state.flag).toBe(true);
+  //   });
 
-//   test("t-on with inline statement, part 3", () => {
-//     const template = xml`<button t-on-click="state.n = someFunction(3)">Toggle</button>`;
-//     let owner = {
-//       someFunction(n) {
-//         return n + 1;
-//       },
-//       state: {
-//         n: 11,
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-//     expect(owner.state.n).toBe(11);
-//     (<HTMLElement>node).click();
-//     expect(owner.state.n).toBe(4);
-//   });
+  //   test("t-on with inline statement, part 3", () => {
+  //     const template = xml`<button t-on-click="state.n = someFunction(3)">Toggle</button>`;
+  //     let owner = {
+  //       someFunction(n) {
+  //         return n + 1;
+  //       },
+  //       state: {
+  //         n: 11,
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     expect(owner.state.n).toBe(11);
+  //     (<HTMLElement>node).click();
+  //     expect(owner.state.n).toBe(4);
+  //   });
 
-//   test("t-on with t-call", async () => {
-//     expect.assertions(2);
-//     qweb.addTemplate("sub", `<p t-on-click="update">lucas</p>`);
-//     qweb.addTemplate("main", `<div><t t-call="sub"/></div>`);
+  //   test("t-on with t-call", async () => {
+  //     expect.assertions(2);
+  //     qweb.addTemplate("sub", `<p t-on-click="update">lucas</p>`);
+  //     qweb.addTemplate("main", `<div><t t-call="sub"/></div>`);
 
-//     let owner = {
-//       update() {
-//         expect(this).toBe(owner);
-//       },
-//     };
+  //     let owner = {
+  //       update() {
+  //         expect(this).toBe(owner);
+  //       },
+  //     };
 
-//     const node = renderToDOM(qweb, "main", owner, { handlers: [] });
-//     (<HTMLElement>node).querySelector("p")!.click();
-//   });
+  //     const node = renderToDOM(qweb, "main", owner, { handlers: [] });
+  //     (<HTMLElement>node).querySelector("p")!.click();
+  //   });
 
-//   test("t-on, with arguments and t-call", async () => {
-//     expect.assertions(3);
-//     qweb.addTemplate("sub", `<p t-on-click="update(value)">lucas</p>`);
-//     qweb.addTemplate("main", `<div><t t-call="sub"/></div>`);
+  //   test("t-on, with arguments and t-call", async () => {
+  //     expect.assertions(3);
+  //     qweb.addTemplate("sub", `<p t-on-click="update(value)">lucas</p>`);
+  //     qweb.addTemplate("main", `<div><t t-call="sub"/></div>`);
 
-//     let owner = {
-//       update(val) {
-//         expect(this).toBe(owner);
-//         expect(val).toBe(444);
-//       },
-//       value: 444,
-//     };
+  //     let owner = {
+  //       update(val) {
+  //         expect(this).toBe(owner);
+  //         expect(val).toBe(444);
+  //       },
+  //       value: 444,
+  //     };
 
-//     const node = renderToDOM(qweb, "main", owner, { handlers: [] });
-//     (<HTMLElement>node).querySelector("p")!.click();
-//   });
+  //     const node = renderToDOM(qweb, "main", owner, { handlers: [] });
+  //     (<HTMLElement>node).querySelector("p")!.click();
+  //   });
 
-//   test("t-on with prevent and/or stop modifiers", async () => {
-//     expect.assertions(7);
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <button t-on-click.prevent="onClickPrevented">Button 1</button>
-//         <button t-on-click.stop="onClickStopped">Button 2</button>
-//         <button t-on-click.prevent.stop="onClickPreventedAndStopped">Button 3</button>
-//       </div>`
-//     );
-//     let owner = {
-//       onClickPrevented(e) {
-//         expect(e.defaultPrevented).toBe(true);
-//         expect(e.cancelBubble).toBe(false);
-//       },
-//       onClickStopped(e) {
-//         expect(e.defaultPrevented).toBe(false);
-//         expect(e.cancelBubble).toBe(true);
-//       },
-//       onClickPreventedAndStopped(e) {
-//         expect(e.defaultPrevented).toBe(true);
-//         expect(e.cancelBubble).toBe(true);
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //   test("t-on with prevent and/or stop modifiers", async () => {
+  //     expect.assertions(7);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <button t-on-click.prevent="onClickPrevented">Button 1</button>
+  //         <button t-on-click.stop="onClickStopped">Button 2</button>
+  //         <button t-on-click.prevent.stop="onClickPreventedAndStopped">Button 3</button>
+  //       </div>`
+  //     );
+  //     let owner = {
+  //       onClickPrevented(e) {
+  //         expect(e.defaultPrevented).toBe(true);
+  //         expect(e.cancelBubble).toBe(false);
+  //       },
+  //       onClickStopped(e) {
+  //         expect(e.defaultPrevented).toBe(false);
+  //         expect(e.cancelBubble).toBe(true);
+  //       },
+  //       onClickPreventedAndStopped(e) {
+  //         expect(e.defaultPrevented).toBe(true);
+  //         expect(e.cancelBubble).toBe(true);
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
 
-//     const buttons = (<HTMLElement>node).getElementsByTagName("button");
-//     buttons[0].click();
-//     buttons[1].click();
-//     buttons[2].click();
-//   });
+  //     const buttons = (<HTMLElement>node).getElementsByTagName("button");
+  //     buttons[0].click();
+  //     buttons[1].click();
+  //     buttons[2].click();
+  //   });
 
-//   test("t-on with self modifier", async () => {
-//     expect.assertions(2);
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <button t-on-click="onClick"><span>Button</span></button>
-//         <button t-on-click.self="onClickSelf"><span>Button</span></button>
-//       </div>`
-//     );
-//     let steps: string[] = [];
-//     let owner = {
-//       onClick(e) {
-//         steps.push("onClick");
-//       },
-//       onClickSelf(e) {
-//         steps.push("onClickSelf");
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //   test("t-on with self modifier", async () => {
+  //     expect.assertions(2);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <button t-on-click="onClick"><span>Button</span></button>
+  //         <button t-on-click.self="onClickSelf"><span>Button</span></button>
+  //       </div>`
+  //     );
+  //     let steps: string[] = [];
+  //     let owner = {
+  //       onClick(e) {
+  //         steps.push("onClick");
+  //       },
+  //       onClickSelf(e) {
+  //         steps.push("onClickSelf");
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
 
-//     const buttons = (<HTMLElement>node).getElementsByTagName("button");
-//     const spans = (<HTMLElement>node).getElementsByTagName("span");
-//     spans[0].click();
-//     spans[1].click();
-//     buttons[0].click();
-//     buttons[1].click();
+  //     const buttons = (<HTMLElement>node).getElementsByTagName("button");
+  //     const spans = (<HTMLElement>node).getElementsByTagName("span");
+  //     spans[0].click();
+  //     spans[1].click();
+  //     buttons[0].click();
+  //     buttons[1].click();
 
-//     expect(steps).toEqual(["onClick", "onClick", "onClickSelf"]);
-//   });
+  //     expect(steps).toEqual(["onClick", "onClick", "onClickSelf"]);
+  //   });
 
-//   test("t-on with self and prevent modifiers (order matters)", async () => {
-//     expect.assertions(2);
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <button t-on-click.self.prevent="onClick"><span>Button</span></button>
-//       </div>`
-//     );
-//     let steps: boolean[] = [];
-//     let owner = {
-//       onClick() {},
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-//     (<HTMLElement>node).addEventListener("click", function (e) {
-//       steps.push(e.defaultPrevented);
-//     });
+  //   test("t-on with self and prevent modifiers (order matters)", async () => {
+  //     expect.assertions(2);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <button t-on-click.self.prevent="onClick"><span>Button</span></button>
+  //       </div>`
+  //     );
+  //     let steps: boolean[] = [];
+  //     let owner = {
+  //       onClick() {},
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     (<HTMLElement>node).addEventListener("click", function (e) {
+  //       steps.push(e.defaultPrevented);
+  //     });
 
-//     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
-//     const span = (<HTMLElement>node).getElementsByTagName("span")[0];
-//     span.click();
-//     button.click();
+  //     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
+  //     const span = (<HTMLElement>node).getElementsByTagName("span")[0];
+  //     span.click();
+  //     button.click();
 
-//     expect(steps).toEqual([false, true]);
-//   });
+  //     expect(steps).toEqual([false, true]);
+  //   });
 
-//   test("t-on with prevent and self modifiers (order matters)", async () => {
-//     expect.assertions(2);
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <button t-on-click.prevent.self="onClick"><span>Button</span></button>
-//       </div>`
-//     );
-//     let steps: boolean[] = [];
-//     let owner = {
-//       onClick() {},
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-//     (<HTMLElement>node).addEventListener("click", function (e) {
-//       steps.push(e.defaultPrevented);
-//     });
+  //   test("t-on with prevent and self modifiers (order matters)", async () => {
+  //     expect.assertions(2);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <button t-on-click.prevent.self="onClick"><span>Button</span></button>
+  //       </div>`
+  //     );
+  //     let steps: boolean[] = [];
+  //     let owner = {
+  //       onClick() {},
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     (<HTMLElement>node).addEventListener("click", function (e) {
+  //       steps.push(e.defaultPrevented);
+  //     });
 
-//     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
-//     const span = (<HTMLElement>node).getElementsByTagName("span")[0];
-//     span.click();
-//     button.click();
+  //     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
+  //     const span = (<HTMLElement>node).getElementsByTagName("span")[0];
+  //     span.click();
+  //     button.click();
 
-//     expect(steps).toEqual([true, true]);
-//   });
+  //     expect(steps).toEqual([true, true]);
+  //   });
 
-//   test("t-on with prevent modifier in t-foreach", async () => {
-//     expect.assertions(5);
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <t t-foreach="projects" t-as="project">
-//           <a href="#" t-key="project" t-on-click.prevent="onEdit(project.id)">
-//             Edit <t t-esc="project.name"/>
-//           </a>
-//         </t>
-//       </div>`
-//     );
-//     const steps: string[] = [];
-//     const owner = {
-//       projects: [
-//         { id: 1, name: "Project 1" },
-//         { id: 2, name: "Project 2" },
-//       ],
+  //   test("t-on with prevent modifier in t-foreach", async () => {
+  //     expect.assertions(5);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <t t-foreach="projects" t-as="project">
+  //           <a href="#" t-key="project" t-on-click.prevent="onEdit(project.id)">
+  //             Edit <t t-esc="project.name"/>
+  //           </a>
+  //         </t>
+  //       </div>`
+  //     );
+  //     const steps: string[] = [];
+  //     const owner = {
+  //       projects: [
+  //         { id: 1, name: "Project 1" },
+  //         { id: 2, name: "Project 2" },
+  //       ],
 
-//       onEdit(projectId, ev) {
-//         expect(ev.defaultPrevented).toBe(true);
-//         steps.push(projectId);
-//       },
-//     };
+  //       onEdit(projectId, ev) {
+  //         expect(ev.defaultPrevented).toBe(true);
+  //         steps.push(projectId);
+  //       },
+  //     };
 
-//     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
-//     expect(node.outerHTML).toBe(
-//       `<div><a href="#"> Edit Project 1</a><a href="#"> Edit Project 2</a></div>`
-//     );
+  //     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     expect(node.outerHTML).toBe(
+  //       `<div><a href="#"> Edit Project 1</a><a href="#"> Edit Project 2</a></div>`
+  //     );
 
-//     const links = node.querySelectorAll("a")!;
-//     links[0].click();
-//     links[1].click();
+  //     const links = node.querySelectorAll("a")!;
+  //     links[0].click();
+  //     links[1].click();
 
-//     expect(steps).toEqual([1, 2]);
-//   });
+  //     expect(steps).toEqual([1, 2]);
+  //   });
 
-//   test("t-on with empty handler (only modifiers)", () => {
-//     expect.assertions(2);
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <button t-on-click.prevent="">Button</button>
-//       </div>`
-//     );
-//     const node = renderToDOM(qweb, "test", {}, { handlers: [] });
+  //   test("t-on with empty handler (only modifiers)", () => {
+  //     expect.assertions(2);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div>
+  //         <button t-on-click.prevent="">Button</button>
+  //       </div>`
+  //     );
+  //     const node = renderToDOM(qweb, "test", {}, { handlers: [] });
 
-//     node.addEventListener("click", (e) => {
-//       expect(e.defaultPrevented).toBe(true);
-//     });
+  //     node.addEventListener("click", (e) => {
+  //       expect(e.defaultPrevented).toBe(true);
+  //     });
 
-//     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
-//     button.click();
-//   });
+  //     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
+  //     button.click();
+  //   });
 
-//   test("t-on combined with t-esc", async () => {
-//     expect.assertions(3);
-//     const template = xml`<div><button t-on-click="onClick" t-esc="text"/></div>`;
-//     const steps: string[] = [];
-//     const owner = {
-//       text: "Click here",
-//       onClick() {
-//         steps.push("onClick");
-//       },
-//     };
+  //   test("t-on combined with t-esc", async () => {
+  //     expect.assertions(3);
+  //     const template = xml`<div><button t-on-click="onClick" t-esc="text"/></div>`;
+  //     const steps: string[] = [];
+  //     const owner = {
+  //       text: "Click here",
+  //       onClick() {
+  //         steps.push("onClick");
+  //       },
+  //     };
 
-//     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
-//     expect(node.outerHTML).toBe(`<div><button>Click here</button></div>`);
+  //     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     expect(node.outerHTML).toBe(`<div><button>Click here</button></div>`);
 
-//     node.querySelector("button")!.click();
+  //     node.querySelector("button")!.click();
 
-//     expect(steps).toEqual(["onClick"]);
-//   });
+  //     expect(steps).toEqual(["onClick"]);
+  //   });
 
-//   test("t-on combined with t-raw", async () => {
-//     expect.assertions(3);
-//     const template = xml`<div><button t-on-click="onClick" t-raw="html"/></div>`;
-//     const steps: string[] = [];
-//     const owner = {
-//       html: "Click <b>here</b>",
-//       onClick() {
-//         steps.push("onClick");
-//       },
-//     };
+  //   test("t-on combined with t-raw", async () => {
+  //     expect.assertions(3);
+  //     const template = xml`<div><button t-on-click="onClick" t-raw="html"/></div>`;
+  //     const steps: string[] = [];
+  //     const owner = {
+  //       html: "Click <b>here</b>",
+  //       onClick() {
+  //         steps.push("onClick");
+  //       },
+  //     };
 
-//     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
-//     expect(node.outerHTML).toBe(`<div><button>Click <b>here</b></button></div>`);
+  //     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     expect(node.outerHTML).toBe(`<div><button>Click <b>here</b></button></div>`);
 
-//     node.querySelector("button")!.click();
+  //     node.querySelector("button")!.click();
 
-//     expect(steps).toEqual(["onClick"]);
-//   });
+  //     expect(steps).toEqual(["onClick"]);
+  //   });
 
-//   test("t-on with .capture modifier", () => {
-//     expect.assertions(2);
-//     qweb.addTemplate(
-//       "test",
-//       `<div t-on-click.capture="onCapture">
-//         <button t-on-click="doSomething">Button</button>
-//       </div>`
-//     );
+  //   test("t-on with .capture modifier", () => {
+  //     expect.assertions(2);
+  //     qweb.addTemplate(
+  //       "test",
+  //       `<div t-on-click.capture="onCapture">
+  //         <button t-on-click="doSomething">Button</button>
+  //       </div>`
+  //     );
 
-//     const steps: string[] = [];
-//     const owner = {
-//       onCapture() {
-//         steps.push("captured");
-//       },
-//       doSomething() {
-//         steps.push("normal");
-//       },
-//     };
-//     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
+  //     const steps: string[] = [];
+  //     const owner = {
+  //       onCapture() {
+  //         steps.push("captured");
+  //       },
+  //       doSomething() {
+  //         steps.push("normal");
+  //       },
+  //     };
+  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
 
-//     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
-//     button.click();
-//     expect(steps).toEqual(["captured", "normal"]);
-//   });
-// });
+  //     const button = (<HTMLElement>node).getElementsByTagName("button")[0];
+  //     button.click();
+  //     expect(steps).toEqual(["captured", "normal"]);
+  //   });
+});
 
 // describe("t-ref", () => {
 //   test("can get a ref on a node", () => {
