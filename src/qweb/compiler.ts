@@ -1,4 +1,4 @@
-import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode, ASTCallNode } from "./parser";
+import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode, ASTCallNode, ASTRawNode } from "./parser";
 import { NodeType } from "../vdom";
 import { VTree } from "../core";
 import { compileExpr } from "./expression_parser";
@@ -68,6 +68,9 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
       break;
     case "T-ESC":
       compileEscNode(ctx, ast);
+      break;
+    case "T-RAW":
+      compileRawNode(ctx, ast);
       break;
     case "T-IF": {
       addIf(ctx, compileExpr(ast.condition, {}));
@@ -332,6 +335,55 @@ function compileEscNode(ctx: CodeContext, ast: ASTEscNode) {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Compile T-RAW node
+// -----------------------------------------------------------------------------
+
+function compileRawNode(ctx: CodeContext, ast: ASTRawNode) {
+  if (ast.expr === "0") {
+    addVNode(ctx, `{type: ${NodeType.Multi}, children: ctx[this.zero]}`, false);
+
+    return;
+  }
+  const expr = compileExpr(ast.expr, {});
+  if (ast.body.length) {
+    const id = uniqueId(ctx);
+    addLine(ctx, `let ${id} = ${expr}`);
+    addIf(ctx, `${id} !== undefined`);
+    const vnode = `...this.htmlToVDOM(${expr})`;
+    addVNode(ctx, vnode, false);
+    ctx.indentLevel--;
+    addLine(ctx, `} else {`);
+    ctx.indentLevel++;
+    generateCode(ast.body, ctx);
+    closeIf(ctx);
+    return;
+  }
+  if (ast.expr in ctx.variables) {
+    // // this is a variable that was already defined, with a body
+    const qwebVar = ctx.variables[ast.expr];
+    if (qwebVar.hasBody && qwebVar.hasValue) {
+      const id = uniqueId(ctx);
+      addLine(
+        ctx,
+        `let ${id} = ${qwebVar.expr} instanceof this.VDomArray ? ${qwebVar.expr} : this.htmlToVDOM(${qwebVar.expr});`
+      );
+      const vnode = `{type: ${NodeType.Multi}, children: ${id}}`;
+      addVNode(ctx, vnode, false);
+    } else {
+      const vnode = `{type: ${NodeType.Multi}, children: ${qwebVar.expr}}`;
+      addVNode(ctx, vnode, false);
+    }
+  } else {
+    if (ctx.currentParent === "tree") {
+      addLine(ctx, `tree.child = {type: ${NodeType.Multi}, children: this.htmlToVDOM(${expr})};`);
+    } else {
+      const vnode = `...this.htmlToVDOM(${expr})`;
+      addVNode(ctx, vnode, false);
+    }
+  }
+  // }
+}
 // -----------------------------------------------------------------------------
 // Compile T-CALL node
 // -----------------------------------------------------------------------------

@@ -1,10 +1,27 @@
 import { renderToString, xml } from "../src/index";
-import { compiledTemplates, clearQWeb, addTemplate } from "../src/qweb/qweb";
+import { compiledTemplates, getTemplateFn, clearQWeb, addTemplate, utils } from "../src/qweb/qweb";
+import { NodeType, patch } from "../src/vdom";
+import { VTree } from "../src/core";
 
-function render(template: string, context?: any): string {
+function render(template: string, context: any = {}): string {
   const str = renderToString(template, context);
   expect(compiledTemplates[template].toString()).toMatchSnapshot();
   return str;
+}
+
+function renderToDOM(template: string, context: any = {}): HTMLDivElement {
+  const fn = getTemplateFn(template);
+  const tree: VTree = {
+    type: NodeType.Data,
+    data: {} as any,
+    child: null,
+    key: 1,
+    hooks: {},
+  };
+  fn.call(utils, tree, context);
+  const div = document.createElement("div");
+  patch(div, tree);
+  return div;
 }
 
 beforeEach(() => {
@@ -172,18 +189,18 @@ describe("t-esc", () => {
     expect(render(template)).toBe("<span>nope</span>");
   });
 
-  //   test("t-esc is escaped", () => {
-  //     const template = xml`("test", `<div><t t-set="var"><p>escaped</p></t><t t-esc="var"/></div>`);
-  //     const domRendered = renderToDOM(qweb, "test");
-  //     expect(domRendered.textContent).toBe("<p>escaped</p>");
-  //   });
+  test("t-esc is escaped", () => {
+    const template = xml`<div><t t-set="var"><p>escaped</p></t><t t-esc="var"/></div>`;
+    const domRendered = renderToDOM(template).firstElementChild!;
+    expect(domRendered.textContent).toBe("<p>escaped</p>");
+  });
 
-  //   test("t-esc=0 is escaped", () => {
-  //     const template = xml`("test", `<span><t t-esc="0"/></span>`);
-  //     const template = xml`("testCaller", `<div><t t-call="test"><p>escaped</p></t></div>`);
-  //     const domRendered = renderToDOM(qweb, "testCaller") as HTMLElement;
-  //     expect(domRendered.querySelector("span")!.textContent).toBe("<p>escaped</p>");
-  //   });
+  test("t-esc=0 is escaped", () => {
+    const sub = xml`<span><t t-esc="0"/></span>`;
+    const main = xml`<div><t t-call="${sub}"><p>escaped</p></t></div>`;
+    const domRendered = renderToDOM(main);
+    expect(domRendered.querySelector("span")!.textContent).toBe("<p>escaped</p>");
+  });
 
   test("div with falsy values", () => {
     const template = xml`
@@ -210,29 +227,49 @@ describe("t-esc", () => {
   });
 });
 
-// describe("t-raw", () => {
-//   test("literal", () => {
-//     const template = xml`<span><t t-raw="'ok'"/></span>`;
-//     expect(render(template)).toBe("<span>ok</span>");
-//   });
+describe("t-raw", () => {
+  test("literal", () => {
+    const template = xml`<span><t t-raw="'ok'"/></span>`;
+    expect(render(template)).toBe("<span>ok</span>");
+  });
 
-//   test("variable", () => {
-//     const template = xml`<span><t t-raw="var"/></span>`;
-//     expect(render(template, { var: "ok" })).toBe("<span>ok</span>");
-//   });
+  test("variable", () => {
+    const template = xml`<span><t t-raw="var"/></span>`;
+    expect(render(template, { var: "ok" })).toBe("<span>ok</span>");
+  });
 
-//   test("not escaping", () => {
-//     const template = xml`<div><t t-raw="var"/></div>`;
-//     expect(render(template, { var: "<ok></ok>" })).toBe("<div><ok></ok></div>");
-//   });
+  test("from a (template, body) variable (*)", () => {
+    const template = xml`<span><t t-set="v"><abc>def</abc></t><t t-raw="v"/></span>`;
+    expect(render(template)).toBe("<span><abc>def</abc></span>");
+  });
 
-//   test("t-raw and another sibling node", () => {
-//     const template = xml`<span><span>hello</span><t t-raw="var"/></span>`;
-//     expect(render(template, { var: "<ok>world</ok>" })).toBe(
-//       "<span><span>hello</span><ok>world</ok></span>"
-//     );
-//   });
-// });
+  test("from a (template, value+body) variable (*)", () => {
+    const template = xml`<span><t t-set="v" t-value="blip"><abc>def</abc></t><t t-raw="v"/></span>`;
+    expect(render(template, { blip: "<blip>1</blip>" })).toBe("<span><blip>1</blip></span>");
+  });
+
+  test("not escaping", () => {
+    const template = xml`<div><t t-raw="var"/></div>`;
+    expect(render(template, { var: "<ok></ok>" })).toBe("<div><ok></ok></div>");
+  });
+
+  test("only a t-raw directive, no parent! (*)", () => {
+    const template = xml`<t t-raw="var"/>`;
+    expect(render(template, { var: "<p>1</p><p>2</p>" })).toBe("<p>1</p><p>2</p>");
+  });
+
+  test("t-raw and another sibling node", () => {
+    const template = xml`<span><span>hello</span><t t-raw="var"/></span>`;
+    expect(render(template, { var: "<ok>world</ok>" })).toBe(
+      "<span><span>hello</span><ok>world</ok></span>"
+    );
+  });
+
+  test("empty value, and a body as default (*)", () => {
+    const template = xml`<span><t t-raw="var">body</t></span>`;
+    expect(render(template)).toBe("<span>body</span>");
+  });
+});
 
 describe("t-set", () => {
   test("set from attribute literal", () => {
@@ -336,57 +373,51 @@ describe("t-set", () => {
     expect(render(template, { flag: false })).toBe("<div>0</div>");
   });
 
-  //   test("t-set body is evaluated immediately", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `<div>
-  //         <t t-set="v1" t-value="'before'"/>
-  //         <t t-set="v2">
-  //           <span><t t-esc="v1"/></span>
-  //         </t>
-  //         <t t-set="v1" t-value="'after'"/>
-  //         <t t-raw="v2"/>
-  //       </div>`
-  //     );
+  test("t-set body is evaluated immediately", () => {
+    const template = xml`
+        <div>
+          <t t-set="v1" t-value="'before'"/>
+          <t t-set="v2">
+            <span><t t-esc="v1"/></span>
+          </t>
+          <t t-set="v1" t-value="'after'"/>
+          <t t-raw="v2"/>
+        </div>`;
 
-  //     expect(render(template)).toBe("<div><span>before</span></div>");
-  //   });
+    expect(render(template)).toBe("<div><span>before</span></div>");
+  });
 
-  //   test("t-set with t-value (falsy) and body", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `<div>
-  //         <t t-set="v3" t-value="false"/>
-  //         <t t-set="v1" t-value="'before'"/>
-  //         <t t-set="v2" t-value="v3">
-  //           <span><t t-esc="v1"/></span>
-  //         </t>
-  //         <t t-set="v1" t-value="'after'"/>
-  //         <t t-set="v3" t-value="true"/>
-  //         <t t-raw="v2"/>
-  //       </div>`
-  //     );
+  test("t-set with t-value (falsy) and body", () => {
+    const template = xml`
+        <div>
+          <t t-set="v3" t-value="false"/>
+          <t t-set="v1" t-value="'before'"/>
+          <t t-set="v2" t-value="v3">
+            <span><t t-esc="v1"/></span>
+          </t>
+          <t t-set="v1" t-value="'after'"/>
+          <t t-set="v3" t-value="true"/>
+          <t t-raw="v2"/>
+        </div>`;
 
-  //     expect(render(template)).toBe("<div><span>before</span></div>");
-  //   });
+    expect(render(template)).toBe("<div><span>before</span></div>");
+  });
 
-  //   test("t-set with t-value (truthy) and body", () => {
-  //     qweb.addTemplate(
-  //       "test",
-  //       `<div>
-  //         <t t-set="v3" t-value="'Truthy'"/>
-  //         <t t-set="v1" t-value="'before'"/>
-  //         <t t-set="v2" t-value="v3">
-  //           <span><t t-esc="v1"/></span>
-  //         </t>
-  //         <t t-set="v1" t-value="'after'"/>
-  //         <t t-set="v3" t-value="false"/>
-  //         <t t-raw="v2"/>
-  //       </div>`
-  //     );
+  test("t-set with t-value (truthy) and body", () => {
+    const template = xml`
+        <div>
+          <t t-set="v3" t-value="'Truthy'"/>
+          <t t-set="v1" t-value="'before'"/>
+          <t t-set="v2" t-value="v3">
+            <span><t t-esc="v1"/></span>
+          </t>
+          <t t-set="v1" t-value="'after'"/>
+          <t t-set="v3" t-value="false"/>
+          <t t-raw="v2"/>
+        </div>`;
 
-  //     expect(render(template)).toBe("<div>Truthy</div>");
-  //   });
+    expect(render(template)).toBe("<div>Truthy</div>");
+  });
 });
 
 describe("t-if", () => {
@@ -786,54 +817,51 @@ describe("t-call (template calling", () => {
     expect(render(caller)).toBe(expected);
   });
 
-  // test("call with several sub nodes on same line", () => {
-  //   const sub = xml`
-  //     <div t-name="SubTemplate">
-  //         <t t-raw="0"/>
-  //     </div>`;
-  //   const main = xml`
-  //     <div>
-  //       <t t-call="${sub}">
-  //         <span>hey</span> <span>yay</span>
-  //       </t>
-  //     </div>`;
-  //   const expected = "<div><div><span>hey</span> <span>yay</span></div></div>";
-  //   expect(render(main)).toBe(expected);
-  // });
+  test("call with several sub nodes on same line", () => {
+    const sub = xml`
+      <div>
+          <t t-raw="0"/>
+      </div>`;
+    const main = xml`
+      <div>
+        <t t-call="${sub}">
+          <span>hey</span> <span>yay</span>
+        </t>
+      </div>`;
+    const expected = "<div><div><span>hey</span> <span>yay</span></div></div>";
+    expect(render(main)).toBe(expected);
+  });
 
-  //   test("cascading t-call t-raw='0'", () => {
-  //     qweb.addTemplates(`
-  //         <templates>
-  //             <div t-name="finalTemplate">
-  //               <span>cascade 2</span>
-  //               <t t-raw="0"/>
-  //             </div>
-
-  //             <div t-name="subSubTemplate">
-  //               <t t-call="finalTemplate">
-  //                 <span>cascade 1</span>
-  //                 <t t-raw="0"/>
-  //               </t>
-  //             </div>
-
-  //             <div t-name="SubTemplate">
-  //               <t t-call="subSubTemplate">
-  //                 <span>cascade 0</span>
-  //                 <t t-raw="0"/>
-  //               </t>
-  //             </div>
-
-  //             <div t-name="main">
-  //               <t t-call="SubTemplate">
-  //                 <span>hey</span> <span>yay</span>
-  //               </t>
-  //             </div>
-  //         </templates>
-  //     `);
-  //     const expected =
-  //       "<div><div><div><div><span>cascade 2</span><span>cascade 1</span><span>cascade 0</span><span>hey</span> <span>yay</span></div></div></div></div>";
-  //     expect(renderToString(qweb, "main")).toBe(expected);
-  //   });
+  test("cascading t-call t-raw='0'", () => {
+    const finalTemplate = xml`
+          <div>
+            <span>cascade 2</span>
+            <t t-raw="0"/>
+          </div>`;
+    const subSubTemplate = xml`
+          <div>
+            <t t-call="${finalTemplate}">
+              <span>cascade 1</span>
+              <t t-raw="0"/>
+            </t>
+          </div>`;
+    const subTemplate = xml`
+          <div>
+            <t t-call="${subSubTemplate}">
+              <span>cascade 0</span>
+              <t t-raw="0"/>
+            </t>
+          </div>`;
+    const main = xml`
+            <div>
+              <t t-call="${subTemplate}">
+                <span>hey</span> <span>yay</span>
+              </t>
+            </div>`;
+    const expected =
+      "<div><div><div><div><span>cascade 2</span><span>cascade 1</span><span>cascade 0</span><span>hey</span> <span>yay</span></div></div></div></div>";
+    expect(render(main)).toBe(expected);
+  });
 
   test("recursive template, part 1", () => {
     addTemplate(
@@ -1111,60 +1139,55 @@ describe("foreach", () => {
   //   });
 });
 
-// describe("misc", () => {
-//   test("global", () => {
-//     qweb.addTemplate("_callee-asc", `<año t-att-falló="'agüero'" t-raw="0"/>`);
-//     qweb.addTemplate("_callee-uses-foo", `<span t-esc="foo">foo default</span>`);
-//     qweb.addTemplate("_callee-asc-toto", `<div t-raw="toto">toto default</div>`);
-//     qweb.addTemplate(
-//       "caller",
-//       `
-//       <div>
-//         <t t-foreach="[4,5,6]" t-as="value">
-//           <span t-esc="value"/>
-//           <t t-call="_callee-asc">
-//             <t t-call="_callee-uses-foo">
-//                 <t t-set="foo" t-value="'aaa'"/>
-//             </t>
-//             <t t-call="_callee-uses-foo"/>
-//             <t t-set="foo" t-value="'bbb'"/>
-//             <t t-call="_callee-uses-foo"/>
-//           </t>
-//         </t>
-//         <t t-call="_callee-asc-toto"/>
-//       </div>
-//     `
-//     );
-//     const result = trim(renderToString(qweb, "caller"));
-//     const expected = trim(`
-//       <div>
-//         <span>4</span>
-//         <año falló="agüero">
-//           <span>aaa</span>
-//           <span>foo default</span>
-//           <span>bbb</span>
-//         </año>
+describe("misc", () => {
+  test("global", () => {
+    const calleeAsc = xml`<año t-att-falló="'agüero'" t-raw="0"/>`;
+    const calleeUsesFoo = xml`<span t-esc="foo">foo default</span>`;
+    const calleeAscToto = xml`<div t-raw="toto">toto default</div>`;
+    const caller = xml`
+      <div>
+        <t t-foreach="[4,5,6]" t-as="value">
+          <span t-esc="value"/>
+          <t t-call="${calleeAsc}">
+            <t t-call="${calleeUsesFoo}">
+                <t t-set="foo" t-value="'aaa'"/>
+            </t>
+            <t t-call="${calleeUsesFoo}"/>
+            <t t-set="foo" t-value="'bbb'"/>
+            <t t-call="${calleeUsesFoo}"/>
+          </t>
+        </t>
+        <t t-call="${calleeAscToto}"/>
+      </div>`;
+    const expected = `
+      <div>
+        <span>4</span>
+        <año falló="agüero">
+          <span>aaa</span>
+          <span>foo default</span>
+          <span>bbb</span>
+        </año>
 
-//         <span>5</span>
-//         <año falló="agüero">
-//           <span>aaa</span>
-//           <span>foo default</span>
-//           <span>bbb</span>
-//         </año>
+        <span>5</span>
+        <año falló="agüero">
+          <span>aaa</span>
+          <span>foo default</span>
+          <span>bbb</span>
+        </año>
 
-//         <span>6</span>
-//         <año falló="agüero">
-//           <span>aaa</span>
-//           <span>foo default</span>
-//           <span>bbb</span>
-//         </año>
+        <span>6</span>
+        <año falló="agüero">
+          <span>aaa</span>
+          <span>foo default</span>
+          <span>bbb</span>
+        </año>
 
-//         <div>toto default</div>
-//       </div>
-//     `);
-//     expect(result).toBe(expected);
-//   });
-// });
+        <div>toto default</div>
+      </div>
+    `.replace(/ |\n/g, "");
+    expect(render(caller).replace(/ /g, "")).toBe(expected);
+  });
+});
 
 // describe("t-on", () => {
 //   test("can bind event handler", () => {

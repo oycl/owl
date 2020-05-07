@@ -208,6 +208,44 @@ exports[`foreach iterate, position 1`] = `
 }"
 `;
 
+exports[`misc global 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <t t-foreach=\\"[4,5,6]\\" t-as=\\"value\\">          <span t-esc=\\"value\\"/>          <t t-ca\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _3 = [4,5,6];
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.value_first = i === 0;
+        ctx.value_last = i === length2 - 1;
+        ctx.value = _3[i];
+        ctx.value_index = i;
+        ctx.value_value = _3[i];
+        const vn4 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        vn1.children.push(vn4);
+        vn4.children.push({type: 1, text: ctx['value'], el: null});
+        ctx = Object.create(ctx);
+        const vn6 = {type: 4, children: []};
+        ctx = Object.create(ctx);
+        const vn7 = {type: 4, children: []};
+        ctx.foo = 'aaa';
+        ctx[this.zero] = vn7.children;
+        vn6.children.push(this.callTemplate(tree, \\"__template__2\\", ctx));
+        ctx = ctx.__proto__;
+        vn6.children.push(this.callTemplate(tree, \\"__template__2\\", ctx));
+        ctx.foo = 'bbb';
+        vn6.children.push(this.callTemplate(tree, \\"__template__2\\", ctx));
+        ctx[this.zero] = vn6.children;
+        vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+        ctx = ctx.__proto__;
+    }
+    ctx = ctx.__proto__;
+    vn1.children.push(this.callTemplate(tree, \\"__template__3\\", ctx));
+}"
+`;
+
 exports[`static templates div with a class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
@@ -366,6 +404,46 @@ exports[`t-call (template calling basic caller, no parent node 1`] = `
 ) {
     // Template: \`<t t-call=\\"__template__1\\"/>\`
     tree.child = this.callTemplate(tree, \\"__template__1\\", ctx);
+}"
+`;
+
+exports[`t-call (template calling call with several sub nodes on same line 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>        <t t-call=\\"__template__1\\">          <span>hey</span> <span>yay</span>        </t>  \`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    const vn3 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn2.children.push(vn3);
+    vn3.children.push({type: 1, text: \`hey\`, el: null});
+    vn2.children.push({type: 1, text: \` \`, el: null});
+    const vn6 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn2.children.push(vn6);
+    vn6.children.push({type: 1, text: \`yay\`, el: null});
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+    ctx = ctx.__proto__;
+}"
+`;
+
+exports[`t-call (template calling cascading t-call t-raw='0' 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>              <t t-call=\\"__template__3\\">                <span>hey</span> <span>yay</span>   \`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    const vn3 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn2.children.push(vn3);
+    vn3.children.push({type: 1, text: \`hey\`, el: null});
+    vn2.children.push({type: 1, text: \` \`, el: null});
+    const vn6 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn2.children.push(vn6);
+    vn6.children.push({type: 1, text: \`yay\`, el: null});
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"__template__3\\", ctx));
+    ctx = ctx.__proto__;
 }"
 `;
 
@@ -906,6 +984,101 @@ exports[`t-if t-set, then t-if, part 2 1`] = `
 }"
 `;
 
+exports[`t-raw empty value, and a body as default (*) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-raw=\\"var\\">body</t></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    let _2 = ctx['var']
+    if (_2 !== undefined) {
+        vn1.children.push(...this.htmlToVDOM(ctx['var']));
+    } else {
+        vn1.children.push({type: 1, text: \`body\`, el: null});
+    }
+}"
+`;
+
+exports[`t-raw from a (template, body) variable (*) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-set=\\"v\\"><abc>def</abc></t><t t-raw=\\"v\\"/></span>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    let _2 = new this.VDomArray();
+    const vn3 = {type: 0, tag: \\"abc\\", el: null, children: [], attrs: {}, key: 1};
+    _2.push(vn3);
+    vn3.children.push({type: 1, text: \`def\`, el: null});
+    ctx.v = _2;
+    vn1.children.push({type: 4, children: ctx.v});
+}"
+`;
+
+exports[`t-raw from a (template, value+body) variable (*) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-set=\\"v\\" t-value=\\"blip\\"><abc>def</abc></t><t t-raw=\\"v\\"/></span>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v = ctx['blip'];
+    if (!ctx.v) {
+        let _2 = new this.VDomArray();
+        const vn3 = {type: 0, tag: \\"abc\\", el: null, children: [], attrs: {}, key: 1};
+        _2.push(vn3);
+        vn3.children.push({type: 1, text: \`def\`, el: null});
+        ctx.v = _2
+    }
+    let _5 = ctx.v instanceof this.VDomArray ? ctx.v : this.htmlToVDOM(ctx.v);
+    vn1.children.push({type: 4, children: _5});
+}"
+`;
+
+exports[`t-raw literal 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-raw=\\"'ok'\\"/></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(...this.htmlToVDOM('ok'));
+}"
+`;
+
+exports[`t-raw not escaping 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-raw=\\"var\\"/></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(...this.htmlToVDOM(ctx['var']));
+}"
+`;
+
+exports[`t-raw only a t-raw directive, no parent! (*) 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<t t-raw=\\"var\\"/>\`
+    tree.child = {type: 4, children: this.htmlToVDOM(ctx['var'])};
+}"
+`;
+
+exports[`t-raw t-raw and another sibling node 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><span>hello</span><t t-raw=\\"var\\"/></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    const vn2 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(vn2);
+    vn2.children.push({type: 1, text: \`hello\`, el: null});
+    vn1.children.push(...this.htmlToVDOM(ctx['var']));
+}"
+`;
+
+exports[`t-raw variable 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<span><t t-raw=\\"var\\"/></span>\`
+    const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    vn1.children.push(...this.htmlToVDOM(ctx['var']));
+}"
+`;
+
 exports[`t-set evaluate value expression 1`] = `
 "function anonymous(tree, ctx
 ) {
@@ -1000,6 +1173,23 @@ exports[`t-set t-set and t-if 1`] = `
 }"
 `;
 
+exports[`t-set t-set body is evaluated immediately 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-set=\\"v1\\" t-value=\\"'before'\\"/>          <t t-set=\\"v2\\">            <span><t t-e\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v1 = 'before';
+    let _2 = new this.VDomArray();
+    const vn3 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    _2.push(vn3);
+    vn3.children.push({type: 1, text: ctx['v1'], el: null});
+    ctx.v2 = _2;
+    ctx.v1 = 'after';
+    vn1.children.push({type: 4, children: ctx.v2});
+}"
+`;
+
 exports[`t-set t-set evaluates an expression only once 1`] = `
 "function anonymous(tree, ctx
 ) {
@@ -1052,6 +1242,52 @@ exports[`t-set t-set with content and sub t-esc 1`] = `
     ctx.setvar = _2;
     let _5 = this.vDomToString(ctx.setvar);
     vn1.children.push({type: 1, text: _5, el: null});
+}"
+`;
+
+exports[`t-set t-set with t-value (falsy) and body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-set=\\"v3\\" t-value=\\"false\\"/>          <t t-set=\\"v1\\" t-value=\\"'before'\\"/>       \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v3 = false;
+    ctx.v1 = 'before';
+    ctx.v2 = ctx['v3'];
+    if (!ctx.v2) {
+        let _2 = new this.VDomArray();
+        const vn3 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        _2.push(vn3);
+        vn3.children.push({type: 1, text: ctx['v1'], el: null});
+        ctx.v2 = _2
+    }
+    ctx.v1 = 'after';
+    ctx.v3 = true;
+    let _6 = ctx.v2 instanceof this.VDomArray ? ctx.v2 : this.htmlToVDOM(ctx.v2);
+    vn1.children.push({type: 4, children: _6});
+}"
+`;
+
+exports[`t-set t-set with t-value (truthy) and body 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div>          <t t-set=\\"v3\\" t-value=\\"'Truthy'\\"/>          <t t-set=\\"v1\\" t-value=\\"'before'\\"/>    \`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx.v3 = 'Truthy';
+    ctx.v1 = 'before';
+    ctx.v2 = ctx['v3'];
+    if (!ctx.v2) {
+        let _2 = new this.VDomArray();
+        const vn3 = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        _2.push(vn3);
+        vn3.children.push({type: 1, text: ctx['v1'], el: null});
+        ctx.v2 = _2
+    }
+    ctx.v1 = 'after';
+    ctx.v3 = false;
+    let _6 = ctx.v2 instanceof this.VDomArray ? ctx.v2 : this.htmlToVDOM(ctx.v2);
+    vn1.children.push({type: 4, children: _6});
 }"
 `;
 

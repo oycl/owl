@@ -1,5 +1,5 @@
 import { CompiledTemplate, compileTemplate, RenderContext } from "./compiler";
-import { patch, NodeType, VNode } from "../vdom";
+import { patch, NodeType, VNode, htmlToVDOM } from "../vdom";
 import { VTree } from "../core";
 
 // -----------------------------------------------------------------------------
@@ -56,6 +56,7 @@ export const utils: any = {
     fn.call(utils, subtree, ctx);
     return subtree;
   },
+  htmlToVDOM,
 };
 
 export function getTemplateFn(template: string): CompiledTemplate {

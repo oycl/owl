@@ -28,6 +28,12 @@ export interface ASTEscNode {
   body: AST[];
 }
 
+export interface ASTRawNode {
+  type: "T-RAW";
+  expr: string;
+  body: AST[];
+}
+
 export interface ASTCommentNode {
   type: "COMMENT";
   text: string;
@@ -81,6 +87,7 @@ export type AST =
   | ASTDOMNode
   | ASTTextNode
   | ASTEscNode
+  | ASTRawNode
   | ASTSetNode
   | ASTCommentNode
   | ASTMultiNode
@@ -108,6 +115,7 @@ function parseNode(node: ChildNode): AST | null {
   return (
     parseTIfNode(node) ||
     parseTEscNode(node) ||
+    parseTRawNode(node) ||
     parseComponentNode(node) ||
     parseTSetNode(node) ||
     parseTCallNode(node) ||
@@ -197,22 +205,34 @@ function parseTIfNode(node: Element): ASTIfNode | null {
 }
 
 // -----------------------------------------------------------------------------
-// t-esc directive
+// t-esc and t-raw directive
 // -----------------------------------------------------------------------------
 
 function parseTEscNode(node: Element): AST | null {
-  if (!node.hasAttribute("t-esc")) {
+  return parseTEscRawNode(node, "t-esc");
+}
+
+function parseTRawNode(node: Element): AST | null {
+  return parseTEscRawNode(node, "t-raw");
+}
+
+function parseTEscRawNode(node: Element, attr: "t-esc" | "t-raw"): AST | null {
+  if (!node.hasAttribute(attr)) {
     return null;
   }
-  const expr = node.getAttribute("t-esc")!;
-  node.removeAttribute("t-esc");
+  const type = attr === "t-esc" ? "T-ESC" : "T-RAW";
+  const expr = node.getAttribute(attr)!;
+  node.removeAttribute(attr);
   const ast = parseNode(node);
   if (ast && ast.type === "DOM") {
     const body = ast.children;
-    ast.children = [{ type: "T-ESC", expr, body }];
+    ast.children = [{ type, expr, body }];
     return ast;
   }
-  return { type: "T-ESC", expr, body: [] };
+  if (ast && ast.type === "MULTI") {
+    return { type, expr, body: ast.children };
+  }
+  return { type, expr, body: ast ? [ast] : [] };
 }
 
 // -----------------------------------------------------------------------------
@@ -280,7 +300,7 @@ function parseChildren(node: Element): AST[] {
 // Regular dom node
 // -----------------------------------------------------------------------------
 
-function parseDOMNode(node: Element): AST {
+function parseDOMNode(node: Element): ASTDOMNode {
   const keyExpr = node.getAttribute("t-key");
   const key = keyExpr ? compileExpr(keyExpr, {}) : "1";
   node.removeAttribute("t-key");

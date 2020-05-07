@@ -8,6 +8,7 @@ import {
   VNode,
   VTextNode,
   VCommentNode,
+  htmlToVDOM,
 } from "../src/vdom";
 
 let nextId = 1;
@@ -365,5 +366,54 @@ describe("hooks", () => {
     expect(span).toBeDefined();
     expect(vnode.hooks.create).toHaveBeenCalledTimes(1);
     expect(vnode.hooks.create).toHaveBeenCalledWith(span);
+  });
+});
+
+//------------------------------------------------------------------------------
+// Html to vdom
+//------------------------------------------------------------------------------
+describe("html to vdom", function () {
+  // let elm, vnode0;
+  // beforeEach(function () {
+  //   elm = document.createElement("div");
+  //   vnode0 = elm;
+  // });
+
+  test("empty strings return empty list", function () {
+    expect(htmlToVDOM("")).toEqual([]);
+  });
+
+  test("just text", function () {
+    const nodeList = htmlToVDOM("simple text");
+    expect(nodeList).toEqual([{ type: NodeType.Text, text: "simple text", el: null }]);
+  });
+
+  test("empty tag", function () {
+    const nodeList = htmlToVDOM("<span></span>");
+    expect(nodeList).toHaveLength(1);
+
+    patch(fixture, nodeList[0]);
+    expect(fixture.innerHTML).toEqual("<span></span>");
+  });
+
+  test("tag with text", function () {
+    const nodeList = htmlToVDOM("<span>abc</span>");
+    expect(nodeList).toHaveLength(1);
+    patch(fixture, nodeList[0]);
+    expect(fixture.innerHTML).toEqual("<span>abc</span>");
+  });
+
+  test("tag with attribute", function () {
+    const nodeList = htmlToVDOM(`<span a="1" b="2">abc</span>`);
+    expect(nodeList).toHaveLength(1);
+    patch(fixture, nodeList[0]);
+    expect(fixture.innerHTML).toEqual(`<span a="1" b="2">abc</span>`);
+  });
+
+  test("misc", function () {
+    const nodeList = htmlToVDOM(`<span a="1" b="2">abc<div>1</div></span>`);
+    expect(nodeList).toHaveLength(1);
+    patch(fixture, nodeList[0]);
+    expect(fixture.innerHTML).toEqual(`<span a="1" b="2">abc<div>1</div></span>`);
   });
 });
