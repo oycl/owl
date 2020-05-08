@@ -38,7 +38,7 @@ export class Component<Props = any, Env = any> {
   env: Env;
 
   el: HTMLElement | Text | Comment | null = null;
-  __vtree: VTree | null = null;
+  __owl__: VTree | null = null;
 
   constructor(props: Props, env: Env) {
     this.props = props;
@@ -87,7 +87,7 @@ export async function mount(
     throw new Error(message);
   }
   if (elem instanceof Component) {
-    return scheduler.addFiber(elem.__vtree!.data.fiber).then(() => {
+    return scheduler.addFiber(elem.__owl__!.data.fiber).then(() => {
       target.appendChild(elem.el!);
       return elem;
     });
@@ -164,7 +164,7 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
     key: 1,
     hooks: {},
   };
-  c.__vtree = tree;
+  c.__owl__ = tree;
   tree.hooks.create = (el) => (c.el = el);
   new Promise((resolve) => {
     tree.data.templateFn.call(qwebUtils, tree, c);

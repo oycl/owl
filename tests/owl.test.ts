@@ -43,7 +43,7 @@ describe("mount", () => {
     };
 
     const mountResult = await mount(fixture, Test);
-    expect(mountResult).toBe(obj);
+    expect(mountResult.context).toBe(obj);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
   });
 
