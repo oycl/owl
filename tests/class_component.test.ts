@@ -1,5 +1,5 @@
-import { makeTestFixture } from "./helpers";
-import { Component, mount, xml } from "../src/index";
+import { makeTestFixture, nextTick } from "./helpers";
+import { Component, mount, xml, useState } from "../src/index";
 
 //------------------------------------------------------------------------------
 // Setup and helpers
@@ -183,24 +183,29 @@ describe("basic component properties", () => {
   //     }
   //   });
 
-  //   test("can be clicked on and updated", async () => {
-  //     class Counter extends Component {
-  //       static template = xml`
-  //       <div><t t-esc="state.counter"/><button t-on-click="state.counter++">Inc</button></div>`;
-  //       state = useState({
-  //         counter: 0,
-  //       });
-  //     }
+  test("can be clicked on and updated", async () => {
+    class Counter extends Component {
+      static template = xml`
+          <div>
+            <t t-esc="state.counter"/>
+            <button t-on-click="increment">Inc</button>
+          </div>`;
+      state = useState({
+        counter: 0,
+      });
 
-  //     const counter = new Counter();
-  //     counter.mount(fixture);
-  //     await nextTick();
-  //     expect(fixture.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //     const button = (<HTMLElement>counter.el).getElementsByTagName("button")[0];
-  //     button.click();
-  //     await nextTick();
-  //     expect(fixture.innerHTML).toBe("<div>1<button>Inc</button></div>");
-  //   });
+      increment() {
+        this.state.counter++;
+      }
+    }
+
+    await mount(fixture, Counter);
+
+    expect(fixture.innerHTML).toBe("<div>0<button>Inc</button></div>");
+    fixture.querySelector("button")!.click();
+    await nextTick();
+    expect(fixture.innerHTML).toBe("<div>1<button>Inc</button></div>");
+  });
 
   //   test("can handle empty props", async () => {
   //     class Child extends Component {

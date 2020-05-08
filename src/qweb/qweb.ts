@@ -1,4 +1,4 @@
-import { CompiledTemplate, compileTemplate, RenderContext } from "./compiler";
+import { CompiledTemplate, compileTemplate, RenderContext, handleEvent } from "./compiler";
 import { patch, NodeType, VNode, htmlToVDOM } from "../vdom";
 import { VTree } from "../component";
 
@@ -57,6 +57,7 @@ export const utils: any = {
     return subtree;
   },
   htmlToVDOM,
+  handleEvent,
 };
 
 export function getTemplateFn(template: string): CompiledTemplate {

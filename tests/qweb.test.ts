@@ -11,6 +11,7 @@ function render(template: string, context: any = {}): string {
 
 function renderToDOM(template: string, context: any = {}): HTMLDivElement {
   const fn = getTemplateFn(template);
+  expect(compiledTemplates[template].toString()).toMatchSnapshot();
   const tree: VTree = {
     type: NodeType.Data,
     data: {} as any,
@@ -1232,27 +1233,6 @@ describe("misc", () => {
 
     expect(render(parent)).toBe("<div>14x 15x 16x 24x 25x 26x 34x 35x 36x </div>");
   });
-  //   <templates>j
-  //   <!-- With t-call -->
-  //   <t t-name="called">
-  //     <t t-esc="a"/>
-  //     <t t-esc="b"/>
-  //     <t t-esc="c"/>
-  //   </t>
-  //   <!-- Without t-call -->
-  //   <t t-name="AppFlat">
-  //     <div>
-  //       <t t-foreach="[1, 2, 3]" t-as="a" t-key="a">
-  //         <t t-foreach="[4, 5, 6]" t-as="b" t-key="b">
-  //           <t t-set="c" t-value="'x '"/>
-  //           <t t-esc="a"/>
-  //           <t t-esc="b"/>
-  //           <t t-esc="c"/>
-  //         </t>
-  //       </t>
-  //     </div>
-  //   </t>
-  // </templates>
 });
 
 describe("t-on", () => {
@@ -1376,17 +1356,17 @@ describe("t-on", () => {
   //     (<HTMLElement>node).getElementsByTagName("a")[0].click();
   //   });
 
-  //   test("handler is bound to proper owner", () => {
-  //     expect.assertions(2);
-  //     const template = xml`<button t-on-click="add">Click</button>`;
-  //     let owner = {
-  //       add() {
-  //         expect(this).toBe(owner);
-  //       },
-  //     };
-  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-  //     (<HTMLElement>node).click();
-  //   });
+  test("handler is bound to proper owner", () => {
+    expect.assertions(2);
+    const template = xml`<button t-on-click="add">Click</button>`;
+    let context = {
+      add() {
+        expect(this).toBe(context);
+      },
+    };
+    const node = renderToDOM(template, context);
+    node.querySelector("button")!.click();
+  });
 
   //   test("t-on with inline statement", () => {
   //     const template = xml`<button t-on-click="state.counter++">Click</button>`;

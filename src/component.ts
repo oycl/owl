@@ -2,7 +2,7 @@ import { Fiber } from "./fiber";
 import { getTemplateFn, utils as qwebUtils } from "./qweb/qweb";
 import { CompiledTemplate, RenderContext } from "./qweb/compiler";
 import { scheduler } from "./scheduler";
-import { patch, VDataNode, NodeType } from "./vdom";
+import { patch, VDataNode, NodeType, update } from "./vdom";
 import { escape } from "./utils";
 
 // -----------------------------------------------------------------------------
@@ -31,6 +31,13 @@ export type VTree = VDataNode<ComponentData>;
 // -----------------------------------------------------------------------------
 // mount
 // -----------------------------------------------------------------------------
+interface SharedData {
+  currentVTree: VTree | null;
+}
+
+export const shared: SharedData = {
+  currentVTree: null,
+};
 
 export class Component<Props = any, Env = any> {
   static template: string;
@@ -147,14 +154,11 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
   if (!template) {
     throw new Error(`Component "${C.name}" does not have a template defined!`);
   }
-  const props = options.props || {};
-  const env = options.env || {};
-  const c = new C(props, env);
   const fiber = new Fiber(null);
   fiber.counter++;
   const data: ComponentData = {
     fiber,
-    context: c,
+    context: null,
     templateFn: getTemplateFn(template),
   };
   const tree: VTree = {
@@ -164,7 +168,12 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
     key: 1,
     hooks: {},
   };
+  const props = options.props || {};
+  const env = options.env || {};
+  shared.currentVTree = tree;
+  const c = new C(props, env);
   c.__owl__ = tree;
+  tree.data.context = c;
   tree.hooks.create = (el) => (c.el = el);
   new Promise((resolve) => {
     tree.data.templateFn.call(qwebUtils, tree, c);
@@ -182,6 +191,29 @@ qwebUtils.makeComponent = function (parent: VTree, name: string, context: Render
     return makeFnComponent(definition, {});
   }
 };
+
+// -----------------------------------------------------------------------------
+// render
+// -----------------------------------------------------------------------------
+
+export function render(tree: VTree): Promise<void> {
+  const fiber = new Fiber(null);
+  const newTree: VTree = Object.create(tree);
+  newTree.child = null;
+  newTree.data.fiber = fiber;
+  fiber.counter = 1;
+  new Promise((resolve) => {
+    tree.data.templateFn.call(qwebUtils, newTree, newTree.data.context);
+    fiber.counter--;
+    resolve();
+  });
+  return scheduler.addFiber(fiber).then(() => {
+    update(tree, newTree);
+  });
+}
+// -----------------------------------------------------------------------------
+// render to string
+// -----------------------------------------------------------------------------
 
 /**
  * Render a template to a html string.

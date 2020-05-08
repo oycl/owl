@@ -851,12 +851,44 @@ exports[`t-esc literal 1`] = `
 }"
 `;
 
+exports[`t-esc t-esc is escaped 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-set=\\"var\\"><p>escaped</p></t><t t-esc=\\"var\\"/></div>\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    let _2 = new this.VDomArray();
+    const vn3 = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    _2.push(vn3);
+    vn3.children.push({type: 1, text: \`escaped\`, el: null});
+    ctx.var = _2;
+    let _5 = this.vDomToString(ctx.var);
+    vn1.children.push({type: 1, text: _5, el: null});
+}"
+`;
+
 exports[`t-esc t-esc work with spread operator 1`] = `
 "function anonymous(tree, ctx
 ) {
     // Template: \`<span><t t-esc=\\"[...state.list]\\"/></span>\`
     const vn1 = tree.child = {type: 0, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
     vn1.children.push({type: 1, text: [...ctx['state'].list], el: null});
+}"
+`;
+
+exports[`t-esc t-esc=0 is escaped 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<div><t t-call=\\"__template__1\\"><p>escaped</p></t></div>\`
+    const vn1 = tree.child = {type: 0, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    ctx = Object.create(ctx);
+    const vn2 = {type: 4, children: []};
+    const vn3 = {type: 0, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    vn2.children.push(vn3);
+    vn3.children.push({type: 1, text: \`escaped\`, el: null});
+    ctx[this.zero] = vn2.children;
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
+    ctx = ctx.__proto__;
 }"
 `;
 
@@ -1096,6 +1128,36 @@ exports[`t-if t-set, then t-if, part 2 1`] = `
         vn1.children.push(vn2);
         vn2.children.push({type: 1, text: \`COUCOU\`, el: null});
     }
+}"
+`;
+
+exports[`t-on can bind event handler 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<button t-on-click=\\"add\\">Click</button>\`
+    const rootCtx = ctx;
+    const vn1 = tree.child = {type: 0, tag: \\"button\\", el: null, children: [], attrs: {}, key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['add'])}}};
+    vn1.children.push({type: 1, text: \`Click\`, el: null});
+}"
+`;
+
+exports[`t-on can bind two event handlers 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<button t-on-click=\\"handleClick\\" t-on-dblclick=\\"handleDblClick\\">Click</button>\`
+    const rootCtx = ctx;
+    const vn1 = tree.child = {type: 0, tag: \\"button\\", el: null, children: [], attrs: {}, key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['handleClick'])}, dblclick: {cb: ev => this.handleEvent(ev, rootCtx, ctx['handleDblClick'])}}};
+    vn1.children.push({type: 1, text: \`Click\`, el: null});
+}"
+`;
+
+exports[`t-on handler is bound to proper owner 1`] = `
+"function anonymous(tree, ctx
+) {
+    // Template: \`<button t-on-click=\\"add\\">Click</button>\`
+    const rootCtx = ctx;
+    const vn1 = tree.child = {type: 0, tag: \\"button\\", el: null, children: [], attrs: {}, key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['add'])}}};
+    vn1.children.push({type: 1, text: \`Click\`, el: null});
 }"
 `;
 

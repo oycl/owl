@@ -314,6 +314,26 @@ describe("update function", () => {
     expect(t2.textContent).toBe("def");
   });
 
+  test("from <div>1</div> to <div>2</div>", async () => {
+    const vnode1 = domNode("div", "k1", [textNode("1")]);
+    const vnode2 = domNode("div", "k1", [textNode("2")]);
+    patch(fixture, vnode1);
+    expect(fixture.innerHTML).toBe("<div>1</div>");
+
+    update(vnode1, vnode2);
+    expect(fixture.innerHTML).toBe("<div>2</div>");
+  });
+
+  test("from <div>1<p></p></div> to <div>2<p></p></div>", async () => {
+    const vnode1 = domNode("div", "k1", [textNode("1"), domNode("p", "k2", [])]);
+    const vnode2 = domNode("div", "k1", [textNode("2"), domNode("p", "k2", [])]);
+    patch(fixture, vnode1);
+    expect(fixture.innerHTML).toBe("<div>1<p></p></div>");
+
+    update(vnode1, vnode2);
+    expect(fixture.innerHTML).toBe("<div>2<p></p></div>");
+  });
+
   test("updating dom nodes with different keys", async () => {
     const vnode = domNode("div", []);
     patch(fixture, vnode);

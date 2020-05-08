@@ -21,6 +21,7 @@ interface CodeContext {
   nextId: number;
   indentLevel: number;
   shouldProtectContext: boolean;
+  shouldDefineRootContext: boolean;
   variables: { [name: string]: QWebVar };
 }
 
@@ -33,6 +34,7 @@ export function compileTemplate(name: string, template: string): CompiledTemplat
     nextId: 1,
     indentLevel: 0,
     shouldProtectContext: false,
+    shouldDefineRootContext: false,
     variables: {},
   };
   const descr = template.trim().slice(0, 100).replace(/`/g, "'").replace(/\n/g, "");
@@ -41,6 +43,9 @@ export function compileTemplate(name: string, template: string): CompiledTemplat
   generateCode(ast, ctx);
   if (ctx.shouldProtectContext) {
     ctx.code.splice(1, 0, `    ctx = Object.create(ctx);`);
+  }
+  if (ctx.shouldDefineRootContext) {
+    ctx.code.splice(1, 0, `    const rootCtx = ctx;`);
   }
   // console.warn(ctx.code.join("\n"));
   const fn = new Function("tree, ctx", ctx.code.join("\n")) as CompiledTemplate;
@@ -218,6 +223,10 @@ function addToAttrs(attrs: { [key: string]: string }, key: string, value: string
   attrs[key] = key in attrs ? attrs[key] + ' + " " + ' + value : value;
 }
 
+export function handleEvent(ev: Event, ctx: any, fn: any) {
+  fn.call(ctx, ev);
+}
+
 function compileDOMNode(ctx: CodeContext, ast: ASTDOMNode) {
   const attrs = {};
   for (let attr in ast.attrs) {
@@ -233,8 +242,11 @@ function compileDOMNode(ctx: CodeContext, ast: ASTDOMNode) {
   let handlers = "";
   if (Object.keys(ast.on).length) {
     let h: string[] = [];
+    ctx.shouldDefineRootContext = true;
     for (let ev in ast.on) {
-      h.push(`${ev}: {cb: ${compileExpr(ast.on[ev].expr, {})}}`);
+      const expr = compileExpr(ast.on[ev].expr, {});
+      const cb = `ev => this.handleEvent(ev, rootCtx, ${expr})`;
+      h.push(`${ev}: {cb: ${cb}}`);
     }
     handlers = `, on: {` + h.join(", ") + "}";
   }
