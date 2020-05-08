@@ -39,7 +39,7 @@ function domNode(
   key: string | number,
   children: VNode<any>[]
 ): VDOMNode<any>;
-function domNode(tag: string, arg2, arg3?, arg4?): VDOMNode<any> {
+function domNode(tag: string, arg2: any, arg3?: any, arg4?: any): VDOMNode<any> {
   let children: VNode<any>[];
   let attrs: Attrs;
   let key: string | number;

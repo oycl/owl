@@ -368,10 +368,10 @@ function parseXML(xml: string): Document {
   for (let i = 0, ilen = tbranch.length; i < ilen; i++) {
     let node = tbranch[i];
     let prevElem = node.previousElementSibling!;
-    let pattr = function (name) {
+    let pattr = function (name: string) {
       return prevElem.getAttribute(name);
     };
-    let nattr = function (name) {
+    let nattr = function (name: string) {
       return +!!node.getAttribute(name);
     };
     if (prevElem && (pattr("t-if") || pattr("t-elif"))) {
@@ -389,12 +389,12 @@ function parseXML(xml: string): Document {
       }
       // All text (with only spaces) and comment nodes (nodeType 8) between
       // branch nodes are removed
-      let textNode;
-      while ((textNode = node.previousSibling) !== prevElem) {
-        if (textNode.nodeValue.trim().length && textNode.nodeType !== 8) {
+      let textNode: any;
+      while ((textNode = node.previousSibling!) !== prevElem) {
+        if (textNode!.nodeValue!.trim().length && textNode!.nodeType !== 8) {
           throw new Error("text is not allowed between branching directives");
         }
-        textNode.remove();
+        textNode!.remove();
       }
     } else {
       throw new Error(

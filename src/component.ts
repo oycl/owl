@@ -203,9 +203,9 @@ export function renderToString(name: string, context: RenderContext = {}): strin
   const div = document.createElement("div");
   patch(div, tree);
 
-  function escapeTextNodes(node) {
+  function escapeTextNodes(node: Node) {
     if (node.nodeType === 3) {
-      node.textContent = escape(node.textContent);
+      node.textContent = escape(node.textContent!);
     }
     for (let n of node.childNodes) {
       escapeTextNodes(n);

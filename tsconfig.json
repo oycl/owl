@@ -2,19 +2,16 @@
   "compilerOptions": {
     "module": "commonjs",
     "preserveConstEnums": true,
-    "noImplicitThis": true,
     "removeComments": false,
     "declaration": true,
     "target": "esnext",
     "outDir": "dist",
-    "alwaysStrict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "strictPropertyInitialization": true,
-    "strictNullChecks": true,
-    "declarationDir": "dist/types"
+    "declarationDir": "dist/types",
+    "strict": true
   },
-  "include": ["src/**/*.ts","src/*.ts"]
+  "include": ["src/**/*.ts","src/*.ts", "tests/*.ts", "tests/**/*.ts"]
 }

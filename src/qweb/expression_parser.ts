@@ -38,6 +38,8 @@ const WORD_REPLACEMENT = {
   lte: "<=",
 };
 
+type WORDS = keyof typeof WORD_REPLACEMENT;
+
 export interface QWebVar {
   id: string; // foo
   expr: string; // scope.foo (local variables => only foo)
@@ -137,7 +139,7 @@ let tokenizeSymbol: Tokenizer = function (expr) {
       i++;
     }
     if (s in WORD_REPLACEMENT) {
-      return { type: "OPERATOR", value: WORD_REPLACEMENT[s], size: s.length };
+      return { type: "OPERATOR", value: WORD_REPLACEMENT[s as WORDS], size: s.length };
     }
     return { type: "SYMBOL", value: s };
   } else {

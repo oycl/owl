@@ -1,5 +1,5 @@
 import { makeTestFixture } from "./helpers";
-import { Component, mount, xml } from "../src";
+import { Component, mount, xml } from "../src/index";
 
 //------------------------------------------------------------------------------
 // Setup and helpers
@@ -98,7 +98,7 @@ describe("basic component properties", () => {
     expect.assertions(2);
     class Test extends Component {
       static template = xml`<div></div>`;
-      constructor(props, env) {
+      constructor(props: any, env: any) {
         super(props, env);
         expect(this.el).toBeNull();
       }

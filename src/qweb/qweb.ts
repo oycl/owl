@@ -16,7 +16,7 @@ export function addTemplate(name: string, template: string) {
   templateMap[name] = template;
 }
 
-export function xml(strings, ...args) {
+export function xml(strings: TemplateStringsArray, ...args: any[]) {
   const name = `__template__${nextId++}`;
   const value = String.raw(strings, ...args);
   addTemplate(name, value);

@@ -1,5 +1,5 @@
 import { makeTestFixture } from "./helpers";
-import { mount, xml } from "../src";
+import { mount, xml } from "../src/index";
 import { FunctionComponent } from "../src/component";
 
 //------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ describe("basic function component properties", () => {
     expect.assertions(1);
     const Test = {
       template: xml`<div></div>`,
-      setup(props) {
+      setup(props: any) {
         expect(props).toEqual({});
       },
     };
@@ -65,7 +65,7 @@ describe("basic function component properties", () => {
 
     const Test = {
       template: xml`<div></div>`,
-      setup(props, env) {
+      setup(props: any, env: any) {
         expect(env).toBe(env);
       },
     };
@@ -78,7 +78,7 @@ describe("basic function component properties", () => {
 
     const Test = {
       template: xml`<div></div>`,
-      setup(props) {
+      setup(props: any) {
         expect(props).toBe(p);
       },
     };
