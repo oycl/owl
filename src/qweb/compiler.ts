@@ -1,6 +1,6 @@
 import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode, ASTCallNode, ASTRawNode } from "./parser";
 import { NodeType } from "../vdom";
-import { VTree } from "../core";
+import { VTree } from "../component";
 import { compileExpr } from "./expression_parser";
 
 export interface RenderContext {

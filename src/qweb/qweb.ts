@@ -1,6 +1,6 @@
 import { CompiledTemplate, compileTemplate, RenderContext } from "./compiler";
 import { patch, NodeType, VNode, htmlToVDOM } from "../vdom";
-import { VTree } from "../core";
+import { VTree } from "../component";
 
 // -----------------------------------------------------------------------------
 // Global template Map
