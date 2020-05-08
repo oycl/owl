@@ -1,7 +1,6 @@
-import { makeTestFixture } from "./helpers";
-import { mount } from "../src/index";
-import { xml } from "../src/qweb/qweb";
-import { Component } from "../src/component";
+import { makeTestFixture } from "../helpers";
+import { mount, xml } from "../../src/index";
+import { Component } from "../../src/core/component";
 
 let fixture: HTMLElement;
 

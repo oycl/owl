@@ -9,7 +9,7 @@ import {
   VTextNode,
   VCommentNode,
   htmlToVDOM,
-} from "../src/vdom";
+} from "../../src/vdom/vdom";
 
 let nextId = 1;
 function textNode(text: any): VTextNode {

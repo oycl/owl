@@ -1,13 +1,12 @@
 import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode, ASTCallNode, ASTRawNode } from "./parser";
-import { NodeType } from "../vdom";
-import { VTree } from "../component";
+import { NodeType, VDataNode } from "../vdom/vdom";
 import { compileExpr } from "./expression_parser";
 
 export interface RenderContext {
   [key: string]: any;
 }
 
-export type CompiledTemplate = (this: any, tree: VTree, context: RenderContext) => void;
+export type CompiledTemplate = (this: any, tree: VDataNode<any>, context: RenderContext) => void;
 
 interface QWebVar {
   expr: string;

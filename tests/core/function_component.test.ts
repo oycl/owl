@@ -1,5 +1,6 @@
-import { makeTestFixture, nextTick } from "./helpers";
-import { Component, mount, xml, useState } from "../src/index";
+import { makeTestFixture } from "../helpers";
+import { mount, xml } from "../../src/index";
+import { FunctionComponent } from "../../src/core/rendering_engine";
 
 //------------------------------------------------------------------------------
 // Setup and helpers
@@ -19,145 +20,122 @@ afterEach(() => {
 // Tests
 //------------------------------------------------------------------------------
 
-describe("basic component properties", () => {
-  test("mounting a Component without template throw errors (*)", async () => {
+describe("basic function component properties", () => {
+  test("mounting a function Component without template throw errors (*)", async () => {
     let e: Error | null = null;
+    const Test = {};
     try {
-      await mount(fixture, Component);
-    } catch (error) {
-      e = error;
-    }
-    expect(e).toBeDefined();
-    expect(e!.message).toBe('Component "Component" does not have a template defined!');
-  });
-
-  test("mounting a sub Component without template throw error (*)", async () => {
-    class D extends Component {}
-    let e: Error | null = null;
-    try {
-      await mount(fixture, D);
-    } catch (error) {
-      e = error;
-    }
-    expect(e).toBeDefined();
-    expect(e!.message).toBe('Component "D" does not have a template defined!');
-  });
-
-  test("mounting a component  with a static template key not registered (*)", async () => {
-    class D extends Component {
-      static template = `<div>abc</div>`;
-    }
-
-    let e: Error | null = null;
-    try {
-      await mount(fixture, D);
+      await mount(fixture, Test as any);
     } catch (error) {
       e = error;
     }
     expect(e).toBeDefined();
     expect(e!.message).toBe(
-      'Cannot find template with name "<div>abc</div>". Maybe you should register it with "xml" helper.'
+      'Component "Anonymous Function Component" does not have a template defined!'
     );
   });
 
-  test("props is set on root components", async () => {
-    class Test extends Component {
-      static template = xml`<div></div>`;
-    }
-    const component = await mount(fixture, Test);
-    expect(component.props).toEqual({});
+  test("props is received in setup function", async () => {
+    expect.assertions(1);
+    const Test = {
+      template: xml`<div></div>`,
+      setup(props: any) {
+        expect(props).toEqual({});
+      },
+    };
+
+    await mount(fixture, Test);
   });
 
   test("env is set on root component (*)", async () => {
-    class Test extends Component {
-      static template = xml`<div></div>`;
-    }
-    const component = await mount(fixture, Test);
-    expect(component.env).toEqual({});
+    expect.assertions(1);
+
+    const Test: FunctionComponent = {
+      template: xml`<div></div>`,
+      setup(props, env) {
+        expect(env).toEqual({});
+      },
+    };
+    await mount(fixture, Test);
   });
 
   test("env is set on root component (*)", async () => {
-    class Test extends Component {
-      static template = xml`<div></div>`;
-    }
+    expect.assertions(1);
     const env = { a: 1 };
-    const component = await mount(fixture, Test, { env });
-    expect(component.env).toEqual(env);
+
+    const Test = {
+      template: xml`<div></div>`,
+      setup(props: any, env: any) {
+        expect(env).toBe(env);
+      },
+    };
+    await mount(fixture, Test, { env });
   });
 
   test("can give props to component with mount method", async () => {
-    class Test extends Component {
-      static template = xml`<div></div>`;
-    }
+    expect.assertions(1);
     const p = { a: 1 };
-    const component = await mount(fixture, Test, { props: p });
-    expect(component.props).toBe(p);
-  });
 
-  test("has no el after creation", async () => {
-    expect.assertions(2);
-    class Test extends Component {
-      static template = xml`<div></div>`;
-      constructor(props: any, env: any) {
-        super(props, env);
-        expect(this.el).toBeNull();
-      }
-    }
-    const component = await mount(fixture, Test);
-    expect(component.el).not.toBe(null);
+    const Test = {
+      template: xml`<div></div>`,
+      setup(props: any) {
+        expect(props).toBe(p);
+      },
+    };
+
+    await mount(fixture, Test, { props: p });
   });
 
   test("can be mounted in a div", async () => {
-    class SomeWidget extends Component {
-      static template = xml`<div>content</div>`;
-    }
-    await mount(fixture, SomeWidget);
+    const Test = {
+      template: xml`<div>content</div>`,
+    };
+    await mount(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>content</div>");
   });
 
   test("can be mounted on a documentFragment, then mounted in a div", async () => {
-    class SomeWidget extends Component {
-      static template = xml`<div>content</div>`;
-    }
+    const Test = {
+      template: xml`<div>content</div>`,
+    };
     const fragment = document.createDocumentFragment();
-    const comp = await mount(fragment, SomeWidget);
+    const fn = await mount(fragment, Test);
     expect(fixture.innerHTML).toBe("");
-    const result = await mount(fixture, comp);
+    await mount(fixture, fn);
     expect(fixture.innerHTML).toBe("<div>content</div>");
-    expect(result).toBe(comp);
   });
 
-  test("display a nice message if mounted on a non existing node", async () => {
-    class SomeWidget extends Component {
-      static template = xml`<div>content</div>`;
-    }
-    let error;
-    try {
-      await mount(null as any, SomeWidget);
-    } catch (e) {
-      error = e;
-    }
-    expect(error).toBeDefined();
-    expect(error.message).toBe(
-      "Component 'SomeWidget' cannot be mounted: the target is not a valid DOM node.\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)"
-    );
-  });
+  //   test("display a nice message if mounted on a non existing node", async () => {
+  //     class SomeWidget extends Component {
+  //       static template = xml`<div>content</div>`;
+  //     }
+  //     let error;
+  //     try {
+  //       await mount(null as any, SomeWidget);
+  //     } catch (e) {
+  //       error = e;
+  //     }
+  //     expect(error).toBeDefined();
+  //     expect(error.message).toBe(
+  //       "Component 'SomeWidget' cannot be mounted: the target is not a valid DOM node.\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)"
+  //     );
+  //   });
 
-  test("display a nice message if mounted on an invalid node (*)", async () => {
-    class SomeWidget extends Component {
-      static template = xml`<div>content</div>`;
-    }
-    let error;
-    try {
-      await mount({} as any, SomeWidget);
-    } catch (e) {
-      error = e;
-    }
-    expect(error).toBeDefined();
-    expect(error.message).toBe(
-      "Component 'SomeWidget' cannot be mounted: the target is not a valid DOM node.\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)"
-    );
-  });
+  //   test("display a nice message if mounted on an invalid node (*)", async () => {
+  //     class SomeWidget extends Component {
+  //       static template = xml`<div>content</div>`;
+  //     }
+  //     let error;
+  //     try {
+  //       await mount({} as any, SomeWidget);
+  //     } catch (e) {
+  //       error = e;
+  //     }
+  //     expect(error).toBeDefined();
+  //     expect(error.message).toBe(
+  //       "Component 'SomeWidget' cannot be mounted: the target is not a valid DOM node.\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)"
+  //     );
+  //   });
 
   // test("display an error message if result of rendering is empty", async () => {
   //   class SomeWidget extends Component {
@@ -183,29 +161,24 @@ describe("basic component properties", () => {
   //     }
   //   });
 
-  test("can be clicked on and updated", async () => {
-    class Counter extends Component {
-      static template = xml`
-          <div>
-            <t t-esc="state.counter"/>
-            <button t-on-click="increment">Inc</button>
-          </div>`;
-      state = useState({
-        counter: 0,
-      });
+  //   test("can be clicked on and updated", async () => {
+  //     class Counter extends Component {
+  //       static template = xml`
+  //       <div><t t-esc="state.counter"/><button t-on-click="state.counter++">Inc</button></div>`;
+  //       state = useState({
+  //         counter: 0,
+  //       });
+  //     }
 
-      increment() {
-        this.state.counter++;
-      }
-    }
-
-    await mount(fixture, Counter);
-
-    expect(fixture.innerHTML).toBe("<div>0<button>Inc</button></div>");
-    fixture.querySelector("button")!.click();
-    await nextTick();
-    expect(fixture.innerHTML).toBe("<div>1<button>Inc</button></div>");
-  });
+  //     const counter = new Counter();
+  //     counter.mount(fixture);
+  //     await nextTick();
+  //     expect(fixture.innerHTML).toBe("<div>0<button>Inc</button></div>");
+  //     const button = (<HTMLElement>counter.el).getElementsByTagName("button")[0];
+  //     button.click();
+  //     await nextTick();
+  //     expect(fixture.innerHTML).toBe("<div>1<button>Inc</button></div>");
+  //   });
 
   //   test("can handle empty props", async () => {
   //     class Child extends Component {

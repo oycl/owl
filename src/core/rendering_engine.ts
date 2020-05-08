@@ -1,9 +1,11 @@
 import { Fiber } from "./fiber";
-import { getTemplateFn, utils as qwebUtils } from "./qweb/qweb";
-import { CompiledTemplate, RenderContext } from "./qweb/compiler";
+import { qweb } from "../qweb/qweb";
+import { CompiledTemplate, RenderContext } from "../qweb/compiler";
 import { scheduler } from "./scheduler";
-import { patch, VDataNode, NodeType, update } from "./vdom";
-import { escape } from "./utils";
+import { patch, VDataNode, NodeType, update } from "../vdom/vdom";
+import { Component } from "./component";
+
+const { utils: qwebUtils, getTemplateFn } = qweb;
 
 // -----------------------------------------------------------------------------
 // Types
@@ -14,6 +16,8 @@ export interface FunctionComponent {
   name?: string;
   setup?: (props: any, env: any) => any | void | Promise<any | void>;
 }
+
+export type ClassComponent = typeof Component;
 
 export interface ComponentData {
   fiber: Fiber;
@@ -28,63 +32,37 @@ export interface FnInstance {
 
 export type VTree = VDataNode<ComponentData>;
 
-// -----------------------------------------------------------------------------
-// mount
-// -----------------------------------------------------------------------------
-interface SharedData {
-  currentVTree: VTree | null;
-}
-
-export const shared: SharedData = {
-  currentVTree: null,
-};
-
-export class Component<Props = any, Env = any> {
-  static template: string;
-  props: Props;
-  env: Env;
-
-  el: HTMLElement | Text | Comment | null = null;
-  __owl__: VTree | null = null;
-
-  constructor(props: Props, env: Env) {
-    this.props = props;
-    this.env = env;
-  }
-}
-
 type MountTarget = HTMLElement | DocumentFragment;
 
-interface MountOptions {
+export interface MountOptions {
   props?: Object;
   env?: Object;
 }
 
-export function mount(
-  target: MountTarget,
-  fn: FunctionComponent,
-  options?: MountOptions
-): Promise<FnInstance>;
-export function mount<C extends typeof Component>(
-  target: MountTarget,
-  Comp: C,
-  options?: MountOptions
-): Promise<InstanceType<C>>;
-export function mount(
-  target: MountTarget,
-  comp: Component,
-  options?: MountOptions
-): Promise<Component>;
-export function mount(
-  target: MountTarget,
-  fn: FnInstance,
-  options?: MountOptions
-): Promise<FnInstance>;
-export async function mount(
-  target: MountTarget,
-  elem: any,
-  options: MountOptions = {}
-): Promise<any> {
+interface OwlEngine {
+  currentVTree: VTree | null;
+  // prettier-ignore
+  mount<C extends ClassComponent>(target: MountTarget,Comp: C,options?: MountOptions): Promise<InstanceType<C>>;
+  mount(target: MountTarget, fn: FunctionComponent, options?: MountOptions): Promise<FnInstance>;
+  mount(target: MountTarget, comp: Component, options?: MountOptions): Promise<Component>;
+  mount(target: MountTarget, fn: FnInstance, options?: MountOptions): Promise<FnInstance>;
+
+  render(tree: VTree): Promise<void>;
+}
+
+// -----------------------------------------------------------------------------
+// Main owl engine
+// -----------------------------------------------------------------------------
+export const engine: OwlEngine = {
+  currentVTree: null,
+  mount,
+  render,
+};
+
+// -----------------------------------------------------------------------------
+// Mount
+// -----------------------------------------------------------------------------
+async function mount(target: MountTarget, elem: any, options: MountOptions = {}): Promise<any> {
   let tree: VTree;
   let result: any = null;
   if (!(target instanceof HTMLElement || target instanceof DocumentFragment)) {
@@ -170,7 +148,7 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
   };
   const props = options.props || {};
   const env = options.env || {};
-  shared.currentVTree = tree;
+  engine.currentVTree = tree;
   const c = new C(props, env);
   c.__owl__ = tree;
   tree.data.context = c;
@@ -184,9 +162,10 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
 }
 
 qwebUtils.makeComponent = function (parent: VTree, name: string, context: RenderContext): VTree {
-  const definition = context[name];
-  if (definition instanceof Component) {
-    throw new Error("not done yet");
+  // todo: find a better way!!!! parent.data.context. ....
+  const definition = context[name] || parent.data.context.constructor.components[name];
+  if (definition.prototype instanceof Component) {
+    return makeClassComponent(definition, {});
   } else {
     return makeFnComponent(definition, {});
   }
@@ -196,7 +175,7 @@ qwebUtils.makeComponent = function (parent: VTree, name: string, context: Render
 // render
 // -----------------------------------------------------------------------------
 
-export function render(tree: VTree): Promise<void> {
+function render(tree: VTree): Promise<void> {
   const fiber = new Fiber(null);
   const newTree: VTree = Object.create(tree);
   newTree.child = null;
@@ -210,39 +189,4 @@ export function render(tree: VTree): Promise<void> {
   return scheduler.addFiber(fiber).then(() => {
     update(tree, newTree);
   });
-}
-// -----------------------------------------------------------------------------
-// render to string
-// -----------------------------------------------------------------------------
-
-/**
- * Render a template to a html string.
- *
- * Note that this is more limited than the `render` method: it is not suitable
- * to render a full component tree, since this is an asynchronous operation.
- * This method can only render templates without components.
- */
-export function renderToString(name: string, context: RenderContext = {}): string {
-  const fn = getTemplateFn(name);
-  const tree: VTree = {
-    type: NodeType.Data,
-    data: {} as any,
-    child: null,
-    key: 1,
-    hooks: {},
-  };
-  fn.call(qwebUtils, tree, context);
-  const div = document.createElement("div");
-  patch(div, tree);
-
-  function escapeTextNodes(node: Node) {
-    if (node.nodeType === 3) {
-      node.textContent = escape(node.textContent!);
-    }
-    for (let n of node.childNodes) {
-      escapeTextNodes(n);
-    }
-  }
-  escapeTextNodes(div);
-  return div.innerHTML;
 }

@@ -1,3 +1,9 @@
+// modifies scheduler to make it faster to test components
+window.requestAnimationFrame = function (callback: FrameRequestCallback) {
+  setTimeout(callback, 1);
+  return 1;
+};
+
 export function makeTestFixture() {
   let fixture = document.createElement("div");
   document.body.appendChild(fixture);

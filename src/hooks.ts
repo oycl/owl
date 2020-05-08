@@ -1,8 +1,7 @@
 import { reactive } from "./reactive";
-import { shared } from "./component";
-import { render } from "./component";
+import { engine } from "./core/rendering_engine";
 
 export function useState<T>(state: T): T {
-  let root = shared.currentVTree!;
-  return reactive(state, () => render(root));
+  let root = engine.currentVTree!;
+  return reactive(state, () => engine.render(root));
 }

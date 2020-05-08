@@ -1,17 +1,17 @@
-import { renderToString, xml } from "../src/index";
-import { compiledTemplates, getTemplateFn, clearQWeb, addTemplate, utils } from "../src/qweb/qweb";
-import { NodeType, patch } from "../src/vdom";
-import { VTree } from "../src/component";
+import { renderToString, xml } from "../../src/index";
+import { qweb } from "../../src/qweb/qweb";
+import { NodeType, patch } from "../../src/vdom/vdom";
+import { VTree } from "../../src/core/rendering_engine";
 
 function render(template: string, context: any = {}): string {
   const str = renderToString(template, context);
-  expect(compiledTemplates[template].toString()).toMatchSnapshot();
+  expect(qweb.compiledTemplates[template].toString()).toMatchSnapshot();
   return str;
 }
 
 function renderToDOM(template: string, context: any = {}): HTMLDivElement {
-  const fn = getTemplateFn(template);
-  expect(compiledTemplates[template].toString()).toMatchSnapshot();
+  const fn = qweb.getTemplateFn(template);
+  expect(qweb.compiledTemplates[template].toString()).toMatchSnapshot();
   const tree: VTree = {
     type: NodeType.Data,
     data: {} as any,
@@ -19,14 +19,16 @@ function renderToDOM(template: string, context: any = {}): HTMLDivElement {
     key: 1,
     hooks: {},
   };
-  fn.call(utils, tree, context);
+  fn.call(qweb.utils, tree, context);
   const div = document.createElement("div");
   patch(div, tree);
   return div;
 }
 
 beforeEach(() => {
-  clearQWeb();
+  qweb.nextId = 1;
+  qweb.compiledTemplates = {};
+  qweb.templateMap = {};
 });
 //------------------------------------------------------------------------------
 // Tests
@@ -872,7 +874,7 @@ describe("t-call (template calling", () => {
   });
 
   test("recursive template, part 1", () => {
-    addTemplate(
+    qweb.addTemplate(
       "recursive",
       `
         <div>
@@ -887,7 +889,7 @@ describe("t-call (template calling", () => {
   });
 
   test("recursive template, part 2", () => {
-    addTemplate(
+    qweb.addTemplate(
       "Parent",
       `
       <div>
@@ -897,7 +899,7 @@ describe("t-call (template calling", () => {
       </div>`
     );
 
-    addTemplate(
+    qweb.addTemplate(
       "nodeTemplate",
       `
         <div>
@@ -915,7 +917,7 @@ describe("t-call (template calling", () => {
   });
 
   test("recursive template, part 3", () => {
-    addTemplate(
+    qweb.addTemplate(
       "Parent",
       `
           <div>
@@ -924,7 +926,7 @@ describe("t-call (template calling", () => {
             </t>
           </div>`
     );
-    addTemplate(
+    qweb.addTemplate(
       "nodeTemplate",
       `
           <div>
@@ -943,7 +945,7 @@ describe("t-call (template calling", () => {
   });
 
   test("recursive template, part 4: with t-set recursive index", () => {
-    addTemplate(
+    qweb.addTemplate(
       "Parent",
       `
           <div>
@@ -953,7 +955,7 @@ describe("t-call (template calling", () => {
             </t>
           </div>`
     );
-    addTemplate(
+    qweb.addTemplate(
       "nodeTemplate",
       `
           <div>
