@@ -68,6 +68,23 @@ describe("basic component properties", () => {
     expect(component.props).toEqual({});
   });
 
+  test("env is set on root component (*)", async () => {
+    class Test extends Component {
+      static template = xml`<div></div>`;
+    }
+    const component = await mount(fixture, Test);
+    expect(component.env).toEqual({});
+  });
+
+  test("env is set on root component (*)", async () => {
+    class Test extends Component {
+      static template = xml`<div></div>`;
+    }
+    const env = { a: 1 };
+    const component = await mount(fixture, Test, { env });
+    expect(component.env).toEqual(env);
+  });
+
   test("can give props to component with mount method", async () => {
     class Test extends Component {
       static template = xml`<div></div>`;
@@ -81,8 +98,8 @@ describe("basic component properties", () => {
     expect.assertions(2);
     class Test extends Component {
       static template = xml`<div></div>`;
-      constructor(props) {
-        super(props);
+      constructor(props, env) {
+        super(props, env);
         expect(this.el).toBeNull();
       }
     }

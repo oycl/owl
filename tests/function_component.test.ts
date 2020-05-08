@@ -1,5 +1,6 @@
 import { makeTestFixture } from "./helpers";
 import { mount, xml } from "../src";
+import { FunctionComponent } from "../src/component";
 
 //------------------------------------------------------------------------------
 // Setup and helpers
@@ -44,6 +45,31 @@ describe("basic function component properties", () => {
     };
 
     await mount(fixture, Test);
+  });
+
+  test("env is set on root component (*)", async () => {
+    expect.assertions(1);
+
+    const Test: FunctionComponent = {
+      template: xml`<div></div>`,
+      setup(props, env) {
+        expect(env).toEqual({});
+      },
+    };
+    await mount(fixture, Test);
+  });
+
+  test("env is set on root component (*)", async () => {
+    expect.assertions(1);
+    const env = { a: 1 };
+
+    const Test = {
+      template: xml`<div></div>`,
+      setup(props, env) {
+        expect(env).toBe(env);
+      },
+    };
+    await mount(fixture, Test, { env });
   });
 
   test("can give props to component with mount method", async () => {

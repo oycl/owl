@@ -9,10 +9,10 @@ import { escape } from "./utils";
 // Types
 // -----------------------------------------------------------------------------
 
-interface FunctionComponent {
+export interface FunctionComponent {
   template: string;
   name?: string;
-  setup?: (props: any) => any | void | Promise<any | void>;
+  setup?: (props: any, env: any) => any | void | Promise<any | void>;
 }
 
 export interface ComponentData {
@@ -35,12 +35,14 @@ export type VTree = VDataNode<ComponentData>;
 export class Component<Props = any, Env = any> {
   static template: string;
   props: Props;
+  env: Env;
 
   el: HTMLElement | Text | Comment | null = null;
   __vtree: VTree | null = null;
 
-  constructor(props: Props) {
+  constructor(props: Props, env: Env) {
     this.props = props;
+    this.env = env;
   }
 }
 
@@ -48,6 +50,7 @@ type MountTarget = HTMLElement | DocumentFragment;
 
 interface MountOptions {
   props?: Object;
+  env?: Object;
 }
 
 export function mount(
@@ -117,7 +120,8 @@ function makeFnComponent(fn: FunctionComponent, options: MountOptions): VTree {
   const fiber = new Fiber(null);
   fiber.counter++;
   const props = options.props || {};
-  const context = fn.setup ? fn.setup(props) : {};
+  const env = options.env || {};
+  const context = fn.setup ? fn.setup(props, env) : {};
   const data: ComponentData = {
     fiber,
     context,
@@ -144,7 +148,8 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
     throw new Error(`Component "${C.name}" does not have a template defined!`);
   }
   const props = options.props || {};
-  const c = new C(props);
+  const env = options.env || {};
+  const c = new C(props, env);
   const fiber = new Fiber(null);
   fiber.counter++;
   const data: ComponentData = {
