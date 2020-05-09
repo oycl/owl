@@ -13,15 +13,19 @@ const { utils: qwebUtils, getTemplateFn } = qweb;
 
 export interface FunctionComponent {
   template: string;
+  components?: { [key: string]: OwlComponent };
   name?: string;
   setup?: (props: any, env: any) => any | void | Promise<any | void>;
 }
 
 export type ClassComponent = typeof Component;
 
+export type OwlComponent = FunctionComponent | ClassComponent;
+
 export interface ComponentData {
   fiber: Fiber;
   templateFn: CompiledTemplate;
+  components: { [key: string]: OwlComponent };
   context: any;
 }
 
@@ -111,6 +115,7 @@ function makeFnComponent(fn: FunctionComponent, options: MountOptions): VTree {
     fiber,
     context,
     templateFn: getTemplateFn(fn.template),
+    components: fn.components || {},
   };
   const tree: VTree = {
     type: NodeType.Data,
@@ -138,6 +143,7 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
     fiber,
     context: null,
     templateFn: getTemplateFn(template),
+    components: C.components || {},
   };
   const tree: VTree = {
     type: NodeType.Data,
@@ -163,7 +169,7 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
 
 qwebUtils.makeComponent = function (parent: VTree, name: string, context: RenderContext): VTree {
   // todo: find a better way!!!! parent.data.context. ....
-  const definition = context[name] || parent.data.context.constructor.components[name];
+  const definition = context[name] || parent.data.components[name];
   if (definition.prototype instanceof Component) {
     return makeClassComponent(definition, {});
   } else {

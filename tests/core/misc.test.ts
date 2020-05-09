@@ -133,6 +133,19 @@ describe("mount", () => {
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
+  test("a functional component inside another, alternate definition", async () => {
+    const Child = {
+      template: xml`<div>simple vnode</div>`,
+    };
+    const Parent = {
+      template: xml`<span><Child/></span>`,
+      components: { Child },
+    };
+
+    await mount(fixture, Parent);
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
+
   test("a class component inside a function component", async () => {
     class Child extends Component {
       static template = xml`<div>simple vnode</div>`;
@@ -143,6 +156,19 @@ describe("mount", () => {
       setup() {
         return { Child };
       },
+    };
+    await mount(fixture, Parent);
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
+
+  test("a class component inside a function component, alternate definition", async () => {
+    class Child extends Component {
+      static template = xml`<div>simple vnode</div>`;
+    }
+
+    const Parent = {
+      template: xml`<span><Child/></span>`,
+      components: { Child },
     };
     await mount(fixture, Parent);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
@@ -162,6 +188,20 @@ describe("mount", () => {
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
+  test("a function component inside a class component, alternate definition", async () => {
+    const Child = {
+      template: xml`<div>simple vnode</div>`,
+    };
+
+    class Parent extends Component {
+      static template = xml`<span><Child/></span>`;
+      static components = { Child };
+    }
+
+    await mount(fixture, Parent);
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
+
   test("a class component inside a class component", async () => {
     class Child extends Component {
       static template = xml`<div>simple vnode</div>`;
@@ -170,6 +210,20 @@ describe("mount", () => {
     class Parent extends Component {
       static template = xml`<span><Child/></span>`;
       Child = Child;
+    }
+
+    await mount(fixture, Parent);
+    expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
+  });
+
+  test("a class component inside a class component, alternate definition", async () => {
+    class Child extends Component {
+      static template = xml`<div>simple vnode</div>`;
+    }
+
+    class Parent extends Component {
+      static template = xml`<span><Child/></span>`;
+      static components = { Child };
     }
 
     await mount(fixture, Parent);

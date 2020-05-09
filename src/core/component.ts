@@ -1,7 +1,8 @@
-import { VTree } from "./rendering_engine";
+import { VTree, OwlComponent } from "./rendering_engine";
 
 export class Component<Props = any, Env = any> {
   static template: string;
+  static components: { [key: string]: OwlComponent } = {};
   props: Props;
   env: Env;
 
