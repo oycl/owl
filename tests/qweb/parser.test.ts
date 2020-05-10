@@ -1,4 +1,4 @@
-import { parse, AST } from "../../src/qweb/parser";
+import { parse, AST, ASTDOMNode } from "../../src/qweb/parser";
 
 function structure(node: AST): any {
   switch (node.type) {
@@ -189,10 +189,25 @@ describe("qweb parser", () => {
   });
 
   test("dom node with dynamic attribute", () => {
-    const ast = parse(`<div t-att-foo="'bar'"/>`);
+    const ast = parse(`<div t-att-foo="'bar'"/>`) as ASTDOMNode;
     expect(structure(ast)).toEqual({
       type: "DOM",
       children: [],
     });
+    expect(ast.attrs).toEqual({ "t-att-foo": "'bar'" });
+  });
+
+  test("dom node with class attribute", () => {
+    const ast = parse(`<div class="abc"><t t-esc="hey"/></div>`) as ASTDOMNode;
+    expect(ast.attrs).toEqual({ class: "abc" });
+    expect(ast.attClass).toEqual("");
+    expect(ast.attfClass).toEqual("");
+  });
+
+  test("dom node with class and t-att-class attribute", () => {
+    const ast = parse(`<div class="abc" t-att-class="d"><t t-esc="hey"/></div>`) as ASTDOMNode;
+    expect(ast.attrs).toEqual({ class: "abc" });
+    expect(ast.attClass).toEqual("d");
+    expect(ast.attfClass).toEqual("");
   });
 });

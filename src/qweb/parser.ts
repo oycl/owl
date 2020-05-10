@@ -15,6 +15,8 @@ export interface ASTDOMNode {
   key: string | number;
   attrs: { [name: string]: string };
   on: { [event: string]: Handler };
+  attClass?: string;
+  attfClass?: string;
 }
 
 export interface ASTStaticNode {
@@ -338,6 +340,8 @@ function parseDOMNode(ctx: ParserContext, node: Element): ASTDOMNode | ASTStatic
   }
   const attributes = (<Element>node).attributes;
   const handlers: ASTDOMNode["on"] = {};
+  let attClass = "";
+  let attfClass = "";
 
   const attrs: { [name: string]: string } = {};
   for (let i = 0; i < attributes.length; i++) {
@@ -349,7 +353,11 @@ function parseDOMNode(ctx: ParserContext, node: Element): ASTDOMNode | ASTStatic
     if (attrName.startsWith("t-on-")) {
       handlers[attrName.slice(5)] = { expr: attrValue };
     } else if (attrValue) {
-      attrs[attrName] = attrValue;
+      if (attrName === "t-att-class") {
+        attClass = attrValue;
+      } else {
+        attrs[attrName] = attrValue;
+      }
     }
   }
   if (!isStatic) {
@@ -364,6 +372,8 @@ function parseDOMNode(ctx: ParserContext, node: Element): ASTDOMNode | ASTStatic
     key,
     attrs,
     on: handlers,
+    attClass,
+    attfClass,
   };
   if (subContext.isStatic && !ctx.isStatic) {
     return {

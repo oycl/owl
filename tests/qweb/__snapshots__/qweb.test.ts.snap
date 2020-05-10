@@ -3,94 +3,89 @@
 exports[`attributes class and t-att-class should combine together 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-att-class=\\"value\\" class=\\"hello\\" />\`
-    let _1 = ctx['value']
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {class:_1 + \\" \\" + \\"hello\\"}, key: 1};
+    // Template: \`__template__1\`
+    tree.child = {type: 2, tag: \\"div\\", children: [], attrs: {class:\\"hello\\"}, key: 1, class: this.toClassObj(ctx['value'])};
 }"
 `;
 
 exports[`attributes dynamic attribute falsy variable  1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-att-foo=\\"value\\"/>\`
+    // Template: \`__template__1\`
     let _1 = ctx['value']
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {foo:_1}, key: 1};
+    tree.child = {type: 2, tag: \\"div\\", children: [], attrs: {foo:_1}, key: 1};
 }"
 `;
 
 exports[`attributes dynamic attribute with a dash 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-att-data-action-id=\\"id\\"/>\`
+    // Template: \`__template__1\`
     let _1 = ctx['id']
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {\\"data-action-id\\":_1}, key: 1};
+    tree.child = {type: 2, tag: \\"div\\", children: [], attrs: {\\"data-action-id\\":_1}, key: 1};
 }"
 `;
 
 exports[`attributes dynamic attributes 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-att-foo=\\"'bar'\\"/>\`
+    // Template: \`__template__1\`
     let _1 = 'bar'
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {foo:_1}, key: 1};
+    tree.child = {type: 2, tag: \\"div\\", children: [], attrs: {foo:_1}, key: 1};
 }"
 `;
 
 exports[`attributes dynamic class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-att-class=\\"c\\"/>\`
-    let _1 = ctx['c']
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {class:_1}, key: 1};
+    // Template: \`__template__1\`
+    tree.child = {type: 2, tag: \\"div\\", children: [], key: 1, class: this.toClassObj(ctx['c'])};
 }"
 `;
 
 exports[`attributes dynamic empty class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-att-class=\\"c\\"/>\`
-    let _1 = ctx['c']
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {class:_1}, key: 1};
+    // Template: \`__template__1\`
+    tree.child = {type: 2, tag: \\"div\\", children: [], key: 1, class: this.toClassObj(ctx['c'])};
 }"
 `;
 
 exports[`attributes fixed variable 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-att-foo=\\"value\\"/>\`
+    // Template: \`__template__1\`
     let _1 = ctx['value']
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {foo:_1}, key: 1};
+    tree.child = {type: 2, tag: \\"div\\", children: [], attrs: {foo:_1}, key: 1};
 }"
 `;
 
 exports[`attributes from object variables set previously 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"o\\" t-value=\\"{a:'b'}\\"/><span t-att-class=\\"o.a\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.o = {a:'b'};
-    let _2 = ctx['o'].a
-    vn1.children.push({type: 2, tag: \\"span\\", el: null, children: [], attrs: {class:_2}, key: 1});
+    vn1.children.push({type: 2, tag: \\"span\\", children: [], key: 1, class: this.toClassObj(ctx['o'].a)});
 }"
 `;
 
 exports[`attributes from variables set previously 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"abc\\" t-value=\\"'def'\\"/><span t-att-class=\\"abc\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.abc = 'def';
-    let _2 = ctx['abc']
-    vn1.children.push({type: 2, tag: \\"span\\", el: null, children: [], attrs: {class:_2}, key: 1});
+    vn1.children.push({type: 2, tag: \\"span\\", children: [], key: 1, class: this.toClassObj(ctx['abc'])});
 }"
 `;
 
 exports[`attributes static attributes 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div foo=\\"a\\" bar=\\"b\\" baz=\\"c\\"/>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -98,7 +93,7 @@ exports[`attributes static attributes 1`] = `
 exports[`attributes static attributes on void elements 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<img src=\\"/test.jpg\\" alt=\\"Test\\"/>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -106,7 +101,7 @@ exports[`attributes static attributes on void elements 1`] = `
 exports[`attributes static attributes with dashes 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div aria-label=\\"Close\\"/>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -114,17 +109,16 @@ exports[`attributes static attributes with dashes 1`] = `
 exports[`attributes t-att-class and class should combine together 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div class=\\"hello\\" t-att-class=\\"value\\"/>\`
-    let _1 = ctx['value']
-    tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {class:\\"hello\\" + \\" \\" + _1}, key: 1};
+    // Template: \`__template__1\`
+    tree.child = {type: 2, tag: \\"div\\", children: [], attrs: {class:\\"hello\\"}, key: 1, class: this.toClassObj(ctx['value'])};
 }"
 `;
 
 exports[`foreach does not pollute the rendering context 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-foreach=\\"[1]\\" t-as=\\"item\\"><t t-esc=\\"item\\"/></t>        </div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = [1];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -143,8 +137,8 @@ exports[`foreach does not pollute the rendering context 1`] = `
 exports[`foreach iterate on items (on a element node) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <span t-foreach=\\"[1, 2]\\" t-as=\\"item\\" t-key=\\"item\\"><t t-esc=\\"item\\"/></span>      </d\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = [1,2];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -154,7 +148,7 @@ exports[`foreach iterate on items (on a element node) 1`] = `
         ctx.item = _3[i];
         ctx.item_index = i;
         ctx.item_value = _3[i];
-        const vn4 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: ctx['item']};
+        const vn4 = {type: 2, tag: \\"span\\", children: [], key: ctx['item']};
         vn1.children.push(vn4);
         vn4.children.push({type: 3, text: ctx['item'], el: null});
     }
@@ -165,8 +159,8 @@ exports[`foreach iterate on items (on a element node) 1`] = `
 exports[`foreach iterate on items 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <t t-foreach=\\"[3, 2, 1]\\" t-as=\\"item\\">          [<t t-esc=\\"item_index\\"/>: <t t-esc=\\"it\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = [3,2,1];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -191,8 +185,8 @@ exports[`foreach iterate on items 1`] = `
 exports[`foreach iterate, position 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-foreach=\\"Array(5)\\" t-as=\\"elem\\">            -<t t-if=\\"elem_first\\">first </t><t \`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = Array(5);
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -220,8 +214,8 @@ exports[`foreach iterate, position 1`] = `
 exports[`foreach t-foreach in t-forach 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-foreach=\\"numbers\\" t-as=\\"number\\">            <t t-foreach=\\"letters\\" t-as=\\"lette\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = ctx['numbers'];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -254,9 +248,9 @@ exports[`foreach t-foreach in t-forach 1`] = `
 exports[`misc global 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <t t-foreach=\\"[4,5,6]\\" t-as=\\"value\\">          <span t-esc=\\"value\\"/>          <t t-ca\`
+    // Template: \`__template__4\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = [4,5,6];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -266,7 +260,7 @@ exports[`misc global 1`] = `
         ctx.value = _3[i];
         ctx.value_index = i;
         ctx.value_value = _3[i];
-        const vn4 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        const vn4 = {type: 2, tag: \\"span\\", children: [], key: 1};
         vn1.children.push(vn4);
         vn4.children.push({type: 3, text: ctx['value'], el: null});
         ctx = Object.create(ctx);
@@ -292,9 +286,9 @@ exports[`misc global 1`] = `
 exports[`misc mix of t-foreach and t-set/t-value 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t>        <div>          <t t-foreach=\\"[1, 2, 3]\\" t-as=\\"a\\" t-key=\\"a\\">            <t t-foreach=\\"[\`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = [1,2,3];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -329,9 +323,9 @@ exports[`misc mix of t-foreach and t-set/t-value 1`] = `
 exports[`misc mix of t-foreach and t-set/t-value, 2 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t>        <div>          <t t-foreach=\\"[1, 2, 3]\\" t-as=\\"a\\" t-key=\\"a\\">            <t t-foreach=\\"[\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = [1,2,3];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -364,7 +358,7 @@ exports[`misc mix of t-foreach and t-set/t-value, 2 1`] = `
 exports[`static templates div with a class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div class=\\"abc\\">word</div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -372,7 +366,7 @@ exports[`static templates div with a class attribute 1`] = `
 exports[`static templates div with a class attribute with a quote 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div class=\\"a'bc\\">word</div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -380,7 +374,7 @@ exports[`static templates div with a class attribute with a quote 1`] = `
 exports[`static templates div with a empty class attribute 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div class=\\"\\">word</div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -388,7 +382,7 @@ exports[`static templates div with a empty class attribute 1`] = `
 exports[`static templates div with a span child node 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><span>word</span></div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -396,7 +390,7 @@ exports[`static templates div with a span child node 1`] = `
 exports[`static templates div with a text node 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>word</div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -404,7 +398,7 @@ exports[`static templates div with a text node 1`] = `
 exports[`static templates div with an arbitrary attribute with a quote 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div abc=\\"a'bc\\">word</div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -412,7 +406,7 @@ exports[`static templates div with an arbitrary attribute with a quote 1`] = `
 exports[`static templates empty div 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div></div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -420,7 +414,7 @@ exports[`static templates empty div 1`] = `
 exports[`static templates no template (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`\`
+    // Template: \`__template__1\`
     tree.child = {type: 1, children:[]};
 }"
 `;
@@ -428,7 +422,7 @@ exports[`static templates no template (*) 1`] = `
 exports[`static templates properly handle comments 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>hello <!-- comment-->owl</div>\`
+    // Template: \`__template__1\`
     tree.child = {type: 5, id: 2};
 }"
 `;
@@ -436,12 +430,12 @@ exports[`static templates properly handle comments 1`] = `
 exports[`static templates properly handle comments between t-if/t-else 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <span t-if=\\"true\\">true</span>        <!-- comment-->        <span t-else=\\"\\">owl</spa\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (true) {
         vn1.children.push({type: 5, id: 2});
     } else {
-        const vn3 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        const vn3 = {type: 2, tag: \\"span\\", children: [], key: 1};
         vn1.children.push(vn3);
         vn3.children.push({type: 3, text: \`owl\`, el: null});
     }
@@ -451,7 +445,7 @@ exports[`static templates properly handle comments between t-if/t-else 1`] = `
 exports[`static templates simple dynamic value 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t><t t-esc=\\"text\\"/></t>\`
+    // Template: \`__template__1\`
     tree.child = {type: 3, text: ctx['text'], el: null};
 }"
 `;
@@ -459,7 +453,7 @@ exports[`static templates simple dynamic value 1`] = `
 exports[`static templates simple string (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`hello vdom\`
+    // Template: \`__template__1\`
     tree.child = {type: 3, text: \`hello vdom\`, el: null};
 }"
 `;
@@ -467,7 +461,7 @@ exports[`static templates simple string (*) 1`] = `
 exports[`static templates simple string 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t>hello vdom</t>\`
+    // Template: \`__template__1\`
     tree.child = {type: 3, text: \`hello vdom\`, el: null};
 }"
 `;
@@ -475,7 +469,7 @@ exports[`static templates simple string 1`] = `
 exports[`static templates simple string, with some dynamic value 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t>hello <t t-esc=\\"text\\"/></t>\`
+    // Template: \`__template__1\`
     const vn1 = tree.child = {type: 1, children:[]};
     vn1.children.push({type: 3, text: \`hello \`, el: null});
     vn1.children.push({type: 3, text: ctx['text'], el: null});
@@ -485,7 +479,7 @@ exports[`static templates simple string, with some dynamic value 1`] = `
 exports[`static templates two empty divs (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div></div><div></div>\`
+    // Template: \`__template__1\`
     const vn1 = tree.child = {type: 1, children:[]};
     vn1.children.push({type: 5, id: 2});
     vn1.children.push({type: 5, id: 3});
@@ -495,8 +489,8 @@ exports[`static templates two empty divs (*) 1`] = `
 exports[`t-call (template calling basic caller 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-call=\\"__template__1\\"/></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__2\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
 }"
 `;
@@ -504,7 +498,7 @@ exports[`t-call (template calling basic caller 1`] = `
 exports[`t-call (template calling basic caller, no parent node 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t t-call=\\"__template__1\\"/>\`
+    // Template: \`__template__2\`
     tree.child = this.callTemplate(tree, \\"__template__1\\", ctx);
 }"
 `;
@@ -512,8 +506,8 @@ exports[`t-call (template calling basic caller, no parent node 1`] = `
 exports[`t-call (template calling call with several sub nodes on same line 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <t t-call=\\"__template__1\\">          <span>hey</span> <span>yay</span>        </t>  \`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__2\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     vn2.children.push({type: 5, id: 3});
@@ -528,8 +522,8 @@ exports[`t-call (template calling call with several sub nodes on same line 1`] =
 exports[`t-call (template calling cascading t-call t-raw='0' 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>              <t t-call=\\"__template__3\\">                <span>hey</span> <span>yay</span>   \`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__4\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     vn2.children.push({type: 5, id: 5});
@@ -544,9 +538,9 @@ exports[`t-call (template calling cascading t-call t-raw='0' 1`] = `
 exports[`t-call (template calling inherit context 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"foo\\" t-value=\\"1\\"/><t t-call=\\"__template__1\\"/></div>\`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.foo = 1;
     vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
 }"
@@ -555,9 +549,9 @@ exports[`t-call (template calling inherit context 1`] = `
 exports[`t-call (template calling recursive template, part 1 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <span>hey</span>          <t t-if=\\"false\\">            <t t-call=\\"recursive\\"/>    \`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    const vn2 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`recursive\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    const vn2 = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push(vn2);
     vn2.children.push({type: 3, text: \`hey\`, el: null});
     if (false) {
@@ -569,9 +563,9 @@ exports[`t-call (template calling recursive template, part 1 1`] = `
 exports[`t-call (template calling recursive template, part 2 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <t t-call=\\"nodeTemplate\\">          <t t-set=\\"node\\" t-value=\\"root\\"/>        </t>    \`
+    // Template: \`Parent\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     ctx.node = ctx['root'];
@@ -584,9 +578,9 @@ exports[`t-call (template calling recursive template, part 2 1`] = `
 exports[`t-call (template calling recursive template, part 3 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>            <t t-call=\\"nodeTemplate\\">              <t t-set=\\"node\\" t-value=\\"root\\"/>         \`
+    // Template: \`Parent\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     ctx.node = ctx['root'];
@@ -599,9 +593,9 @@ exports[`t-call (template calling recursive template, part 3 1`] = `
 exports[`t-call (template calling recursive template, part 4: with t-set recursive index 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>            <t t-call=\\"nodeTemplate\\">                <t t-set=\\"recursive_idx\\" t-value=\\"1\\"/> \`
+    // Template: \`Parent\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     ctx.recursive_idx = 1;
@@ -615,9 +609,9 @@ exports[`t-call (template calling recursive template, part 4: with t-set recursi
 exports[`t-call (template calling scoped parameters 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>              <t t-call=\\"__template__1\\">                  <t t-set=\\"foo\\" t-value=\\"42\\"/>     \`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     ctx.foo = 42;
@@ -631,8 +625,8 @@ exports[`t-call (template calling scoped parameters 1`] = `
 exports[`t-call (template calling t-call with t-if 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-if=\\"flag\\" t-call=\\"__template__1\\"/></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__2\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['flag']) {
         vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
     }
@@ -642,9 +636,9 @@ exports[`t-call (template calling t-call with t-if 1`] = `
 exports[`t-call (template calling t-call with t-set inside and outside 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>            <t t-foreach=\\"list\\" t-as=\\"v\\">              <t t-set=\\"val\\" t-value=\\"v.val\\"/>     \`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _3 = ctx['list'];
     let length2 = _3.length;
     ctx = Object.create(ctx);
@@ -669,9 +663,9 @@ exports[`t-call (template calling t-call with t-set inside and outside 1`] = `
 exports[`t-call (template calling t-call with t-set inside and outside. 2 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<p><t t-set=\\"w\\" t-value=\\"'fromwrapper'\\"/><t t-call=\\"__template__2\\"/></p>\`
+    // Template: \`__template__3\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"p\\", children: [], key: 1};
     ctx.w = 'fromwrapper';
     vn1.children.push(this.callTemplate(tree, \\"__template__2\\", ctx));
 }"
@@ -680,9 +674,9 @@ exports[`t-call (template calling t-call with t-set inside and outside. 2 1`] = 
 exports[`t-call (template calling t-call, conditional and t-set in t-call body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"v1\\" t-value=\\"'elif'\\"/>          <t t-if=\\"v1 === 'if'\\" t-call=\\"__template_\`
+    // Template: \`__template__3\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.v1 = 'elif';
     if (ctx['v1']==='if') {
         vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx));
@@ -700,7 +694,7 @@ exports[`t-call (template calling t-call, conditional and t-set in t-call body 1
 exports[`t-call (template calling with unused body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t t-call=\\"__template__1\\">WHEEE</t>\`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
     const vn1 = {type: 1, children: []};
     vn1.children.push({type: 3, text: \`WHEEE\`, el: null});
@@ -713,7 +707,7 @@ exports[`t-call (template calling with unused body 1`] = `
 exports[`t-call (template calling with unused setbody 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t t-call=\\"__template__1\\"><t t-set=\\"qux\\" t-value=\\"3\\"/></t>\`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
     ctx = Object.create(ctx);
     const vn1 = {type: 1, children: []};
@@ -727,7 +721,7 @@ exports[`t-call (template calling with unused setbody 1`] = `
 exports[`t-call (template calling with used body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t t-call=\\"__template__1\\">ok</t>\`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
     const vn1 = {type: 1, children: []};
     vn1.children.push({type: 3, text: \`ok\`, el: null});
@@ -740,9 +734,9 @@ exports[`t-call (template calling with used body 1`] = `
 exports[`t-call (template calling with used set body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-call=\\"__template__1\\"><t t-set=\\"foo\\" t-value=\\"'ok'\\"/></t></span>\`
+    // Template: \`__template__2\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     ctx.foo = 'ok';
@@ -755,21 +749,21 @@ exports[`t-call (template calling with used set body 1`] = `
 exports[`t-esc div with falsy values 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <p t-esc=\\"v1\\"/>          <p t-esc=\\"v2\\"/>          <p t-esc=\\"v3\\"/>          <p t-e\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    const vn2 = {type: 2, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    const vn2 = {type: 2, tag: \\"p\\", children: [], key: 1};
     vn1.children.push(vn2);
     vn2.children.push({type: 3, text: ctx['v1'], el: null});
-    const vn4 = {type: 2, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    const vn4 = {type: 2, tag: \\"p\\", children: [], key: 1};
     vn1.children.push(vn4);
     vn4.children.push({type: 3, text: ctx['v2'], el: null});
-    const vn6 = {type: 2, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    const vn6 = {type: 2, tag: \\"p\\", children: [], key: 1};
     vn1.children.push(vn6);
     vn6.children.push({type: 3, text: ctx['v3'], el: null});
-    const vn8 = {type: 2, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    const vn8 = {type: 2, tag: \\"p\\", children: [], key: 1};
     vn1.children.push(vn8);
     vn8.children.push({type: 3, text: ctx['v4'], el: null});
-    const vn10 = {type: 2, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    const vn10 = {type: 2, tag: \\"p\\", children: [], key: 1};
     vn1.children.push(vn10);
     vn10.children.push({type: 3, text: ctx['v5'], el: null});
 }"
@@ -778,8 +772,8 @@ exports[`t-esc div with falsy values 1`] = `
 exports[`t-esc escaping 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-esc=\\"var\\"/></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push({type: 3, text: ctx['var'], el: null});
 }"
 `;
@@ -787,8 +781,8 @@ exports[`t-esc escaping 1`] = `
 exports[`t-esc escaping on a node 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span t-esc=\\"'ok'\\"/>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push({type: 3, text: 'ok', el: null});
 }"
 `;
@@ -796,8 +790,8 @@ exports[`t-esc escaping on a node 1`] = `
 exports[`t-esc escaping on a node with a body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span t-esc=\\"'ok'\\">nope</span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     let _2 = 'ok'
     if (_2 !== undefined) {
         vn1.children.push({type: 3, text: _2, el: null});
@@ -810,8 +804,8 @@ exports[`t-esc escaping on a node with a body 1`] = `
 exports[`t-esc escaping on a node with a body, as a default 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span t-esc=\\"var\\">nope</span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     let _2 = ctx['var']
     if (_2 !== undefined) {
         vn1.children.push({type: 3, text: _2, el: null});
@@ -824,8 +818,8 @@ exports[`t-esc escaping on a node with a body, as a default 1`] = `
 exports[`t-esc literal 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-esc=\\"'ok'\\"/></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push({type: 3, text: 'ok', el: null});
 }"
 `;
@@ -833,11 +827,11 @@ exports[`t-esc literal 1`] = `
 exports[`t-esc t-esc is escaped 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"var\\"><p>escaped</p></t><t t-esc=\\"var\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _2 = new this.VDomArray();
-    const vn3 = {type: 2, tag: \\"p\\", el: null, children: [], attrs: {}, key: 1};
+    const vn3 = {type: 2, tag: \\"p\\", children: [], key: 1};
     _2.push(vn3);
     vn3.children.push({type: 3, text: \`escaped\`, el: null});
     ctx.var = _2;
@@ -849,8 +843,8 @@ exports[`t-esc t-esc is escaped 1`] = `
 exports[`t-esc t-esc work with spread operator 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-esc=\\"[...state.list]\\"/></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push({type: 3, text: [...ctx['state'].list], el: null});
 }"
 `;
@@ -858,8 +852,8 @@ exports[`t-esc t-esc work with spread operator 1`] = `
 exports[`t-esc t-esc=0 is escaped 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-call=\\"__template__1\\"><p>escaped</p></t></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__2\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx = Object.create(ctx);
     const vn2 = {type: 1, children: []};
     vn2.children.push({type: 5, id: 3});
@@ -872,8 +866,8 @@ exports[`t-esc t-esc=0 is escaped 1`] = `
 exports[`t-esc variable 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-esc=\\"var\\"/></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push({type: 3, text: ctx['var'], el: null});
 }"
 `;
@@ -881,8 +875,8 @@ exports[`t-esc variable 1`] = `
 exports[`t-if boolean value condition elif 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <t t-if=\\"color == 'black'\\">black pearl</t>        <t t-elif=\\"color == 'yellow'\\">yello\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['color']=='black') {
         vn1.children.push({type: 3, text: \`black pearl\`, el: null});
     } else if (ctx['color']=='yellow') {
@@ -898,9 +892,9 @@ exports[`t-if boolean value condition elif 1`] = `
 exports[`t-if boolean value condition else 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <span>begin</span>        <t t-if=\\"condition\\">ok</t>        <t t-else=\\"\\">ok-else</t>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    const vn2 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    const vn2 = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push(vn2);
     vn2.children.push({type: 3, text: \`begin\`, el: null});
     if (ctx['condition']) {
@@ -915,9 +909,9 @@ exports[`t-if boolean value condition else 1`] = `
 exports[`t-if boolean value condition false else 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><span>begin</span><t t-if=\\"condition\\">fail</t>          <t t-else=\\"\\">fail-else</t><span>end</s\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
-    const vn2 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    const vn2 = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push(vn2);
     vn2.children.push({type: 3, text: \`begin\`, el: null});
     if (ctx['condition']) {
@@ -932,8 +926,8 @@ exports[`t-if boolean value condition false else 1`] = `
 exports[`t-if boolean value condition missing 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-if=\\"condition\\">fail</t></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     if (ctx['condition']) {
         vn1.children.push({type: 3, text: \`fail\`, el: null});
     }
@@ -943,8 +937,8 @@ exports[`t-if boolean value condition missing 1`] = `
 exports[`t-if boolean value false condition (on a dom node) (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><span t-if=\\"condition\\">ok</span></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['condition']) {
         vn1.children.push({type: 5, id: 2});
     }
@@ -954,8 +948,8 @@ exports[`t-if boolean value false condition (on a dom node) (*) 1`] = `
 exports[`t-if boolean value false condition 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-if=\\"condition\\">ok</t></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['condition']) {
         vn1.children.push({type: 3, text: \`ok\`, el: null});
     }
@@ -965,7 +959,7 @@ exports[`t-if boolean value false condition 1`] = `
 exports[`t-if boolean value false condition, resulting in empty template (on a dom node) (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div t-if=\\"condition\\">ok</div>\`
+    // Template: \`__template__1\`
     if (ctx['condition']) {
         tree.child = {type: 5, id: 2};
     }
@@ -975,8 +969,8 @@ exports[`t-if boolean value false condition, resulting in empty template (on a d
 exports[`t-if boolean value true condition (on a dom node) (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><span t-if=\\"condition\\">ok</span></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['condition']) {
         vn1.children.push({type: 5, id: 2});
     }
@@ -986,8 +980,8 @@ exports[`t-if boolean value true condition (on a dom node) (*) 1`] = `
 exports[`t-if boolean value true condition 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-if=\\"condition\\">ok</t></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['condition']) {
         vn1.children.push({type: 3, text: \`ok\`, el: null});
     }
@@ -997,8 +991,8 @@ exports[`t-if boolean value true condition 1`] = `
 exports[`t-if can use some boolean operators in expressions 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>        <t t-if=\\"cond1 and cond2\\">and</t>        <t t-if=\\"cond1 and cond3\\">nope</t>        <\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['cond1']&&ctx['cond2']) {
         vn1.children.push({type: 3, text: \`and\`, el: null});
     }
@@ -1029,8 +1023,8 @@ exports[`t-if can use some boolean operators in expressions 1`] = `
 exports[`t-if t-esc with t-elif 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-if=\\"false\\">abc</t><t t-else=\\"\\" t-esc=\\"'x'\\"/></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (false) {
         vn1.children.push({type: 3, text: \`abc\`, el: null});
     } else {
@@ -1042,8 +1036,8 @@ exports[`t-if t-esc with t-elif 1`] = `
 exports[`t-if t-esc with t-if 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-if=\\"true\\" t-esc=\\"'x'\\"/></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (true) {
         vn1.children.push({type: 3, text: 'x', el: null});
     }
@@ -1053,9 +1047,9 @@ exports[`t-if t-esc with t-if 1`] = `
 exports[`t-if t-set, then t-elif, part 3 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>              <t t-set=\\"y\\" t-value=\\"false\\"/>              <t t-set=\\"x\\" t-value=\\"y\\"/>        \`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.y = false;
     ctx.x = ctx['y'];
     if (ctx['x']) {
@@ -1069,9 +1063,9 @@ exports[`t-if t-set, then t-elif, part 3 1`] = `
 exports[`t-if t-set, then t-if 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"title\\" t-value=\\"'test'\\"/>          <t t-if=\\"title\\"><t t-esc=\\"title\\"/></t>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.title = 'test';
     if (ctx['title']) {
         vn1.children.push({type: 3, text: ctx['title'], el: null});
@@ -1082,9 +1076,9 @@ exports[`t-if t-set, then t-if 1`] = `
 exports[`t-if t-set, then t-if, part 2 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>              <t t-set=\\"y\\" t-value=\\"true\\"/>              <t t-set=\\"x\\" t-value=\\"y\\"/>         \`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.y = true;
     ctx.x = ctx['y'];
     if (ctx['x']) {
@@ -1096,9 +1090,9 @@ exports[`t-if t-set, then t-if, part 2 1`] = `
 exports[`t-on can bind event handler 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<button t-on-click=\\"add\\">Click</button>\`
+    // Template: \`__template__1\`
     const rootCtx = ctx;
-    const vn1 = tree.child = {type: 2, tag: \\"button\\", el: null, children: [], attrs: {}, key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['add'])}}};
+    const vn1 = tree.child = {type: 2, tag: \\"button\\", children: [], key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['add'])}}};
     vn1.children.push({type: 3, text: \`Click\`, el: null});
 }"
 `;
@@ -1106,9 +1100,9 @@ exports[`t-on can bind event handler 1`] = `
 exports[`t-on can bind two event handlers 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<button t-on-click=\\"handleClick\\" t-on-dblclick=\\"handleDblClick\\">Click</button>\`
+    // Template: \`__template__1\`
     const rootCtx = ctx;
-    const vn1 = tree.child = {type: 2, tag: \\"button\\", el: null, children: [], attrs: {}, key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['handleClick'])}, dblclick: {cb: ev => this.handleEvent(ev, rootCtx, ctx['handleDblClick'])}}};
+    const vn1 = tree.child = {type: 2, tag: \\"button\\", children: [], key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['handleClick'])}, dblclick: {cb: ev => this.handleEvent(ev, rootCtx, ctx['handleDblClick'])}}};
     vn1.children.push({type: 3, text: \`Click\`, el: null});
 }"
 `;
@@ -1116,9 +1110,9 @@ exports[`t-on can bind two event handlers 1`] = `
 exports[`t-on handler is bound to proper owner 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<button t-on-click=\\"add\\">Click</button>\`
+    // Template: \`__template__1\`
     const rootCtx = ctx;
-    const vn1 = tree.child = {type: 2, tag: \\"button\\", el: null, children: [], attrs: {}, key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['add'])}}};
+    const vn1 = tree.child = {type: 2, tag: \\"button\\", children: [], key: 1, on: {click: {cb: ev => this.handleEvent(ev, rootCtx, ctx['add'])}}};
     vn1.children.push({type: 3, text: \`Click\`, el: null});
 }"
 `;
@@ -1126,8 +1120,8 @@ exports[`t-on handler is bound to proper owner 1`] = `
 exports[`t-raw empty value, and a body as default (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-raw=\\"var\\">body</t></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     let _2 = ctx['var']
     if (_2 !== undefined) {
         vn1.children.push(...this.htmlToVDOM(ctx['var']));
@@ -1140,11 +1134,11 @@ exports[`t-raw empty value, and a body as default (*) 1`] = `
 exports[`t-raw from a (template, body) variable (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-set=\\"v\\"><abc>def</abc></t><t t-raw=\\"v\\"/></span>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     let _2 = new this.VDomArray();
-    const vn3 = {type: 2, tag: \\"abc\\", el: null, children: [], attrs: {}, key: 1};
+    const vn3 = {type: 2, tag: \\"abc\\", children: [], key: 1};
     _2.push(vn3);
     vn3.children.push({type: 3, text: \`def\`, el: null});
     ctx.v = _2;
@@ -1155,13 +1149,13 @@ exports[`t-raw from a (template, body) variable (*) 1`] = `
 exports[`t-raw from a (template, value+body) variable (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-set=\\"v\\" t-value=\\"blip\\"><abc>def</abc></t><t t-raw=\\"v\\"/></span>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     ctx.v = ctx['blip'];
     if (!ctx.v) {
         let _2 = new this.VDomArray();
-        const vn3 = {type: 2, tag: \\"abc\\", el: null, children: [], attrs: {}, key: 1};
+        const vn3 = {type: 2, tag: \\"abc\\", children: [], key: 1};
         _2.push(vn3);
         vn3.children.push({type: 3, text: \`def\`, el: null});
         ctx.v = _2
@@ -1174,8 +1168,8 @@ exports[`t-raw from a (template, value+body) variable (*) 1`] = `
 exports[`t-raw literal 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-raw=\\"'ok'\\"/></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push(...this.htmlToVDOM('ok'));
 }"
 `;
@@ -1183,8 +1177,8 @@ exports[`t-raw literal 1`] = `
 exports[`t-raw not escaping 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-raw=\\"var\\"/></div>\`
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     vn1.children.push(...this.htmlToVDOM(ctx['var']));
 }"
 `;
@@ -1192,7 +1186,7 @@ exports[`t-raw not escaping 1`] = `
 exports[`t-raw only a t-raw directive, no parent! (*) 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t t-raw=\\"var\\"/>\`
+    // Template: \`__template__1\`
     tree.child = {type: 1, children: this.htmlToVDOM(ctx['var'])};
 }"
 `;
@@ -1200,9 +1194,9 @@ exports[`t-raw only a t-raw directive, no parent! (*) 1`] = `
 exports[`t-raw t-raw and another sibling node 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><span>hello</span><t t-raw=\\"var\\"/></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
-    const vn2 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
+    const vn2 = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push(vn2);
     vn2.children.push({type: 3, text: \`hello\`, el: null});
     vn1.children.push(...this.htmlToVDOM(ctx['var']));
@@ -1212,8 +1206,8 @@ exports[`t-raw t-raw and another sibling node 1`] = `
 exports[`t-raw variable 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<span><t t-raw=\\"var\\"/></span>\`
-    const vn1 = tree.child = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
     vn1.children.push(...this.htmlToVDOM(ctx['var']));
 }"
 `;
@@ -1221,9 +1215,9 @@ exports[`t-raw variable 1`] = `
 exports[`t-set evaluate value expression 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"value\\" t-value=\\"1 + 2\\"/><t t-esc=\\"value\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.value = 1+2;
     vn1.children.push({type: 3, text: ctx['value'], el: null});
 }"
@@ -1232,9 +1226,9 @@ exports[`t-set evaluate value expression 1`] = `
 exports[`t-set evaluate value expression, part 2 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"value\\" t-value=\\"somevariable + 2\\"/><t t-esc=\\"value\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.value = ctx['somevariable']+2;
     vn1.children.push({type: 3, text: ctx['value'], el: null});
 }"
@@ -1243,9 +1237,9 @@ exports[`t-set evaluate value expression, part 2 1`] = `
 exports[`t-set set from attribute literal 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"value\\" t-value=\\"'ok'\\"/><t t-esc=\\"value\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.value = 'ok';
     vn1.children.push({type: 3, text: ctx['value'], el: null});
 }"
@@ -1254,9 +1248,9 @@ exports[`t-set set from attribute literal 1`] = `
 exports[`t-set set from attribute lookup 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"stuff\\" t-value=\\"value\\"/><t t-esc=\\"stuff\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.stuff = ctx['value'];
     vn1.children.push({type: 3, text: ctx['stuff'], el: null});
 }"
@@ -1265,7 +1259,7 @@ exports[`t-set set from attribute lookup 1`] = `
 exports[`t-set set from body literal 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<t><t t-set=\\"value\\">ok</t><t t-esc=\\"value\\"/></t>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
     const vn1 = tree.child = {type: 1, children:[]};
     let _2 = new this.VDomArray();
@@ -1279,9 +1273,9 @@ exports[`t-set set from body literal 1`] = `
 exports[`t-set set from body lookup 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"stuff\\"><t t-esc=\\"value\\"/></t><t t-esc=\\"stuff\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _2 = new this.VDomArray();
     _2.push({type: 3, text: ctx['value'], el: null});
     ctx.stuff = _2;
@@ -1293,18 +1287,18 @@ exports[`t-set set from body lookup 1`] = `
 exports[`t-set set from empty body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"stuff\\"/><t t-esc=\\"stuff\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
 }"
 `;
 
 exports[`t-set t-set and t-if 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"v\\" t-value=\\"value\\"/>          <t t-if=\\"v === 'ok'\\">grimbergen</t>       \`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.v = ctx['value'];
     if (ctx['v']==='ok') {
         vn1.children.push({type: 3, text: \`grimbergen\`, el: null});
@@ -1315,12 +1309,12 @@ exports[`t-set t-set and t-if 1`] = `
 exports[`t-set t-set body is evaluated immediately 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"v1\\" t-value=\\"'before'\\"/>          <t t-set=\\"v2\\">            <span><t t-e\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.v1 = 'before';
     let _2 = new this.VDomArray();
-    const vn3 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+    const vn3 = {type: 2, tag: \\"span\\", children: [], key: 1};
     _2.push(vn3);
     vn3.children.push({type: 3, text: ctx['v1'], el: null});
     ctx.v2 = _2;
@@ -1332,9 +1326,9 @@ exports[`t-set t-set body is evaluated immediately 1`] = `
 exports[`t-set t-set does not modify main context 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"value\\" t-value=\\"'ok'\\"/><t t-esc=\\"value\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.value = 'ok';
     vn1.children.push({type: 3, text: ctx['value'], el: null});
 }"
@@ -1343,9 +1337,9 @@ exports[`t-set t-set does not modify main context 1`] = `
 exports[`t-set t-set evaluates an expression only once 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div >            <t t-set=\\"v\\" t-value=\\"value + ' artois'\\"/>            <t t-esc=\\"v\\"/>           \`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.v = ctx['value']+' artois';
     vn1.children.push({type: 3, text: ctx['v'], el: null});
     vn1.children.push({type: 3, text: ctx['v'], el: null});
@@ -1355,9 +1349,9 @@ exports[`t-set t-set evaluates an expression only once 1`] = `
 exports[`t-set t-set should reuse variable if possible 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"v\\" t-value=\\"1\\"/>          <div t-foreach=\\"list\\" t-as=\\"elem\\" t-key=\\"elem_i\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.v = 1;
     let _3 = ctx['list'];
     let length2 = _3.length;
@@ -1368,9 +1362,9 @@ exports[`t-set t-set should reuse variable if possible 1`] = `
         ctx.elem = _3[i];
         ctx.elem_index = i;
         ctx.elem_value = _3[i];
-        const vn4 = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: ctx['elem_index']};
+        const vn4 = {type: 2, tag: \\"div\\", children: [], key: ctx['elem_index']};
         vn1.children.push(vn4);
-        const vn5 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        const vn5 = {type: 2, tag: \\"span\\", children: [], key: 1};
         vn4.children.push(vn5);
         vn5.children.push({type: 3, text: \`v\`, el: null});
         vn5.children.push({type: 3, text: ctx['v'], el: null});
@@ -1383,9 +1377,9 @@ exports[`t-set t-set should reuse variable if possible 1`] = `
 exports[`t-set t-set with content and sub t-esc 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"setvar\\"><t t-esc=\\"beep\\"/> boop</t>          <t t-esc=\\"setvar\\"/>        <\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     let _2 = new this.VDomArray();
     _2.push({type: 3, text: ctx['beep'], el: null});
     _2.push({type: 3, text: \` boop\`, el: null});
@@ -1398,15 +1392,15 @@ exports[`t-set t-set with content and sub t-esc 1`] = `
 exports[`t-set t-set with t-value (falsy) and body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"v3\\" t-value=\\"false\\"/>          <t t-set=\\"v1\\" t-value=\\"'before'\\"/>       \`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.v3 = false;
     ctx.v1 = 'before';
     ctx.v2 = ctx['v3'];
     if (!ctx.v2) {
         let _2 = new this.VDomArray();
-        const vn3 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        const vn3 = {type: 2, tag: \\"span\\", children: [], key: 1};
         _2.push(vn3);
         vn3.children.push({type: 3, text: ctx['v1'], el: null});
         ctx.v2 = _2
@@ -1421,15 +1415,15 @@ exports[`t-set t-set with t-value (falsy) and body 1`] = `
 exports[`t-set t-set with t-value (truthy) and body 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-set=\\"v3\\" t-value=\\"'Truthy'\\"/>          <t t-set=\\"v1\\" t-value=\\"'before'\\"/>    \`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.v3 = 'Truthy';
     ctx.v1 = 'before';
     ctx.v2 = ctx['v3'];
     if (!ctx.v2) {
         let _2 = new this.VDomArray();
-        const vn3 = {type: 2, tag: \\"span\\", el: null, children: [], attrs: {}, key: 1};
+        const vn3 = {type: 2, tag: \\"span\\", children: [], key: 1};
         _2.push(vn3);
         vn3.children.push({type: 3, text: ctx['v1'], el: null});
         ctx.v2 = _2
@@ -1444,9 +1438,9 @@ exports[`t-set t-set with t-value (truthy) and body 1`] = `
 exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-if=\\"flag\\" t-set=\\"ourvar\\">1</t>          <t t-else=\\"\\" t-set=\\"ourvar\\" t-value=\\"0\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['flag']) {
         let _2 = new this.VDomArray();
         _2.push({type: 3, text: \`1\`, el: null});
@@ -1462,9 +1456,9 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 1`] = `
 exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 2`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-if=\\"flag\\" t-set=\\"ourvar\\">1</t>          <t t-else=\\"\\" t-set=\\"ourvar\\" t-value=\\"0\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['flag']) {
         let _2 = new this.VDomArray();
         _2.push({type: 3, text: \`1\`, el: null});
@@ -1480,9 +1474,9 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 2`] = `
 exports[`t-set t-set, t-if, and mix of expression/body lookup, 2 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-if=\\"flag\\" t-set=\\"ourvar\\" t-value=\\"1\\"></t>          <t t-else=\\"\\" t-set=\\"ourvar\\"\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['flag']) {
         ctx.ourvar = 1;
     } else {
@@ -1498,9 +1492,9 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 2 1`] = `
 exports[`t-set t-set, t-if, and mix of expression/body lookup, 2 2`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div>          <t t-if=\\"flag\\" t-set=\\"ourvar\\" t-value=\\"1\\"></t>          <t t-else=\\"\\" t-set=\\"ourvar\\"\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     if (ctx['flag']) {
         ctx.ourvar = 1;
     } else {
@@ -1516,9 +1510,9 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 2 2`] = `
 exports[`t-set value priority 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`<div><t t-set=\\"value\\" t-value=\\"1\\">2</t><t t-esc=\\"value\\"/></div>\`
+    // Template: \`__template__1\`
     ctx = Object.create(ctx);
-    const vn1 = tree.child = {type: 2, tag: \\"div\\", el: null, children: [], attrs: {}, key: 1};
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     ctx.value = 1;
     if (!ctx.value) {
         let _2 = new this.VDomArray();

@@ -47,7 +47,7 @@ export function compileTemplate(qweb: QWeb, name: string, template: string): Com
     shouldDefineRootContext: false,
     variables: {},
   };
-  const descr = template.trim().slice(0, 100).replace(/`/g, "'").replace(/\n/g, "");
+  const descr = name.trim().slice(0, 100).replace(/`/g, "'").replace(/\n/g, "");
   addLine(ctx, `// Template: \`${descr}\``);
 
   generateCode(ast, ctx);
@@ -241,6 +241,7 @@ export function handleEvent(ev: Event, ctx: any, fn: any) {
 }
 
 function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
+  // attributes
   const attrs = {};
   for (let attr in ast.attrs) {
     let value = ast.attrs[attr];
@@ -252,6 +253,15 @@ function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
       addToAttrs(attrs, attr, `"${value}"`);
     }
   }
+  const attrObjStr = objToAttr(attrs);
+  const attrCode = attrObjStr === "{}" ? "" : `, attrs: ${attrObjStr}`;
+
+  // classes
+  let classObj = "";
+  if (ast.attClass) {
+    classObj = `, class: this.toClassObj(${compileExpr(ast.attClass, {})})`;
+  }
+  // handlers
   let handlers = "";
   if (Object.keys(ast.on).length) {
     let h: string[] = [];
@@ -263,9 +273,9 @@ function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
     }
     handlers = `, on: {` + h.join(", ") + "}";
   }
-  const vnode = `{type: ${NodeType.DOM}, tag: "${
-    ast.tag
-  }", el: null, children: [], attrs: ${objToAttr(attrs)}, key: ${ast.key}${handlers}}`;
+
+  // final code
+  const vnode = `{type: ${NodeType.DOM}, tag: "${ast.tag}", children: []${attrCode}, key: ${ast.key}${handlers}${classObj}}`;
   const id = addVNode(ctx, vnode, ast.children.length > 0);
   withParent(ctx, id, () => {
     generateCode(ast.children, ctx);

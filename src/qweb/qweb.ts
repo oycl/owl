@@ -1,5 +1,6 @@
 import { CompiledTemplate, compileTemplate, RenderContext, handleEvent } from "./compiler";
-import { patch, NodeType, VNode, VDataNode, htmlToVDOM } from "../vdom/vdom";
+import { patch, NodeType, VNode, VDataNode } from "../vdom/vdom";
+import { htmlToVDOM } from "../vdom/html_to_vdom";
 import { escape } from "../utils";
 
 // -----------------------------------------------------------------------------
@@ -33,6 +34,21 @@ const qwebContext: any = {
   },
   htmlToVDOM,
   handleEvent,
+  toClassObj(expr: any) {
+    if (typeof expr === "string") {
+      expr = expr.trim();
+      if (!expr) {
+        return {};
+      }
+      let words = expr.split(/\s+/);
+      let result: { [key: string]: boolean } = {};
+      for (let i = 0; i < words.length; i++) {
+        result[words[i]] = true;
+      }
+      return result;
+    }
+    return expr;
+  },
 };
 
 // -----------------------------------------------------------------------------

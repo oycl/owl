@@ -734,7 +734,7 @@ describe("attributes", () => {
   test("class and t-att-class should combine together", () => {
     const template = xml`<div t-att-class="value" class="hello" />`;
     const result = render(template, { value: "world" });
-    expect(result).toBe(`<div class="world hello"></div>`);
+    expect(result).toBe(`<div class="hello world"></div>`);
   });
 
   //   test("class and t-attf-class with ternary operation", () => {

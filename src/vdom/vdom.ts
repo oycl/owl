@@ -30,11 +30,12 @@ export interface Handler {
 export interface VDOMNode<T> {
   type: NodeType.DOM;
   tag: string;
-  el: HTMLElement | null;
   children: VNode<T>[];
-  attrs: { [name: string]: string };
   key: Key;
+  el?: HTMLElement;
+  attrs?: { [name: string]: string | boolean | number | null };
   on?: { [event: string]: Handler };
+  class?: { [name: string]: boolean };
 }
 
 export interface VStaticNode {
@@ -107,8 +108,15 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
       const attrs = vnode.attrs;
       for (let name in attrs) {
         let value = attrs[name];
-        if (value) {
-          htmlEl.setAttribute(name, value);
+        if (value === true) {
+          htmlEl.setAttribute(name, "");
+        } else if (value !== false) {
+          htmlEl.setAttribute(name, String(value));
+        }
+      }
+      for (let c in vnode.class) {
+        if (vnode.class[c]) {
+          htmlEl.classList.add(c);
         }
       }
       if (vnode.on) {
@@ -233,54 +241,4 @@ function updateChildren<T>(oldChildren: VNode<T>[], newParent: VDOMNode<T> | VMu
   for (let i = 0; i < l; i++) {
     update(oldChildren[i], newChildren[i]);
   }
-}
-
-// -----------------------------------------------------------------------------
-// html to vdom
-// -----------------------------------------------------------------------------
-
-const parser = new DOMParser();
-
-/**
- * We can put the vdom expression in a cache because it is only html content,
- * there are no t-component or any kind of dynamic element inside. Therefore,
- * the way this will be used by owl is to simply patch it. This will add a el
- * node on those vnodes, but it is fine because it will be ignored anyway on
- * subsequent patches, due to the fact that we have a different patch/update
- * methods.
- */
-const cache: { [html: string]: VNode<any>[] } = {};
-
-export function htmlToVDOM(html: string): VNode<any>[] {
-  if (!cache[html]) {
-    const doc = parser.parseFromString(html, "text/html");
-    const result: VNode<any>[] = [];
-    for (let child of doc.body.childNodes) {
-      result.push(htmlToVNode(child));
-    }
-    cache[html] = result;
-  }
-  return cache[html];
-}
-
-function htmlToVNode(node: ChildNode): VNode<any> {
-  if (!(node instanceof Element)) {
-    return { type: NodeType.Text, text: node.textContent!, el: null };
-  }
-  const attrs: { [attr: string]: string } = {};
-  for (let attr of node.attributes) {
-    attrs[attr.name] = attr.textContent || "";
-  }
-  const children: VNode<any>[] = [];
-  for (let c of node.childNodes) {
-    children.push(htmlToVNode(c));
-  }
-  return {
-    type: NodeType.DOM,
-    tag: node.tagName,
-    children,
-    el: null,
-    key: -1,
-    attrs,
-  };
 }

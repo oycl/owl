@@ -20,90 +20,93 @@ describe("attributes", function () {
     vnode0 = elm;
   });
 
-  test("have their provided values", function () {
-    const vnode1 = h("div", {
-      attrs: { href: "/foo", minlength: 1, selected: true, disabled: false },
-    });
-    elm = patch(vnode0, vnode1).elm;
+  // test("have their provided values", function () {
+  //   const vnode1 = h("div", {
+  //     attrs: { href: "/foo", minlength: 1, selected: true, disabled: false },
+  //   });
+  //   elm = patch(vnode0, vnode1).elm;
 
-    expect(elm.getAttribute("href")).toBe("/foo");
-    expect(elm.getAttribute("minlength")).toBe("1");
-    expect(elm.hasAttribute("selected")).toBe(true);
-    expect(elm.getAttribute("selected")).toBe("");
-    expect(elm.hasAttribute("disabled")).toBe(false);
-  });
+  //   expect(elm.getAttribute("href")).toBe("/foo");
+  //   expect(elm.getAttribute("minlength")).toBe("1");
+  //   expect(elm.hasAttribute("selected")).toBe(true);
+  //   expect(elm.getAttribute("selected")).toBe("");
+  //   expect(elm.hasAttribute("disabled")).toBe(false);
+  // });
 
-  test("can be memoized", function () {
-    const cachedAttrs = { href: "/foo", minlength: 1, selected: true };
-    const vnode1 = h("div", { attrs: cachedAttrs });
-    const vnode2 = h("div", { attrs: cachedAttrs });
-    elm = patch(vnode0, vnode1).elm;
-    expect(elm.getAttribute("href")).toBe("/foo");
-    expect(elm.getAttribute("minlength")).toBe("1");
-    expect(elm.getAttribute("selected")).toBe("");
-    elm = patch(vnode1, vnode2).elm;
-    expect(elm.getAttribute("href")).toBe("/foo");
-    expect(elm.getAttribute("minlength")).toBe("1");
-    expect(elm.getAttribute("selected")).toBe("");
-  });
+  // DOES NOT APPLY
+  // test("can be memoized", function () {
+  //   const cachedAttrs = { href: "/foo", minlength: 1, selected: true };
+  //   const vnode1 = h("div", { attrs: cachedAttrs });
+  //   const vnode2 = h("div", { attrs: cachedAttrs });
+  //   elm = patch(vnode0, vnode1).elm;
+  //   expect(elm.getAttribute("href")).toBe("/foo");
+  //   expect(elm.getAttribute("minlength")).toBe("1");
+  //   expect(elm.getAttribute("selected")).toBe("");
+  //   elm = patch(vnode1, vnode2).elm;
+  //   expect(elm.getAttribute("href")).toBe("/foo");
+  //   expect(elm.getAttribute("minlength")).toBe("1");
+  //   expect(elm.getAttribute("selected")).toBe("");
+  // });
 
-  test("are not omitted when falsy values are provided", function () {
-    const vnode1 = h("div", <any>{
-      attrs: { href: null, minlength: 0, value: "", title: "undefined" },
-    });
-    elm = patch(vnode0, vnode1).elm;
-    expect(elm.getAttribute("href")).toBe("null");
-    expect(elm.getAttribute("minlength")).toBe("0");
-    expect(elm.getAttribute("value")).toBe("");
-    expect(elm.getAttribute("title")).toBe("undefined");
-  });
+  // test("are not omitted when falsy values are provided", function () {
+  //   const vnode1 = h("div", <any>{
+  //     attrs: { href: null, minlength: 0, value: "", title: "undefined" },
+  //   });
+  //   elm = patch(vnode0, vnode1).elm;
+  //   expect(elm.getAttribute("href")).toBe("null");
+  //   expect(elm.getAttribute("minlength")).toBe("0");
+  //   expect(elm.getAttribute("value")).toBe("");
+  //   expect(elm.getAttribute("title")).toBe("undefined");
+  // });
 
-  test("are set correctly when namespaced", function () {
-    const vnode1 = h("div", { attrs: { "xlink:href": "#foo" } });
-    elm = patch(vnode0, vnode1).elm;
-    expect(elm.getAttributeNS("http://www.w3.org/1999/xlink", "href")).toBe("#foo");
-  });
+  // DOES NOT APPLY
+  // test("are set correctly when namespaced", function () {
+  //   const vnode1 = h("div", { attrs: { "xlink:href": "#foo" } });
+  //   elm = patch(vnode0, vnode1).elm;
+  //   expect(elm.getAttributeNS("http://www.w3.org/1999/xlink", "href")).toBe("#foo");
+  // });
 
-  test("should not touch class nor id fields", function () {
-    elm = document.createElement("div");
-    elm.id = "myId";
-    elm.className = "myClass";
-    vnode0 = elm;
-    const vnode1 = h("div#myId.myClass", { attrs: {} }, ["Hello"]);
-    elm = patch(vnode0, vnode1).elm;
-    expect(elm.tagName).toBe("DIV");
-    expect(elm.id).toBe("myId");
-    expect(elm.className).toBe("myClass");
-    expect(elm.textContent).toBe("Hello");
-  });
+  // DOES NOT APPLY: we add a child, not modify in place
+  // test("should not touch class nor id fields", function () {
+  //   elm = document.createElement("div");
+  //   elm.id = "myId";
+  //   elm.className = "myClass";
+  //   vnode0 = elm;
+  //   const vnode1 = h("div#myId.myClass", { attrs: {} }, ["Hello"]);
+  //   elm = patch(vnode0, vnode1).elm;
+  //   expect(elm.tagName).toBe("DIV");
+  //   expect(elm.id).toBe("myId");
+  //   expect(elm.className).toBe("myClass");
+  //   expect(elm.textContent).toBe("Hello");
+  // });
 
   describe("boolean attribute", function () {
-    test("is present and empty string if the value is truthy", function () {
-      const vnode1 = h("div", {
-        attrs: { required: true, readonly: 1, noresize: "truthy" },
-      });
-      elm = patch(vnode0, vnode1).elm;
-      expect(elm.hasAttribute("required")).toBe(true);
-      expect(elm.getAttribute("required")).toBe("");
-      expect(elm.hasAttribute("readonly")).toBe(true);
-      expect(elm.getAttribute("readonly")).toBe("1");
-      expect(elm.hasAttribute("noresize")).toBe(true);
-      expect(elm.getAttribute("noresize")).toBe("truthy");
-    });
+    // test("is present and empty string if the value is truthy", function () {
+    //   const vnode1 = h("div", {
+    //     attrs: { required: true, readonly: 1, noresize: "truthy" },
+    //   });
+    //   elm = patch(vnode0, vnode1).elm;
+    //   expect(elm.hasAttribute("required")).toBe(true);
+    //   expect(elm.getAttribute("required")).toBe("");
+    //   expect(elm.hasAttribute("readonly")).toBe(true);
+    //   expect(elm.getAttribute("readonly")).toBe("1");
+    //   expect(elm.hasAttribute("noresize")).toBe(true);
+    //   expect(elm.getAttribute("noresize")).toBe("truthy");
+    // });
 
-    test("is omitted if the value is false", function () {
-      const vnode1 = h("div", { attrs: { required: false } });
-      elm = patch(vnode0, vnode1).elm;
-      expect(elm.hasAttribute("required")).toBe(false);
-      expect(elm.getAttribute("required")).toBe(null);
-    });
+    // test("is omitted if the value is false", function () {
+    //   const vnode1 = h("div", { attrs: { required: false } });
+    //   elm = patch(vnode0, vnode1).elm;
+    //   expect(elm.hasAttribute("required")).toBe(false);
+    //   expect(elm.getAttribute("required")).toBe(null);
+    // });
 
-    test("is not omitted if the value is falsy but casted to string", function () {
-      const vnode1 = h("div", <any>{ attrs: { readonly: 0, noresize: null } });
-      elm = patch(vnode0, vnode1).elm;
-      expect(elm.getAttribute("readonly")).toBe("0");
-      expect(elm.getAttribute("noresize")).toBe("null");
-    });
+    // test("is not omitted if the value is falsy but casted to string", function () {
+    //   const vnode1 = h("div", <any>{ attrs: { readonly: 0, noresize: null } });
+    //   elm = patch(vnode0, vnode1).elm;
+    //   expect(elm.getAttribute("readonly")).toBe("0");
+    //   expect(elm.getAttribute("noresize")).toBe("null");
+    // });
   });
 
   describe("Object.prototype property", function () {
