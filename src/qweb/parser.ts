@@ -146,7 +146,8 @@ function parseTextCommentNode(node: ChildNode): AST | null {
   text = text.replace(whitespaceRE, " ");
   return {
     type,
-    text: "`" + text + "`",
+    text,
+    // text: "`" + text + "`",
   };
 }
 

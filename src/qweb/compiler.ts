@@ -63,7 +63,7 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
       compileDOMNode(ctx, ast);
       break;
     case "TEXT": {
-      const vnode = `{type: ${NodeType.Text}, text: ${ast.text}, el: null}`;
+      const vnode = `{type: ${NodeType.Text}, text: \`${ast.text}\`, el: null}`;
       addVNode(ctx, vnode, false);
       break;
     }
@@ -110,7 +110,7 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
     }
 
     case "COMMENT": {
-      const vnode = `{type: ${NodeType.Comment}, text: ${ast.text}, el: null}`;
+      const vnode = `{type: ${NodeType.Comment}, text: \`${ast.text}\`, el: null}`;
       addVNode(ctx, vnode, false);
       break;
     }
