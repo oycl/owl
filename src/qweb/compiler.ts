@@ -1,7 +1,16 @@
-import { AST, parse, ASTDOMNode, ASTSetNode, ASTEscNode, ASTCallNode, ASTRawNode } from "./parser";
-import { NodeType, VDataNode } from "../vdom/vdom";
+import { NodeType, registerStaticNode, VDataNode } from "../vdom/vdom";
 import { compileExpr } from "./expression_parser";
-
+import {
+  AST,
+  ASTCallNode,
+  ASTDOMNode,
+  ASTEscNode,
+  ASTRawNode,
+  ASTSetNode,
+  ASTStaticNode,
+  parse,
+} from "./parser";
+import { QWeb } from "./qweb";
 export interface RenderContext {
   [key: string]: any;
 }
@@ -14,7 +23,8 @@ interface QWebVar {
   hasValue: boolean;
 }
 
-interface CodeContext {
+interface CompilerContext {
+  qweb: QWeb;
   currentParent: string;
   code: string[];
   nextId: number;
@@ -24,10 +34,11 @@ interface CodeContext {
   variables: { [name: string]: QWebVar };
 }
 
-export function compileTemplate(name: string, template: string): CompiledTemplate {
+export function compileTemplate(qweb: QWeb, name: string, template: string): CompiledTemplate {
   const ast = parse(template);
   // console.warn(JSON.stringify(ast, null, 3))
-  const ctx: CodeContext = {
+  const ctx: CompilerContext = {
+    qweb,
     currentParent: "tree",
     code: [],
     nextId: 1,
@@ -51,7 +62,7 @@ export function compileTemplate(name: string, template: string): CompiledTemplat
   return fn;
 }
 
-function generateCode(ast: AST | AST[], ctx: CodeContext) {
+function generateCode(ast: AST | AST[], ctx: CompilerContext) {
   if (ast instanceof Array) {
     for (let elem of ast) {
       generateCode(elem, ctx);
@@ -67,6 +78,9 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
       addVNode(ctx, vnode, false);
       break;
     }
+    case "STATIC":
+      compileStaticNode(ctx, ast);
+      break;
     case "T-SET":
       compileSetNode(ctx, ast);
       break;
@@ -157,21 +171,21 @@ function generateCode(ast: AST | AST[], ctx: CodeContext) {
 // Code generation helpers
 // -----------------------------------------------------------------------------
 
-function addIf(ctx: CodeContext, condition: string) {
+function addIf(ctx: CompilerContext, condition: string) {
   addLine(ctx, `if (${condition}) {`);
   ctx.indentLevel++;
 }
 
-function closeIf(ctx: CodeContext) {
+function closeIf(ctx: CompilerContext) {
   ctx.indentLevel--;
   addLine(ctx, `}`);
 }
 
-function uniqueId(ctx: CodeContext, prefix: string = "_"): string {
+function uniqueId(ctx: CompilerContext, prefix: string = "_"): string {
   return prefix + String(ctx.nextId++);
 }
 
-function addVNode(ctx: CodeContext, str: string, keepRef: boolean = true): string {
+function addVNode(ctx: CompilerContext, str: string, keepRef: boolean = true): string {
   const id = uniqueId(ctx, "vn");
   if (ctx.currentParent === "tree") {
     if (keepRef) {
@@ -194,14 +208,14 @@ function addVNode(ctx: CodeContext, str: string, keepRef: boolean = true): strin
   return id;
 }
 
-function withParent(ctx: CodeContext, parent: string, cb: Function) {
+function withParent(ctx: CompilerContext, parent: string, cb: Function) {
   const current = ctx.currentParent;
   ctx.currentParent = parent;
   cb();
   ctx.currentParent = current;
 }
 
-function addLine(ctx: CodeContext, code: string) {
+function addLine(ctx: CompilerContext, code: string) {
   ctx.code.push(new Array(ctx.indentLevel + 2).join("    ") + code);
 }
 
@@ -226,7 +240,7 @@ export function handleEvent(ev: Event, ctx: any, fn: any) {
   fn.call(ctx, ev);
 }
 
-function compileDOMNode(ctx: CodeContext, ast: ASTDOMNode) {
+function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
   const attrs = {};
   for (let attr in ast.attrs) {
     let value = ast.attrs[attr];
@@ -262,7 +276,7 @@ function compileDOMNode(ctx: CodeContext, ast: ASTDOMNode) {
 // Compile T-SET node
 // -----------------------------------------------------------------------------
 
-function compileSetNode(ctx: CodeContext, ast: ASTSetNode) {
+function compileSetNode(ctx: CompilerContext, ast: ASTSetNode) {
   ctx.shouldProtectContext = true;
   if (ast.value !== null) {
     addLine(ctx, `ctx.${ast.name} = ${compileExpr(ast.value, {})};`);
@@ -303,7 +317,7 @@ function compileSetNode(ctx: CodeContext, ast: ASTSetNode) {
 // Compile T-ESC node
 // -----------------------------------------------------------------------------
 
-function compileEscNode(ctx: CodeContext, ast: ASTEscNode) {
+function compileEscNode(ctx: CompilerContext, ast: ASTEscNode) {
   if (ast.expr === "0") {
     addVNode(
       ctx,
@@ -358,7 +372,7 @@ function compileEscNode(ctx: CodeContext, ast: ASTEscNode) {
 // Compile T-RAW node
 // -----------------------------------------------------------------------------
 
-function compileRawNode(ctx: CodeContext, ast: ASTRawNode) {
+function compileRawNode(ctx: CompilerContext, ast: ASTRawNode) {
   if (ast.expr === "0") {
     addVNode(ctx, `{type: ${NodeType.Multi}, children: ctx[this.zero]}`, false);
 
@@ -403,11 +417,12 @@ function compileRawNode(ctx: CodeContext, ast: ASTRawNode) {
   }
   // }
 }
+
 // -----------------------------------------------------------------------------
 // Compile T-CALL node
 // -----------------------------------------------------------------------------
 
-function compileCallNode(ctx: CodeContext, ast: ASTCallNode) {
+function compileCallNode(ctx: CompilerContext, ast: ASTCallNode) {
   if (ast.children.length) {
     addLine(ctx, `ctx = Object.create(ctx);`);
     const id = uniqueId(ctx, "vn");
@@ -423,4 +438,39 @@ function compileCallNode(ctx: CodeContext, ast: ASTCallNode) {
   if (ast.children.length) {
     addLine(ctx, `ctx = ctx.__proto__;`);
   }
+}
+
+// -----------------------------------------------------------------------------
+// Compile static nodes
+// -----------------------------------------------------------------------------
+
+function compileStaticNode(ctx: CompilerContext, ast: ASTStaticNode) {
+  const id = ctx.qweb.nextId++;
+  const el = makeEl(ast.child) as HTMLElement;
+  registerStaticNode(id, el);
+  const vnode = `{type: ${NodeType.Static}, id: ${id}}`;
+  addVNode(ctx, vnode, false);
+}
+
+function makeEl(ast: AST): HTMLElement | Text | Comment {
+  switch (ast.type) {
+    case "DOM": {
+      const el = document.createElement(ast.tag);
+      const attrs = ast.attrs;
+      for (let attr in attrs) {
+        el.setAttribute(attr, attrs[attr]);
+      }
+      for (let child of ast.children) {
+        el.appendChild(makeEl(child));
+      }
+      return el;
+    }
+    case "TEXT": {
+      return document.createTextNode(ast.text);
+    }
+    case "COMMENT": {
+      return document.createComment(ast.text);
+    }
+  }
+  throw new Error("Something is wrong...");
 }

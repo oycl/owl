@@ -38,6 +38,7 @@ const qwebContext: any = {
 // -----------------------------------------------------------------------------
 // QWeb
 // -----------------------------------------------------------------------------
+export type QWeb = typeof qweb;
 
 export const qweb = {
   nextId: 1,
@@ -63,7 +64,7 @@ export const qweb = {
         );
       }
 
-      fn = compileTemplate(template, rawTemplate);
+      fn = compileTemplate(qweb, template, rawTemplate);
       qweb.compiledTemplates[template] = fn;
     }
     return fn;

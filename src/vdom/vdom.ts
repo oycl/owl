@@ -16,11 +16,12 @@ interface Hooks {
 }
 
 export const enum NodeType {
+  Data,
+  Multi,
   DOM,
   Text,
   Comment,
-  Data,
-  Multi,
+  Static,
 }
 
 export interface Handler {
@@ -34,6 +35,11 @@ export interface VDOMNode<T> {
   attrs: { [name: string]: string };
   key: Key;
   on?: { [event: string]: Handler };
+}
+
+export interface VStaticNode {
+  type: NodeType.Static;
+  id: number;
 }
 
 export interface VTextNode {
@@ -61,11 +67,23 @@ export interface VMultiNode<T> {
   children: VNode<T>[];
 }
 
-export type VNode<T> = VDOMNode<T> | VTextNode | VDataNode<T> | VMultiNode<T> | VCommentNode;
+export type VNode<T> =
+  | VDOMNode<T>
+  | VTextNode
+  | VStaticNode
+  | VDataNode<T>
+  | VMultiNode<T>
+  | VCommentNode;
 
 // -----------------------------------------------------------------------------
 // patch and update
 // -----------------------------------------------------------------------------
+
+const staticNodes: { [id: number]: HTMLElement } = {};
+
+export function registerStaticNode(id: number, el: HTMLElement) {
+  staticNodes[id] = el;
+}
 
 export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): VNodeEl {
   // console.warn(JSON.stringify(vnode))
@@ -120,6 +138,11 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
       }
       return nodeEl;
     }
+    case NodeType.Static: {
+      const staticEl = staticNodes[vnode.id].cloneNode(true) as HTMLElement;
+      el.appendChild(staticEl);
+      return staticEl;
+    }
   }
 }
 
@@ -146,6 +169,10 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
         case NodeType.Text:
           vnode.el!.textContent = target.text;
           return;
+        case NodeType.Static:
+          const staticNode = staticNodes[target.id].cloneNode(true) as HTMLElement;
+          vnode.el!.replaceWith(staticNode);
+          return;
         case NodeType.DOM:
           vnode.el!.replaceWith(makeDOMVNode(target));
           return;
@@ -163,6 +190,10 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
             vnode.el!.replaceWith(makeDOMVNode(target));
           }
           return;
+        case NodeType.Static:
+          const staticNode = staticNodes[target.id].cloneNode(true) as HTMLElement;
+          vnode.el!.replaceWith(staticNode);
+          return;
         case NodeType.Text:
         case NodeType.Data:
         case NodeType.Comment:
@@ -175,6 +206,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           update(vnode.child!, target.child!);
           return;
         case NodeType.Text:
+        case NodeType.Static:
         case NodeType.DOM:
         case NodeType.Data:
         case NodeType.Comment:
