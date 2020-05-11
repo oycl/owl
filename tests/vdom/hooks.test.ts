@@ -1,5 +1,5 @@
 import { patch } from "../../src/vdom/vdom";
-import { domNode, textNode, multiNode, dataNode } from "./helpers";
+import { vDom, vText, vMulti, vRoot } from "./helpers";
 
 let fixture: HTMLElement;
 
@@ -9,7 +9,7 @@ beforeEach(() => {
 
 describe("hooks", () => {
   test("create hook on a  data node, 1 text node", () => {
-    const vnode = dataNode(textNode("abc"));
+    const vnode = vRoot(vText("abc"));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("abc");
@@ -20,7 +20,7 @@ describe("hooks", () => {
   });
 
   test("create hook on a data node, with domnode", () => {
-    const vnode = dataNode(domNode("div", [textNode("abc")]));
+    const vnode = vRoot(vDom("div", [vText("abc")]));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("<div>abc</div>");
@@ -30,7 +30,7 @@ describe("hooks", () => {
   });
 
   test("create hook on a datanode with inside multi node", () => {
-    const vnode = dataNode(multiNode([domNode("div", [])]));
+    const vnode = vRoot(vMulti([vDom("div")]));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("<div></div>");
@@ -40,7 +40,7 @@ describe("hooks", () => {
   });
 
   test("create hook, data node with multi node with two dom children", () => {
-    const vnode = dataNode(multiNode([domNode("div", []), domNode("span", [])]));
+    const vnode = vRoot(vMulti([vDom("div"), vDom("span")]));
     vnode.hooks.create = jest.fn();
     patch(fixture, vnode);
     expect(fixture.innerHTML).toBe("<div></div><span></span>");

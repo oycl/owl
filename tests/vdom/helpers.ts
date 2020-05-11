@@ -12,7 +12,7 @@ import {
 
 let nextId = 1;
 
-export function textNode(text: any): VTextNode {
+export function vText(text: any): VTextNode {
   return {
     type: NodeType.Text,
     text,
@@ -20,7 +20,7 @@ export function textNode(text: any): VTextNode {
   };
 }
 
-export function commentNode(text: string): VCommentNode {
+export function vComment(text: string): VCommentNode {
   return {
     type: NodeType.Comment,
     text,
@@ -28,7 +28,7 @@ export function commentNode(text: string): VCommentNode {
   };
 }
 
-export function staticNode(id: number, html: string): VStaticNode {
+export function vStatic(id: number, html: string): VStaticNode {
   const div = document.createElement("div");
   div.innerHTML = html;
   const el = div.firstElementChild! as HTMLElement;
@@ -36,13 +36,13 @@ export function staticNode(id: number, html: string): VStaticNode {
   return { type: NodeType.Static, id };
 }
 
-export function domNode(tag: string, children?: VNode<any>[]): VDOMNode<any>;
-export function domNode(
+export function vDom(tag: string, children?: VNode<any>[]): VDOMNode<any>;
+export function vDom(
   tag: string,
   data: Partial<VDOMNode<any>>,
   children?: VNode<any>[]
 ): VDOMNode<any>;
-export function domNode(tag: string, arg1: any, arg2?: any): VDOMNode<any> {
+export function vDom(tag: string, arg1: any, arg2?: any): VDOMNode<any> {
   let children: VNode<any>[];
   let data: Partial<VDOMNode<any>>;
   if (Array.isArray(arg1)) {
@@ -50,7 +50,7 @@ export function domNode(tag: string, arg1: any, arg2?: any): VDOMNode<any> {
     data = {};
   } else {
     children = arg2 || [];
-    data = arg1;
+    data = arg1 || {};
   }
   return {
     type: NodeType.DOM,
@@ -63,14 +63,14 @@ export function domNode(tag: string, arg1: any, arg2?: any): VDOMNode<any> {
   };
 }
 
-export function multiNode(children: VNode<any>[]): VMultiNode<any> {
+export function vMulti(children: VNode<any>[]): VMultiNode<any> {
   return {
     type: NodeType.Multi,
     children,
   };
 }
 
-export function dataNode(child: VNode<any>): VDataNode<any> {
+export function vRoot(child: VNode<any>): VDataNode<any> {
   return {
     type: NodeType.Data,
     child,
