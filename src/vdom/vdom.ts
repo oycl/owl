@@ -1,20 +1,12 @@
-/**
- * Owl 2 VDOM
- */
-
 import { NodeType, VNodeEl, VNode, VDOMNode, VMultiNode } from "./types";
+
 // -----------------------------------------------------------------------------
 // patch and update
 // -----------------------------------------------------------------------------
 
-const staticNodes: { [id: number]: HTMLElement } = {};
-
-export function registerStaticNode(id: number, el: HTMLElement) {
-  staticNodes[id] = el;
-}
+let staticNodes: HTMLElement[] | null = null;
 
 export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): VNodeEl {
-  // console.warn(JSON.stringify(vnode))
   switch (vnode.type) {
     case NodeType.Text:
       let text = vnode.text; // === undefined ? "" : vnode.text;
@@ -54,10 +46,13 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
       }
       el.appendChild(htmlEl);
       return htmlEl;
-    case NodeType.Data: {
+    case NodeType.Root: {
       const child = vnode.child;
       if (child) {
+        const current = staticNodes;
+        staticNodes = vnode.staticNodes;
         const nodeEl = patch(el, child);
+        staticNodes = current;
         const createHook = vnode.hooks.create;
         if (createHook) {
           createHook(nodeEl);
@@ -68,13 +63,19 @@ export function patch<T>(el: HTMLElement | DocumentFragment, vnode: VNode<T>): V
     }
     case NodeType.Multi: {
       let nodeEl: VNodeEl = null;
+      const current = staticNodes;
+      if (vnode.staticNodes) {
+        staticNodes = vnode.staticNodes;
+      }
       for (let child of vnode.children) {
         nodeEl = patch(el, child);
       }
+      staticNodes = current;
+
       return nodeEl;
     }
     case NodeType.Static: {
-      const staticEl = staticNodes[vnode.id].cloneNode(true) as HTMLElement;
+      const staticEl = staticNodes![vnode.id].cloneNode(true) as HTMLElement;
       el.appendChild(staticEl);
       return staticEl;
     }
@@ -105,13 +106,13 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           vnode.el!.textContent = target.text;
           return;
         case NodeType.Static:
-          const staticNode = staticNodes[target.id].cloneNode(true) as HTMLElement;
+          const staticNode = staticNodes![target.id].cloneNode(true) as HTMLElement;
           vnode.el!.replaceWith(staticNode);
           return;
         case NodeType.DOM:
           vnode.el!.replaceWith(makeDOMVNode(target));
           return;
-        case NodeType.Data:
+        case NodeType.Root:
         case NodeType.Multi:
         case NodeType.Comment:
           throw new Error("not yet implemented");
@@ -126,24 +127,24 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
           }
           return;
         case NodeType.Static:
-          const staticNode = staticNodes[target.id].cloneNode(true) as HTMLElement;
+          const staticNode = staticNodes![target.id].cloneNode(true) as HTMLElement;
           vnode.el!.replaceWith(staticNode);
           return;
         case NodeType.Text:
-        case NodeType.Data:
+        case NodeType.Root:
         case NodeType.Comment:
         case NodeType.Multi:
           throw new Error("not yet implemented");
       }
-    case NodeType.Data:
+    case NodeType.Root:
       switch (target.type) {
-        case NodeType.Data:
+        case NodeType.Root:
           update(vnode.child!, target.child!);
           return;
         case NodeType.Text:
         case NodeType.Static:
         case NodeType.DOM:
-        case NodeType.Data:
+        case NodeType.Root:
         case NodeType.Comment:
         case NodeType.Multi:
           throw new Error("not yet implemented");
@@ -156,7 +157,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
         case NodeType.Text:
         case NodeType.DOM:
         case NodeType.Comment:
-        case NodeType.Data:
+        case NodeType.Root:
           throw new Error("not yet implemented");
       }
   }

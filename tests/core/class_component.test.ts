@@ -218,7 +218,7 @@ describe("basic component properties", () => {
     }
 
     await mount(fixture, Parent);
-    expect(qweb.compiledTemplates[Parent.template].toString()).toMatchSnapshot();
+    expect(qweb.compiledTemplates[Parent.template].fn.toString()).toMatchSnapshot();
     expect(fixture.innerHTML).toBe("<div><span></span></div>");
   });
 

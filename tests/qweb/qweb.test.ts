@@ -1,26 +1,18 @@
 import { renderToString, xml } from "../../src/index";
 import { qweb } from "../../src/qweb/qweb";
-import { NodeType } from "../../src/vdom/types";
 import { patch } from "../../src/vdom/vdom";
 import { VTree } from "../../src/core/rendering_engine";
 
 function render(template: string, context: any = {}): string {
   const str = renderToString(template, context);
-  expect(qweb.compiledTemplates[template].toString()).toMatchSnapshot();
+  expect(qweb.compiledTemplates[template].fn.toString()).toMatchSnapshot();
   return str;
 }
 
 function renderToDOM(template: string, context: any = {}): HTMLDivElement {
-  const fn = qweb.getTemplateFn(template);
-  expect(qweb.compiledTemplates[template].toString()).toMatchSnapshot();
-  const tree: VTree = {
-    type: NodeType.Data,
-    data: {} as any,
-    child: null,
-    key: 1,
-    hooks: {},
-  };
-  fn.call(qweb.utils, tree, context);
+  const tree: VTree = qweb.createRoot(template, {} as any);
+  tree.renderFn(tree, context);
+  expect(qweb.compiledTemplates[template].fn.toString()).toMatchSnapshot();
   const div = document.createElement("div");
   patch(div, tree);
   return div;

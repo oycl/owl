@@ -8,7 +8,6 @@ import {
   VTextNode,
   VRootNode,
 } from "../../src/vdom/types";
-import { registerStaticNode } from "../../src/vdom/vdom";
 
 let nextId = 1;
 
@@ -28,11 +27,11 @@ export function vComment(text: string): VCommentNode {
   };
 }
 
-export function vStatic(id: number, html: string): VStaticNode {
+export function vStatic(root: VRootNode<any>, html: string): VStaticNode {
   const div = document.createElement("div");
   div.innerHTML = html;
   const el = div.firstElementChild! as HTMLElement;
-  registerStaticNode(id, el);
+  const id = root.staticNodes.push(el) - 1;
   return { type: NodeType.Static, id };
 }
 
@@ -70,12 +69,13 @@ export function vMulti(children: VNode<any>[]): VMultiNode<any> {
   };
 }
 
-export function vRoot(child: VNode<any>): VRootNode<any> {
+export function vRoot(child: VNode<any> | null): VRootNode<any> {
   return {
-    type: NodeType.Data,
+    type: NodeType.Root,
     child,
     data: null,
     key: nextId++,
     hooks: {},
+    staticNodes: [],
   };
 }

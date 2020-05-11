@@ -12,7 +12,7 @@ interface Hooks {
 }
 
 export const enum NodeType {
-  Data,
+  Root,
   Multi,
   DOM,
   Text,
@@ -23,6 +23,16 @@ export const enum NodeType {
 export interface Handler {
   cb: (this: HTMLElement, ev: any) => any;
 }
+
+export interface VRootNode<T> {
+  type: NodeType.Root;
+  data: T;
+  child: VNode<T> | null;
+  key: Key;
+  hooks: Hooks;
+  staticNodes: HTMLElement[];
+}
+
 export interface VDOMNode<T> {
   type: NodeType.DOM;
   tag: string;
@@ -51,17 +61,10 @@ export interface VCommentNode {
   el: Comment | null;
 }
 
-export interface VRootNode<T> {
-  type: NodeType.Data;
-  data: T;
-  child: VNode<T> | null;
-  key: Key;
-  hooks: Hooks;
-}
-
 export interface VMultiNode<T> {
   type: NodeType.Multi;
   children: VNode<T>[];
+  staticNodes?: HTMLElement[]; // sometimes useful to propagate nodes from a body to a t-call
 }
 
 export type VNode<T> =

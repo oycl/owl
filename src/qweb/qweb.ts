@@ -1,6 +1,6 @@
 import { CompiledTemplate, compileTemplate, RenderContext, handleEvent } from "./compiler";
 import { patch } from "../vdom/vdom";
-import { NodeType, VNode, VRootNode } from "../vdom/types";
+import { NodeType, VNode, VRootNode, VMultiNode } from "../vdom/types";
 import { htmlToVDOM } from "../vdom/html_to_vdom";
 import { escape } from "../utils";
 
@@ -21,16 +21,14 @@ const qwebContext: any = {
     patch(div, { type: NodeType.Multi, children: vdomArray });
     return div.innerHTML;
   },
-  callTemplate(tree: VRootNode<any>, name: string, ctx: RenderContext) {
-    const subtree: VRootNode<any> = {
-      type: NodeType.Data,
-      data: tree.data,
-      child: null,
-      key: 1,
-      hooks: {},
-    };
-    let fn = qweb.getTemplateFn(name);
-    fn.call(qwebContext, subtree, ctx);
+  vMultiToString: function (multi: VMultiNode<any>): string {
+    const div = document.createElement("div");
+    patch(div, multi);
+    return div.innerHTML;
+  },
+  callTemplate(tree: VTemplateRoot<any>, name: string, ctx: RenderContext) {
+    const subtree: VTemplateRoot<any> = qweb.createRoot(name, tree.data);
+    subtree.renderFn(subtree, ctx);
     return subtree;
   },
   htmlToVDOM,
@@ -52,6 +50,10 @@ const qwebContext: any = {
   },
 };
 
+export interface VTemplateRoot<T> extends VRootNode<T> {
+  renderFn(tree: VRootNode<T>, context: RenderContext): void;
+}
+
 // -----------------------------------------------------------------------------
 // QWeb
 // -----------------------------------------------------------------------------
@@ -67,6 +69,18 @@ export const qweb = {
     this.templateMap[name] = template;
   },
 
+  createRoot<T>(template: string, data: T): VTemplateRoot<T> {
+    const { fn, staticNodes } = this.getTemplateFn(template);
+    return {
+      type: NodeType.Root,
+      data,
+      child: null,
+      key: -1,
+      hooks: {},
+      staticNodes,
+      renderFn: fn.bind(qwebContext),
+    };
+  },
   getTemplateFn(template: string): CompiledTemplate {
     let fn = qweb.compiledTemplates[template];
     if (!fn) {
@@ -95,15 +109,8 @@ export const qweb = {
    * This method can only render templates without components.
    */
   renderToString(name: string, context: RenderContext = {}): string {
-    const fn = qweb.getTemplateFn(name);
-    const tree: VRootNode<any> = {
-      type: NodeType.Data,
-      data: {},
-      child: null,
-      key: 1,
-      hooks: {},
-    };
-    fn.call(qwebContext, tree, context);
+    const tree: VTemplateRoot<any> = qweb.createRoot(name, {});
+    tree.renderFn(tree, context);
     const div = document.createElement("div");
     patch(div, tree);
 

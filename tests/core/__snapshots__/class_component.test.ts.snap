@@ -3,7 +3,7 @@
 exports[`basic component properties can handle empty props 1`] = `
 "function anonymous(tree, ctx
 ) {
-    // Template: \`__template__19\`
+    // Template: \`__template__12\`
     const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
     vn1.children.push(this.makeComponent(tree, \\"Child\\", ctx));
 }"

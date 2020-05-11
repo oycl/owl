@@ -1,12 +1,11 @@
 import { Fiber } from "./fiber";
-import { qweb } from "../qweb/qweb";
-import { CompiledTemplate, RenderContext } from "../qweb/compiler";
+import { qweb, VTemplateRoot } from "../qweb/qweb";
+import { RenderContext } from "../qweb/compiler";
 import { scheduler } from "./scheduler";
 import { patch, update } from "../vdom/vdom";
-import { VRootNode, NodeType } from "../vdom/types";
 import { Component } from "./component";
 
-const { utils: qwebUtils, getTemplateFn } = qweb;
+const { utils: qwebUtils } = qweb;
 
 // -----------------------------------------------------------------------------
 // Types
@@ -25,7 +24,6 @@ export type OwlComponent = FunctionComponent | ClassComponent;
 
 export interface ComponentData {
   fiber: Fiber;
-  templateFn: CompiledTemplate;
   components: { [key: string]: OwlComponent };
   context: any;
 }
@@ -35,7 +33,7 @@ export interface FnInstance {
   context: any;
 }
 
-export type VTree = VRootNode<ComponentData>;
+export type VTree = VTemplateRoot<ComponentData>;
 
 type MountTarget = HTMLElement | DocumentFragment;
 
@@ -115,18 +113,12 @@ function makeFnComponent(fn: FunctionComponent, options: MountOptions): VTree {
   const data: ComponentData = {
     fiber,
     context,
-    templateFn: getTemplateFn(fn.template),
     components: fn.components || {},
   };
-  const tree: VTree = {
-    type: NodeType.Data,
-    data,
-    child: null,
-    key: 1,
-    hooks: {},
-  };
+  const tree: VTree = qweb.createRoot(fn.template, data);
+
   new Promise(async (resolve) => {
-    tree.data.templateFn.call(qwebUtils, tree, context);
+    tree.renderFn(tree, context);
     fiber.counter--;
     resolve();
   });
@@ -143,16 +135,9 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
   const data: ComponentData = {
     fiber,
     context: null,
-    templateFn: getTemplateFn(template),
     components: C.components || {},
   };
-  const tree: VTree = {
-    type: NodeType.Data,
-    data,
-    child: null,
-    key: 1,
-    hooks: {},
-  };
+  const tree = qweb.createRoot(template, data);
   const props = options.props || {};
   const env = options.env || {};
   engine.currentVTree = tree;
@@ -161,7 +146,7 @@ function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
   tree.data.context = c;
   tree.hooks.create = (el) => (c.el = el);
   new Promise((resolve) => {
-    tree.data.templateFn.call(qwebUtils, tree, c);
+    tree.renderFn(tree, c);
     fiber.counter--;
     resolve();
   });
@@ -189,7 +174,7 @@ function render(tree: VTree): Promise<void> {
   newTree.data.fiber = fiber;
   fiber.counter = 1;
   new Promise((resolve) => {
-    tree.data.templateFn.call(qwebUtils, newTree, newTree.data.context);
+    tree.renderFn(newTree, newTree.data.context);
     fiber.counter--;
     resolve();
   });

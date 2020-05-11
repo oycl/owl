@@ -1,4 +1,3 @@
-import { registerStaticNode } from "../vdom/vdom";
 import { NodeType, VRootNode } from "../vdom/types";
 import { compileExpr } from "./expression_parser";
 import {
@@ -16,7 +15,10 @@ export interface RenderContext {
   [key: string]: any;
 }
 
-export type CompiledTemplate = (this: any, tree: VRootNode<any>, context: RenderContext) => void;
+export interface CompiledTemplate {
+  fn: (this: any, tree: VRootNode<any>, context: RenderContext) => void;
+  staticNodes: HTMLElement[];
+}
 
 interface QWebVar {
   expr: string;
@@ -33,6 +35,7 @@ interface CompilerContext {
   shouldProtectContext: boolean;
   shouldDefineRootContext: boolean;
   variables: { [name: string]: QWebVar };
+  staticNodes: HTMLElement[];
 }
 
 export function compileTemplate(qweb: QWeb, name: string, template: string): CompiledTemplate {
@@ -47,6 +50,7 @@ export function compileTemplate(qweb: QWeb, name: string, template: string): Com
     shouldProtectContext: false,
     shouldDefineRootContext: false,
     variables: {},
+    staticNodes: [],
   };
   const descr = name.trim().slice(0, 100).replace(/`/g, "'").replace(/\n/g, "");
   addLine(ctx, `// Template: \`${descr}\``);
@@ -59,8 +63,11 @@ export function compileTemplate(qweb: QWeb, name: string, template: string): Com
     ctx.code.splice(1, 0, `    const rootCtx = ctx;`);
   }
   // console.warn(ctx.code.join("\n"));
-  const fn = new Function("tree, ctx", ctx.code.join("\n")) as CompiledTemplate;
-  return fn;
+  const fn = new Function("tree, ctx", ctx.code.join("\n")) as any;
+  return {
+    fn,
+    staticNodes: ctx.staticNodes,
+  };
 }
 
 function generateCode(ast: AST | AST[], ctx: CompilerContext) {
@@ -330,11 +337,7 @@ function compileSetNode(ctx: CompilerContext, ast: ASTSetNode) {
 
 function compileEscNode(ctx: CompilerContext, ast: ASTEscNode) {
   if (ast.expr === "0") {
-    addVNode(
-      ctx,
-      `{type: ${NodeType.Text}, text: this.vDomToString(ctx[this.zero]), el: null}`,
-      false
-    );
+    addVNode(ctx, `{type: ${NodeType.Text}, text: this.vMultiToString(ctx[this.zero])}`, false);
 
     return;
   }
@@ -385,7 +388,7 @@ function compileEscNode(ctx: CompilerContext, ast: ASTEscNode) {
 
 function compileRawNode(ctx: CompilerContext, ast: ASTRawNode) {
   if (ast.expr === "0") {
-    addVNode(ctx, `{type: ${NodeType.Multi}, children: ctx[this.zero]}`, false);
+    addVNode(ctx, `ctx[this.zero]`, false);
 
     return;
   }
@@ -437,11 +440,14 @@ function compileCallNode(ctx: CompilerContext, ast: ASTCallNode) {
   if (ast.children.length) {
     addLine(ctx, `ctx = Object.create(ctx);`);
     const id = uniqueId(ctx, "vn");
-    addLine(ctx, `const ${id} = {type: ${NodeType.Multi}, children: []};`);
+    addLine(
+      ctx,
+      `const ${id} = {type: ${NodeType.Multi}, children: [], staticNodes: tree.staticNodes};`
+    );
     withParent(ctx, id, () => {
       generateCode(ast.children, ctx);
     });
-    addLine(ctx, `ctx[this.zero] = ${id}.children;`);
+    addLine(ctx, `ctx[this.zero] = ${id};`);
   }
   const vnode = `this.callTemplate(tree, "${ast.template}", ctx)`;
 
@@ -456,9 +462,8 @@ function compileCallNode(ctx: CompilerContext, ast: ASTCallNode) {
 // -----------------------------------------------------------------------------
 
 function compileStaticNode(ctx: CompilerContext, ast: ASTStaticNode) {
-  const id = ctx.qweb.nextId++;
   const el = makeEl(ast.child) as HTMLElement;
-  registerStaticNode(id, el);
+  const id = ctx.staticNodes.push(el) - 1;
   const vnode = `{type: ${NodeType.Static}, id: ${id}}`;
   addVNode(ctx, vnode, false);
 }
