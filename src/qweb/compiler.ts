@@ -1,4 +1,5 @@
-import { NodeType, registerStaticNode, VDataNode } from "../vdom/vdom";
+import { registerStaticNode } from "../vdom/vdom";
+import { NodeType, VDataNode } from "../vdom/types";
 import { compileExpr } from "./expression_parser";
 import {
   AST,

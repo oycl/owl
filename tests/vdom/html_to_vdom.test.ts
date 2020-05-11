@@ -1,4 +1,5 @@
-import { NodeType, patch } from "../../src/vdom/vdom";
+import { patch } from "../../src/vdom/vdom";
+import { NodeType } from "../../src/vdom/types";
 import { htmlToVDOM } from "../../src/vdom/html_to_vdom";
 
 let fixture: HTMLElement;

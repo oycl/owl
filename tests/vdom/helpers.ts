@@ -1,6 +1,5 @@
 import {
   NodeType,
-  registerStaticNode,
   VCommentNode,
   VDataNode,
   VDOMNode,
@@ -8,7 +7,8 @@ import {
   VNode,
   VStaticNode,
   VTextNode,
-} from "../../src/vdom/vdom";
+} from "../../src/vdom/types";
+import { registerStaticNode } from "../../src/vdom/vdom";
 
 let nextId = 1;
 

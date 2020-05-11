@@ -1,5 +1,6 @@
 import { CompiledTemplate, compileTemplate, RenderContext, handleEvent } from "./compiler";
-import { patch, NodeType, VNode, VDataNode } from "../vdom/vdom";
+import { patch } from "../vdom/vdom";
+import { NodeType, VNode, VDataNode } from "../vdom/types";
 import { htmlToVDOM } from "../vdom/html_to_vdom";
 import { escape } from "../utils";
 

@@ -1,4 +1,4 @@
-import { VNode, NodeType } from "./vdom";
+import { VNode, NodeType } from "./types";
 
 // -----------------------------------------------------------------------------
 // html to vdom

@@ -1,6 +1,7 @@
 import { renderToString, xml } from "../../src/index";
 import { qweb } from "../../src/qweb/qweb";
-import { NodeType, patch } from "../../src/vdom/vdom";
+import { NodeType } from "../../src/vdom/types";
+import { patch } from "../../src/vdom/vdom";
 import { VTree } from "../../src/core/rendering_engine";
 
 function render(template: string, context: any = {}): string {
