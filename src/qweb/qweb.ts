@@ -1,6 +1,6 @@
 import { CompiledTemplate, compileTemplate, RenderContext, handleEvent } from "./compiler";
 import { patch } from "../vdom/vdom";
-import { NodeType, VNode, VDataNode } from "../vdom/types";
+import { NodeType, VNode, VRootNode } from "../vdom/types";
 import { htmlToVDOM } from "../vdom/html_to_vdom";
 import { escape } from "../utils";
 
@@ -21,8 +21,8 @@ const qwebContext: any = {
     patch(div, { type: NodeType.Multi, children: vdomArray });
     return div.innerHTML;
   },
-  callTemplate(tree: VDataNode<any>, name: string, ctx: RenderContext) {
-    const subtree: VDataNode<any> = {
+  callTemplate(tree: VRootNode<any>, name: string, ctx: RenderContext) {
+    const subtree: VRootNode<any> = {
       type: NodeType.Data,
       data: tree.data,
       child: null,
@@ -96,7 +96,7 @@ export const qweb = {
    */
   renderToString(name: string, context: RenderContext = {}): string {
     const fn = qweb.getTemplateFn(name);
-    const tree: VDataNode<any> = {
+    const tree: VRootNode<any> = {
       type: NodeType.Data,
       data: {},
       child: null,

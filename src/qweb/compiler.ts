@@ -1,5 +1,5 @@
 import { registerStaticNode } from "../vdom/vdom";
-import { NodeType, VDataNode } from "../vdom/types";
+import { NodeType, VRootNode } from "../vdom/types";
 import { compileExpr } from "./expression_parser";
 import {
   AST,
@@ -16,7 +16,7 @@ export interface RenderContext {
   [key: string]: any;
 }
 
-export type CompiledTemplate = (this: any, tree: VDataNode<any>, context: RenderContext) => void;
+export type CompiledTemplate = (this: any, tree: VRootNode<any>, context: RenderContext) => void;
 
 interface QWebVar {
   expr: string;

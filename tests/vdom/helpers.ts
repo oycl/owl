@@ -1,12 +1,12 @@
 import {
   NodeType,
   VCommentNode,
-  VDataNode,
   VDOMNode,
   VMultiNode,
   VNode,
   VStaticNode,
   VTextNode,
+  VRootNode,
 } from "../../src/vdom/types";
 import { registerStaticNode } from "../../src/vdom/vdom";
 
@@ -70,7 +70,7 @@ export function vMulti(children: VNode<any>[]): VMultiNode<any> {
   };
 }
 
-export function vRoot(child: VNode<any>): VDataNode<any> {
+export function vRoot(child: VNode<any>): VRootNode<any> {
   return {
     type: NodeType.Data,
     child,

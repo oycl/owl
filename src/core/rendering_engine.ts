@@ -3,7 +3,7 @@ import { qweb } from "../qweb/qweb";
 import { CompiledTemplate, RenderContext } from "../qweb/compiler";
 import { scheduler } from "./scheduler";
 import { patch, update } from "../vdom/vdom";
-import { VDataNode, NodeType } from "../vdom/types";
+import { VRootNode, NodeType } from "../vdom/types";
 import { Component } from "./component";
 
 const { utils: qwebUtils, getTemplateFn } = qweb;
@@ -35,7 +35,7 @@ export interface FnInstance {
   context: any;
 }
 
-export type VTree = VDataNode<ComponentData>;
+export type VTree = VRootNode<ComponentData>;
 
 type MountTarget = HTMLElement | DocumentFragment;
 

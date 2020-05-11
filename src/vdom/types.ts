@@ -51,7 +51,7 @@ export interface VCommentNode {
   el: Comment | null;
 }
 
-export interface VDataNode<T> {
+export interface VRootNode<T> {
   type: NodeType.Data;
   data: T;
   child: VNode<T> | null;
@@ -68,6 +68,6 @@ export type VNode<T> =
   | VDOMNode<T>
   | VTextNode
   | VStaticNode
-  | VDataNode<T>
+  | VRootNode<T>
   | VMultiNode<T>
   | VCommentNode;
