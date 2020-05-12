@@ -20,48 +20,50 @@ export const enum NodeType {
   Static,
 }
 
+interface BaseNode {
+  key?: Key;
+}
+
 export interface Handler {
   cb: (this: HTMLElement, ev: any) => any;
 }
 
-export interface VRootNode<T> {
+export interface VRootNode<T> extends BaseNode {
   type: NodeType.Root;
   data: T;
   child: VNode<T> | null;
-  key: Key;
   hooks: Hooks;
   staticNodes: HTMLElement[];
 }
 
-export interface VDOMNode<T> {
+export interface VDOMNode<T> extends BaseNode {
   type: NodeType.DOM;
   tag: string;
   children: VNode<T>[];
-  key: Key;
   el?: HTMLElement;
   attrs?: { [name: string]: string | boolean | number | null };
   on?: { [event: string]: Handler };
   class?: { [name: string]: boolean };
 }
 
-export interface VStaticNode {
+export interface VStaticNode extends BaseNode {
   type: NodeType.Static;
   id: number;
 }
 
-export interface VTextNode {
+export interface VTextNode extends BaseNode {
   type: NodeType.Text;
   text: any;
   el: Text | null;
 }
 
-export interface VCommentNode {
+export interface VCommentNode extends BaseNode {
   type: NodeType.Comment;
   text: string;
   el: Comment | null;
 }
 
-export interface VMultiNode<T> {
+export interface VMultiNode<T> extends BaseNode {
   type: NodeType.Multi;
   children: VNode<T>[];
   staticNodes?: HTMLElement[]; // sometimes useful to propagate nodes from a body to a t-call

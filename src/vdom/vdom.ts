@@ -121,7 +121,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
       switch (target.type) {
         case NodeType.DOM:
           if (vnode.key === target.key && vnode.tag === target.tag) {
-            updateChildren(vnode.children, target);
+            updateChildren(vnode, target);
           } else {
             vnode.el!.replaceWith(makeDOMVNode(target));
           }
@@ -152,7 +152,7 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
     case NodeType.Multi:
       switch (target.type) {
         case NodeType.Multi:
-          updateChildren(vnode.children, target);
+          updateChildren(vnode, target);
           return;
         case NodeType.Text:
         case NodeType.DOM:
@@ -163,10 +163,65 @@ export function update<T>(vnode: VNode<T>, target: VNode<T>) {
   }
 }
 
-function updateChildren<T>(oldChildren: VNode<T>[], newParent: VDOMNode<T> | VMultiNode<T>) {
+function isSame(vn1: VNode<any>, vn2: VNode<any>): boolean {
+  return vn1.type === vn2.type && vn1.key === vn2.key;
+  //   if (vn1.type !== vn2.type) {
+  //     return false;
+  //   }
+  //   switch (vn1.type) {
+  //     case NodeType.DOM:
+  //       return vn1.key === (vn2 as VDOMNode<any>).key && vn1.tag === (vn2 as VDOMNode<any>).tag;
+
+  //   }
+  //   if (vn1.type === NodeType.DOM && vn2.type === NodeType.DOM) {
+
+  //   }
+}
+
+function updateChildren<T>(
+  vnode: VDOMNode<T> | VMultiNode<T>,
+  newParent: VDOMNode<T> | VMultiNode<T>
+) {
+  const oldChildren = vnode.children;
+  const parentElm = (vnode as any).el;
   const newChildren = newParent.children;
-  const l = newChildren.length;
-  for (let i = 0; i < l; i++) {
-    update(oldChildren[i], newChildren[i]);
+  let oldStartIdx = 0;
+  let newStartIdx = 0;
+  let oldEndIdx = oldChildren.length - 1;
+  let newEndIdx = newChildren.length - 1;
+  let oldStartVnode = oldChildren[0];
+  let newStartVnode = newChildren[0];
+  // console.warn(oldChildren, newChildren)
+
+  // main update loop
+  while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+    // console.warn(JSON.stringify(oldStartVnode));
+    // console.warn( JSON.stringify(newStartVnode))
+
+    if (isSame(oldStartVnode, newStartVnode)) {
+      update(oldStartVnode, newStartVnode);
+      oldStartVnode = oldChildren[++oldStartIdx];
+      newStartVnode = newChildren[++newStartIdx];
+    } else {
+      throw new Error("boom" + oldStartVnode);
+    }
+    // console.warn(oldStartIdx, oldEndIdx, newStartIdx, newEndIdx)
   }
+
+  // the diff is done now. But there may be still nodes to add or remove
+  if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
+    if (oldStartIdx > oldEndIdx) {
+      for (; newStartIdx <= newEndIdx; ++newStartIdx) {
+        patch(parentElm, newChildren[newStartIdx]);
+      }
+      // before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
+      // addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
+    } else {
+      // removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
+    }
+  }
+  // const l = newChildren.length;
+  // for (let i = 0; i < l; i++) {
+  //   update(oldChildren[i], newChildren[i]);
+  // }
 }

@@ -40,6 +40,12 @@ describe("patch function", () => {
     expect(fixture.innerHTML).toBe("<div>abc</div>");
   });
 
+  test("can make an element with a span and a text node", () => {
+    const vnode = vDom("a", [vDom("span"), vText("abc")]);
+    patch(fixture, vnode);
+    expect(fixture.innerHTML).toBe("<a><span></span>abc</a>");
+  });
+
   test("can patch an empty multi node", () => {
     const vnode = vMulti([]);
     patch(fixture, vnode);
@@ -158,7 +164,7 @@ describe("patch function", () => {
       expect(elm.getAttribute("noresize")).toBe("null");
     });
 
-    test("is not considered as a boolean attribute and shouldn't be omitted", function () {
+    test("object.prototype property: is not considered as a boolean attribute and shouldn't be omitted", function () {
       const attrs1 = { constructor: true };
       const vnode1 = vDom("div", { attrs: attrs1 }, []);
       patch(fixture, vnode1);

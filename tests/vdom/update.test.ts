@@ -1,5 +1,6 @@
 import { patch, update } from "../../src/vdom/vdom";
 import { vDom, vText, vMulti, vRoot } from "./helpers";
+import { VDOMNode } from "../../src/vdom/types";
 
 let fixture: HTMLElement;
 
@@ -158,6 +159,35 @@ describe("update function", () => {
     update(vnode, vDom("div", []));
     expect(fixture.innerHTML).toBe("<div></div>");
     expect(fixture.childNodes[0]).not.toBe(div);
+  });
+});
+
+describe("updating children in a dom node, with keys", () => {
+  function spanNum(n: number): VDOMNode<any> {
+    return vDom("span", { key: String(n) }, [vText(String(n))]);
+  }
+
+  describe("addition of elements", () => {
+    test.only("appends elements", function () {
+      const vnode1 = vDom("p", { key: 1 }, [spanNum(1)]);
+      const vnode2 = vDom("p", { key: 1 }, [1, 2, 3].map(spanNum));
+
+      patch(fixture, vnode1);
+      expect(fixture.innerHTML).toBe("<p><span>1</span></p>");
+      const p = fixture.firstElementChild!;
+
+      update(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe("<p><span>1</span><span>2</span><span>3</span></p>");
+      expect(fixture.firstElementChild!).toBe(p);
+      // const vnode1 = h("span", [1].map(spanNum));
+      // const vnode2 = h("span", [1, 2, 3].map(spanNum));
+      // elm = patch(vnode0, vnode1).elm;
+      // expect(elm.children.length).toBe(1);
+      // elm = patch(vnode1, vnode2).elm;
+      // expect(elm.children.length).toBe(3);
+      // expect(elm.children[1].innerHTML).toBe("2");
+      // expect(elm.children[2].innerHTML).toBe("3");
+    });
   });
 });
 
