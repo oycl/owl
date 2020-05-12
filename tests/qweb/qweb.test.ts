@@ -1,6 +1,6 @@
 import { renderToString, xml } from "../../src/index";
 import { qweb } from "../../src/qweb/qweb";
-import { patch } from "../../src/vdom/vdom";
+import { buildTree } from "../../src/vdom/vdom";
 import { VTree } from "../../src/core/rendering_engine";
 
 function render(template: string, context: any = {}): string {
@@ -14,7 +14,7 @@ function renderToDOM(template: string, context: any = {}): HTMLDivElement {
   tree.renderFn(tree, context);
   expect(qweb.compiledTemplates[template].fn.toString()).toMatchSnapshot();
   const div = document.createElement("div");
-  patch(div, tree);
+  buildTree(tree, div);
   return div;
 }
 

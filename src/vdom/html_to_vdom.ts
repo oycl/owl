@@ -30,7 +30,7 @@ export function htmlToVDOM(html: string): VNode<any>[] {
 
 function htmlToVNode(node: ChildNode): VNode<any> {
   if (!(node instanceof Element)) {
-    return { type: NodeType.Text, text: node.textContent!, el: null };
+    return { type: NodeType.Text, text: node.textContent! };
   }
   const attrs: { [attr: string]: string } = {};
   for (let attr of node.attributes) {

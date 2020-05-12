@@ -7,6 +7,7 @@ import {
   VStaticNode,
   VTextNode,
   VRootNode,
+  Key,
 } from "../../src/vdom/types";
 
 let nextId = 1;
@@ -15,7 +16,6 @@ export function vText(text: any): VTextNode {
   return {
     type: NodeType.Text,
     text,
-    el: null,
   };
 }
 
@@ -23,11 +23,10 @@ export function vComment(text: string): VCommentNode {
   return {
     type: NodeType.Comment,
     text,
-    el: null,
   };
 }
 
-export function vStatic(root: VRootNode<any>, html: string): VStaticNode {
+export function vStatic(root: VRootNode, html: string): VStaticNode {
   const div = document.createElement("div");
   div.innerHTML = html;
   const el = div.firstElementChild! as HTMLElement;
@@ -35,15 +34,11 @@ export function vStatic(root: VRootNode<any>, html: string): VStaticNode {
   return { type: NodeType.Static, id };
 }
 
-export function vDom(tag: string, children?: VNode<any>[]): VDOMNode<any>;
-export function vDom(
-  tag: string,
-  data: Partial<VDOMNode<any>>,
-  children?: VNode<any>[]
-): VDOMNode<any>;
-export function vDom(tag: string, arg1: any, arg2?: any): VDOMNode<any> {
-  let children: VNode<any>[];
-  let data: Partial<VDOMNode<any>>;
+export function vDom(tag: string, children?: VNode[]): VDOMNode;
+export function vDom(tag: string, data: Partial<VDOMNode>, children?: VNode[]): VDOMNode;
+export function vDom(tag: string, arg1: any, arg2?: any): VDOMNode {
+  let children: VNode[];
+  let data: Partial<VDOMNode>;
   if (Array.isArray(arg1)) {
     children = arg1;
     data = {};
@@ -62,14 +57,19 @@ export function vDom(tag: string, arg1: any, arg2?: any): VDOMNode<any> {
   };
 }
 
-export function vMulti(children: VNode<any>[]): VMultiNode<any> {
-  return {
-    type: NodeType.Multi,
-    children,
-  };
+export function vMulti(children: VNode[]): VMultiNode;
+export function vMulti(key: Key, children: VNode[]): VMultiNode;
+export function vMulti(arg1: any, arg2: any = []): VMultiNode {
+  if (Array.isArray(arg1)) {
+    return {
+      type: NodeType.Multi,
+      children: arg1,
+    };
+  }
+  return { type: NodeType.Multi, key: arg1, children: arg2 };
 }
 
-export function vRoot(child: VNode<any> | null): VRootNode<any> {
+export function vRoot(child: VNode | null): VRootNode {
   return {
     type: NodeType.Root,
     child,
@@ -77,5 +77,7 @@ export function vRoot(child: VNode<any> | null): VRootNode<any> {
     key: nextId++,
     hooks: {},
     staticNodes: [],
+    anchor: null,
+    position: null,
   };
 }

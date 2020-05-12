@@ -2,7 +2,7 @@ import { Fiber } from "./fiber";
 import { qweb, VTemplateRoot } from "../qweb/qweb";
 import { RenderContext } from "../qweb/compiler";
 import { scheduler } from "./scheduler";
-import { patch, update } from "../vdom/vdom";
+import { buildTree, patch } from "../vdom/vdom";
 import { Component } from "./component";
 
 const { utils: qwebUtils } = qweb;
@@ -93,7 +93,7 @@ async function mount(target: MountTarget, elem: any, options: MountOptions = {})
   }
   return scheduler.addFiber(tree.data.fiber).then(() => {
     const fragment = document.createDocumentFragment();
-    patch(fragment, tree);
+    buildTree(tree, (fragment as any) as HTMLElement);
     target.appendChild(fragment);
     return result || tree.data.context;
   });
@@ -179,6 +179,6 @@ function render(tree: VTree): Promise<void> {
     resolve();
   });
   return scheduler.addFiber(fiber).then(() => {
-    update(tree, newTree);
+    patch(tree, newTree);
   });
 }

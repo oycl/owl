@@ -1,5 +1,5 @@
 import { CompiledTemplate, compileTemplate, RenderContext, handleEvent } from "./compiler";
-import { patch } from "../vdom/vdom";
+import { buildTree } from "../vdom/vdom";
 import { NodeType, VNode, VRootNode, VMultiNode } from "../vdom/types";
 import { htmlToVDOM } from "../vdom/html_to_vdom";
 import { escape } from "../utils";
@@ -18,12 +18,12 @@ const qwebContext: any = {
   VDomArray: class VDomArray extends Array {},
   vDomToString: function (vdomArray: VNode<any>[]): string {
     const div = document.createElement("div");
-    patch(div, { type: NodeType.Multi, children: vdomArray });
+    buildTree({ type: NodeType.Multi, children: vdomArray }, div);
     return div.innerHTML;
   },
   vMultiToString: function (multi: VMultiNode<any>): string {
     const div = document.createElement("div");
-    patch(div, multi);
+    buildTree(multi, div);
     return div.innerHTML;
   },
   callTemplate(tree: VTemplateRoot<any>, name: string, ctx: RenderContext) {
@@ -79,6 +79,8 @@ export const qweb = {
       hooks: {},
       staticNodes,
       renderFn: fn.bind(qwebContext),
+      anchor: null,
+      position: null,
     };
   },
   getTemplateFn(template: string): CompiledTemplate {
@@ -112,7 +114,7 @@ export const qweb = {
     const tree: VTemplateRoot<any> = qweb.createRoot(name, {});
     tree.renderFn(tree, context);
     const div = document.createElement("div");
-    patch(div, tree);
+    buildTree(tree, div);
 
     escapeTextNodes(div);
     return div.innerHTML;
