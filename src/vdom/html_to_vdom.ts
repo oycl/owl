@@ -14,12 +14,12 @@ const parser = new DOMParser();
  * subsequent patches, due to the fact that we have a different patch/update
  * methods.
  */
-const cache: { [html: string]: VNode<any>[] } = {};
+const cache: { [html: string]: VNode[] } = {};
 
-export function htmlToVDOM(html: string): VNode<any>[] {
+export function htmlToVDOM(html: string): VNode[] {
   if (!cache[html]) {
     const doc = parser.parseFromString(html, "text/html");
-    const result: VNode<any>[] = [];
+    const result: VNode[] = [];
     for (let child of doc.body.childNodes) {
       result.push(htmlToVNode(child));
     }
@@ -28,7 +28,7 @@ export function htmlToVDOM(html: string): VNode<any>[] {
   return cache[html];
 }
 
-function htmlToVNode(node: ChildNode): VNode<any> {
+function htmlToVNode(node: ChildNode): VNode {
   if (!(node instanceof Element)) {
     return { type: NodeType.Text, text: node.textContent! };
   }
@@ -36,7 +36,7 @@ function htmlToVNode(node: ChildNode): VNode<any> {
   for (let attr of node.attributes) {
     attrs[attr.name] = attr.textContent || "";
   }
-  const children: VNode<any>[] = [];
+  const children: VNode[] = [];
   for (let c of node.childNodes) {
     children.push(htmlToVNode(c));
   }

@@ -1,8 +1,9 @@
-import { CompiledTemplate, compileTemplate, RenderContext, handleEvent } from "./compiler";
+import { compileTemplate, handleEvent } from "./compiler";
 import { buildTree } from "../vdom/vdom";
-import { NodeType, VNode, VRootNode, VMultiNode } from "../vdom/types";
+import { NodeType, VNode, VMultiNode, VRootNode } from "../vdom/types";
 import { htmlToVDOM } from "../vdom/html_to_vdom";
 import { escape } from "../utils";
+import { TemplateInfo, RenderContext, QWebTemplate } from "./types";
 
 // -----------------------------------------------------------------------------
 // QWeb Context
@@ -16,19 +17,20 @@ import { escape } from "../utils";
 const qwebContext: any = {
   zero: Symbol("zero"),
   VDomArray: class VDomArray extends Array {},
-  vDomToString: function (vdomArray: VNode<any>[]): string {
+  vDomToString: function (vdomArray: VNode[]): string {
     const div = document.createElement("div");
     buildTree({ type: NodeType.Multi, children: vdomArray }, div);
     return div.innerHTML;
   },
-  vMultiToString: function (multi: VMultiNode<any>): string {
+  vMultiToString: function (multi: VMultiNode): string {
     const div = document.createElement("div");
     buildTree(multi, div);
     return div.innerHTML;
   },
-  callTemplate(tree: VTemplateRoot<any>, name: string, ctx: RenderContext) {
-    const subtree: VTemplateRoot<any> = qweb.createRoot(name, tree.data);
-    subtree.renderFn(subtree, ctx);
+  callTemplate(tree: VRootNode, name: string, ctx: RenderContext, metadata?: any) {
+    const template = qweb.getTemplate(name);
+    const subtree = template.createRoot();
+    template.render(subtree, ctx, metadata);
     return subtree;
   },
   htmlToVDOM,
@@ -50,10 +52,6 @@ const qwebContext: any = {
   },
 };
 
-export interface VTemplateRoot<T> extends VRootNode<T> {
-  renderFn(tree: VRootNode<T>, context: RenderContext): void;
-}
-
 // -----------------------------------------------------------------------------
 // QWeb
 // -----------------------------------------------------------------------------
@@ -63,29 +61,15 @@ export const qweb = {
   nextId: 1,
   utils: qwebContext,
   templateMap: {} as { [name: string]: string },
-  compiledTemplates: {} as { [name: string]: CompiledTemplate },
+  compiledTemplates: {} as { [name: string]: TemplateInfo },
 
   addTemplate(name: string, template: string): void {
     this.templateMap[name] = template;
   },
 
-  createRoot<T>(template: string, data: T): VTemplateRoot<T> {
-    const { fn, staticNodes } = this.getTemplateFn(template);
-    return {
-      type: NodeType.Root,
-      data,
-      child: null,
-      key: -1,
-      hooks: {},
-      staticNodes,
-      renderFn: fn.bind(qwebContext),
-      anchor: null,
-      position: null,
-    };
-  },
-  getTemplateFn(template: string): CompiledTemplate {
-    let fn = qweb.compiledTemplates[template];
-    if (!fn) {
+  getTemplate(template: string): QWebTemplate {
+    let templateInfo = qweb.compiledTemplates[template];
+    if (!templateInfo) {
       const rawTemplate = qweb.templateMap[template];
       if (rawTemplate === undefined) {
         let descr = template.slice(0, 100);
@@ -97,10 +81,23 @@ export const qweb = {
         );
       }
 
-      fn = compileTemplate(qweb, template, rawTemplate);
-      qweb.compiledTemplates[template] = fn;
+      templateInfo = compileTemplate(qweb, template, rawTemplate);
+      qweb.compiledTemplates[template] = templateInfo;
     }
-    return fn;
+    return {
+      createRoot() {
+        return {
+          type: NodeType.Root,
+          child: null,
+          key: -1,
+          hooks: {},
+          staticNodes: templateInfo.staticNodes,
+          anchor: null,
+          position: null,
+        };
+      },
+      render: templateInfo.fn.bind(qwebContext),
+    };
   },
 
   /**
@@ -111,11 +108,11 @@ export const qweb = {
    * This method can only render templates without components.
    */
   renderToString(name: string, context: RenderContext = {}): string {
-    const tree: VTemplateRoot<any> = qweb.createRoot(name, {});
-    tree.renderFn(tree, context);
+    const template = qweb.getTemplate(name);
+    const tree = template.createRoot();
+    template.render(tree, context, null);
     const div = document.createElement("div");
     buildTree(tree, div);
-
     escapeTextNodes(div);
     return div.innerHTML;
   },

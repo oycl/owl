@@ -1,4 +1,5 @@
-import { parse, AST, ASTDOMNode } from "../../src/qweb/parser";
+import { parse } from "../../src/qweb/parser";
+import { AST, ASTDOMNode } from "../../src/qweb/types";
 
 function structure(node: AST): any {
   switch (node.type) {

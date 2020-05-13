@@ -1,4 +1,4 @@
-import { VTree, OwlComponent } from "./rendering_engine";
+import { OwlComponent, ComponentData } from "./rendering_engine";
 
 export class Component<Props = any, Env = any> {
   static template: string;
@@ -7,7 +7,7 @@ export class Component<Props = any, Env = any> {
   env: Env;
 
   el: HTMLElement | Text | Comment | null = null;
-  __owl__: VTree | null = null;
+  __owl__: ComponentData | null = null;
 
   constructor(props: Props, env: Env) {
     this.props = props;

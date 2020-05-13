@@ -1,3 +1,7 @@
+/**
+ * Make this a simple object???
+ */
+
 export class Fiber {
   static nextId: number = 1;
 

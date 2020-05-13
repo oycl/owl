@@ -1,117 +1,5 @@
 import { compileExpr } from "./expression_parser";
-
-// -----------------------------------------------------------------------------
-// AST Type definition
-// -----------------------------------------------------------------------------
-
-interface Handler {
-  expr: string;
-}
-
-export interface ASTDOMNode {
-  type: "DOM";
-  tag: string;
-  children: AST[];
-  key: string | number;
-  attrs: { [name: string]: string };
-  on: { [event: string]: Handler };
-  attClass?: string;
-  attfClass?: string;
-}
-
-export interface ASTStaticNode {
-  type: "STATIC";
-  child: AST;
-}
-
-export interface ASTComponentNode {
-  type: "COMPONENT";
-  name: string;
-}
-
-export interface ASTTextNode {
-  type: "TEXT";
-  text: string;
-}
-
-export interface ASTEscNode {
-  type: "T-ESC";
-  expr: string;
-  body: AST[];
-}
-
-export interface ASTRawNode {
-  type: "T-RAW";
-  expr: string;
-  body: AST[];
-}
-
-export interface ASTCommentNode {
-  type: "COMMENT";
-  text: string;
-}
-
-export interface ASTMultiNode {
-  type: "MULTI";
-  children: AST[];
-}
-
-export interface ASTIfNode {
-  type: "T-IF";
-  condition: string;
-  child: AST;
-  next: ASTElifNode | ASTElseNode | null;
-}
-
-export interface ASTElifNode {
-  type: "T-ELIF";
-  condition: string;
-  child: AST;
-  next: ASTElifNode | ASTElseNode | null;
-}
-
-export interface ASTElseNode {
-  type: "T-ELSE";
-  child: AST;
-}
-
-export interface ASTSetNode {
-  type: "T-SET";
-  name: string;
-  value: string | null;
-  body: AST[];
-}
-
-export interface ASTForeachNode {
-  type: "T-FOREACH";
-  collection: string;
-  varName: string;
-  children: AST[];
-}
-
-export interface ASTCallNode {
-  type: "T-CALL";
-  template: string;
-  children: AST[];
-}
-
-// TODO: add and support nodes of types "BLOCK":
-
-export type AST =
-  | ASTDOMNode
-  | ASTStaticNode
-  | ASTTextNode
-  | ASTEscNode
-  | ASTRawNode
-  | ASTSetNode
-  | ASTCommentNode
-  | ASTMultiNode
-  | ASTIfNode
-  | ASTElifNode
-  | ASTElseNode
-  | ASTComponentNode
-  | ASTForeachNode
-  | ASTCallNode;
+import { AST, ASTIfNode, ASTDOMNode, ASTStaticNode, ASTElifNode, ASTElseNode } from "./types";
 
 // -----------------------------------------------------------------------------
 // Parser
@@ -335,7 +223,7 @@ function parseDOMNode(ctx: ParserContext, node: Element): ASTDOMNode | ASTStatic
   if (node.hasAttribute("t-key")) {
     isStatic = false;
     const keyExpr = node.getAttribute("t-key");
-    key = keyExpr ? compileExpr(keyExpr, {}) : "1";
+    key = keyExpr ? compileExpr(keyExpr) : "1";
     node.removeAttribute("t-key");
   }
   const attributes = (<Element>node).attributes;

@@ -1,4 +1,4 @@
-import { makeTestFixture, nextTick } from "../helpers";
+import { makeTestFixture, nextTick, mountComponent } from "../helpers";
 import { Component, mount, xml, useState } from "../../src/index";
 import { qweb } from "../../src/qweb/qweb";
 
@@ -65,7 +65,7 @@ describe("basic component properties", () => {
     class Test extends Component {
       static template = xml`<div></div>`;
     }
-    const component = await mount(fixture, Test);
+    const component = await mountComponent(fixture, Test);
     expect(component.props).toEqual({});
   });
 
@@ -73,7 +73,7 @@ describe("basic component properties", () => {
     class Test extends Component {
       static template = xml`<div></div>`;
     }
-    const component = await mount(fixture, Test);
+    const component = await mountComponent(fixture, Test);
     expect(component.env).toEqual({});
   });
 
@@ -82,7 +82,7 @@ describe("basic component properties", () => {
       static template = xml`<div></div>`;
     }
     const env = { a: 1 };
-    const component = await mount(fixture, Test, { env });
+    const component = await mountComponent(fixture, Test, { env });
     expect(component.env).toEqual(env);
   });
 
@@ -91,7 +91,7 @@ describe("basic component properties", () => {
       static template = xml`<div></div>`;
     }
     const p = { a: 1 };
-    const component = await mount(fixture, Test, { props: p });
+    const component = await mountComponent(fixture, Test, { props: p });
     expect(component.props).toBe(p);
   });
 
@@ -104,7 +104,7 @@ describe("basic component properties", () => {
         expect(this.el).toBeNull();
       }
     }
-    const component = await mount(fixture, Test);
+    const component = await mountComponent(fixture, Test);
     expect(component.el).not.toBe(null);
   });
 
@@ -222,25 +222,42 @@ describe("basic component properties", () => {
     expect(fixture.innerHTML).toBe("<div><span></span></div>");
   });
 
-  //   test("cannot be clicked on and updated if not in DOM", async () => {
-  //     class Counter extends Component {
-  //       static template = xml`
-  //       <div><t t-esc="state.counter"/><button t-on-click="state.counter++">Inc</button></div>`;
-  //       state = useState({
-  //         counter: 0,
-  //       });
-  //     }
+  test("components are flagged mounted if in dom", async () => {
+    class Test extends Component {
+      static template = xml`<div></div>`;
+    }
 
-  //     const counter = new Counter();
-  //     const target = document.createElement("div");
-  //     await counter.mount(target);
-  //     expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //     const button = (<HTMLElement>counter.el).getElementsByTagName("button")[0];
-  //     button.click();
-  //     await nextTick();
-  //     expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //     expect(counter.state.counter).toBe(0);
-  //   });
+    const target = document.createElement("div");
+    const test1 = await mount(target, Test);
+    expect(test1.isMounted).toBe(false);
+    const test2 = await mount(fixture, Test);
+    expect(test2.isMounted).toBe(true);
+  });
+
+  // test.skip("cannot be clicked on and updated if not in DOM", async () => {
+  //   class Counter extends Component {
+  //     static template = xml`
+  //         <div>
+  //           <t t-esc="state.counter"/>
+  //           <button t-on-click="increment">Inc</button>
+  //         </div>`;
+  //     state = useState({
+  //       counter: 0,
+  //     });
+  //     increment() {
+  //       this.state.counter++;
+  //     }
+  //   }
+
+  //   const target = document.createElement("div");
+  //   const counter = await mount(target, Counter);
+  //   expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
+  //   const button = target.getElementsByTagName("button")[0];
+  //   button.click();
+  //   await nextTick();
+  //   expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
+  //   expect(counter.state.counter).toBe(0);
+  // });
 
   //   test("widget style and classname", async () => {
   //     class StyledWidget extends Component {

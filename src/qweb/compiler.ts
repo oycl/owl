@@ -1,4 +1,4 @@
-import { NodeType, VRootNode } from "../vdom/types";
+import { NodeType } from "../vdom/types";
 import { compileExpr } from "./expression_parser";
 import {
   AST,
@@ -8,17 +8,10 @@ import {
   ASTRawNode,
   ASTSetNode,
   ASTStaticNode,
-  parse,
-} from "./parser";
+  TemplateInfo,
+} from "./types";
+import { parse } from "./parser";
 import { QWeb } from "./qweb";
-export interface RenderContext {
-  [key: string]: any;
-}
-
-export interface CompiledTemplate {
-  fn: (this: any, tree: VRootNode<any>, context: RenderContext) => void;
-  staticNodes: HTMLElement[];
-}
 
 interface QWebVar {
   expr: string;
@@ -38,7 +31,7 @@ interface CompilerContext {
   staticNodes: HTMLElement[];
 }
 
-export function compileTemplate(qweb: QWeb, name: string, template: string): CompiledTemplate {
+export function compileTemplate(qweb: QWeb, name: string, template: string): TemplateInfo {
   const ast = parse(template);
   // console.warn(JSON.stringify(ast, null, 3))
   const ctx: CompilerContext = {
@@ -63,7 +56,7 @@ export function compileTemplate(qweb: QWeb, name: string, template: string): Com
     ctx.code.splice(1, 0, `    const rootCtx = ctx;`);
   }
   // console.warn(ctx.code.join("\n"));
-  const fn = new Function("tree, ctx", ctx.code.join("\n")) as any;
+  const fn = new Function("tree, ctx, metadata", ctx.code.join("\n")) as any;
   return {
     fn,
     staticNodes: ctx.staticNodes,
@@ -99,7 +92,7 @@ function generateCode(ast: AST | AST[], ctx: CompilerContext) {
       compileRawNode(ctx, ast);
       break;
     case "T-IF": {
-      addIf(ctx, compileExpr(ast.condition, {}));
+      addIf(ctx, compileExpr(ast.condition));
       generateCode(ast.child, ctx);
       ctx.indentLevel--;
       if (ast.next) {
@@ -111,7 +104,7 @@ function generateCode(ast: AST | AST[], ctx: CompilerContext) {
     }
 
     case "T-ELIF": {
-      addLine(ctx, `} else if (${compileExpr(ast.condition, {})}) {`);
+      addLine(ctx, `} else if (${compileExpr(ast.condition)}) {`);
       ctx.indentLevel++;
       generateCode(ast.child, ctx);
       ctx.indentLevel--;
@@ -151,7 +144,7 @@ function generateCode(ast: AST | AST[], ctx: CompilerContext) {
       {
         const colLength = uniqueId(ctx, "length");
         const colId = uniqueId(ctx);
-        addLine(ctx, `let ${colId} = ${compileExpr(ast.collection, {})};`);
+        addLine(ctx, `let ${colId} = ${compileExpr(ast.collection)};`);
         addLine(ctx, `let ${colLength} = ${colId}.length;`);
         addLine(ctx, `ctx = Object.create(ctx);`);
         addLine(ctx, `for (let i = 0; i < ${colLength}; i++) {`);
@@ -168,7 +161,7 @@ function generateCode(ast: AST | AST[], ctx: CompilerContext) {
       }
       break;
     case "COMPONENT": {
-      const vnode = `this.makeComponent(tree, "${ast.name}", ctx)`;
+      const vnode = `this.makeComponent(metadata, "${ast.name}", ctx)`;
       addVNode(ctx, vnode, false);
       break;
     }
@@ -255,7 +248,7 @@ function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
     let value = ast.attrs[attr];
     if (attr.startsWith("t-att-")) {
       const id = uniqueId(ctx);
-      addLine(ctx, `let ${id} = ${compileExpr(value, {})}`);
+      addLine(ctx, `let ${id} = ${compileExpr(value)}`);
       addToAttrs(attrs, attr.slice(6), id);
     } else {
       addToAttrs(attrs, attr, `"${value}"`);
@@ -267,7 +260,7 @@ function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
   // classes
   let classObj = "";
   if (ast.attClass) {
-    classObj = `, class: this.toClassObj(${compileExpr(ast.attClass, {})})`;
+    classObj = `, class: this.toClassObj(${compileExpr(ast.attClass)})`;
   }
   // handlers
   let handlers = "";
@@ -275,7 +268,7 @@ function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
     let h: string[] = [];
     ctx.shouldDefineRootContext = true;
     for (let ev in ast.on) {
-      const expr = compileExpr(ast.on[ev].expr, {});
+      const expr = compileExpr(ast.on[ev].expr);
       const cb = `ev => this.handleEvent(ev, rootCtx, ${expr})`;
       h.push(`${ev}: {cb: ${cb}}`);
     }
@@ -297,7 +290,7 @@ function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
 function compileSetNode(ctx: CompilerContext, ast: ASTSetNode) {
   ctx.shouldProtectContext = true;
   if (ast.value !== null) {
-    addLine(ctx, `ctx.${ast.name} = ${compileExpr(ast.value, {})};`);
+    addLine(ctx, `ctx.${ast.name} = ${compileExpr(ast.value)};`);
   }
   if (ast.body.length && ast.value === null) {
     let id = uniqueId(ctx);
@@ -341,7 +334,7 @@ function compileEscNode(ctx: CompilerContext, ast: ASTEscNode) {
 
     return;
   }
-  const expr = compileExpr(ast.expr, {});
+  const expr = compileExpr(ast.expr);
   if (ast.body.length) {
     const id = uniqueId(ctx);
     addLine(ctx, `let ${id} = ${expr}`);
@@ -392,7 +385,7 @@ function compileRawNode(ctx: CompilerContext, ast: ASTRawNode) {
 
     return;
   }
-  const expr = compileExpr(ast.expr, {});
+  const expr = compileExpr(ast.expr);
   if (ast.body.length) {
     const id = uniqueId(ctx);
     addLine(ctx, `let ${id} = ${expr}`);
@@ -407,7 +400,7 @@ function compileRawNode(ctx: CompilerContext, ast: ASTRawNode) {
     return;
   }
   if (ast.expr in ctx.variables) {
-    // // this is a variable that was already defined, with a body
+    // this is a variable that was already defined, with a body
     const qwebVar = ctx.variables[ast.expr];
     if (qwebVar.hasBody && qwebVar.hasValue) {
       const id = uniqueId(ctx);
@@ -429,7 +422,6 @@ function compileRawNode(ctx: CompilerContext, ast: ASTRawNode) {
       addVNode(ctx, vnode, false);
     }
   }
-  // }
 }
 
 // -----------------------------------------------------------------------------

@@ -43,20 +43,19 @@ export const enum NodePosition {
   Before,
 }
 
-export interface VRootNode<T = any> extends BaseNode {
+export interface VRootNode extends BaseNode {
   type: NodeType.Root;
-  data: T;
-  child: VNode<T> | null;
+  child: VNode | null;
   hooks: Hooks;
   staticNodes: HTMLElement[];
   anchor: HTMLElement | DocumentFragment | null;
   position: NodePosition | null;
 }
 
-export interface VDOMNode<T = any> extends BaseNode {
+export interface VDOMNode extends BaseNode {
   type: NodeType.DOM;
   tag: string;
-  children: VNode<T>[];
+  children: VNode[];
   el?: HTMLElement;
   attrs?: { [name: string]: string | boolean | number | null };
   on?: { [event: string]: Handler };
@@ -81,16 +80,10 @@ export interface VCommentNode extends BaseNode {
   el?: Comment;
 }
 
-export interface VMultiNode<T = any> extends BaseNode {
+export interface VMultiNode extends BaseNode {
   type: NodeType.Multi;
-  children: VNode<T>[];
+  children: VNode[];
   staticNodes?: HTMLElement[]; // sometimes useful to propagate nodes from a body to a t-call
 }
 
-export type VNode<T = any> =
-  | VDOMNode<T>
-  | VTextNode
-  | VCommentNode
-  | VStaticNode
-  | VRootNode<T>
-  | VMultiNode<T>;
+export type VNode = VDOMNode | VTextNode | VCommentNode | VStaticNode | VRootNode | VMultiNode;

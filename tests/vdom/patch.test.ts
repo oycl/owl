@@ -163,7 +163,7 @@ describe("update function", () => {
 });
 
 describe("updating children in a dom node, with keys", () => {
-  function spanNum(n: number): VDOMNode<any> {
+  function spanNum(n: number): VDOMNode {
     return vDom("span", { key: String(n) }, [vText(String(n))]);
   }
 

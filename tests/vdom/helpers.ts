@@ -73,7 +73,6 @@ export function vRoot(child: VNode | null): VRootNode {
   return {
     type: NodeType.Root,
     child,
-    data: null,
     key: nextId++,
     hooks: {},
     staticNodes: [],

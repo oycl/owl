@@ -1,9 +1,10 @@
 import { Fiber } from "./fiber";
-import { qweb, VTemplateRoot } from "../qweb/qweb";
-import { RenderContext } from "../qweb/compiler";
+import { qweb } from "../qweb/qweb";
+import { RenderContext, QWebTemplate } from "../qweb/types";
 import { scheduler } from "./scheduler";
 import { buildTree, patch } from "../vdom/vdom";
 import { Component } from "./component";
+import { VRootNode } from "../vdom/types";
 
 const { utils: qwebUtils } = qweb;
 
@@ -26,38 +27,16 @@ export interface ComponentData {
   fiber: Fiber;
   components: { [key: string]: OwlComponent };
   context: any;
-}
-
-export interface FnInstance {
-  vtree: VTree;
-  context: any;
-}
-
-export type VTree = VTemplateRoot<ComponentData>;
-
-type MountTarget = HTMLElement | DocumentFragment;
-
-export interface MountOptions {
-  props?: Object;
-  env?: Object;
-}
-
-interface OwlEngine {
-  currentVTree: VTree | null;
-  // prettier-ignore
-  mount<C extends ClassComponent>(target: MountTarget,Comp: C,options?: MountOptions): Promise<InstanceType<C>>;
-  mount(target: MountTarget, fn: FunctionComponent, options?: MountOptions): Promise<FnInstance>;
-  mount(target: MountTarget, comp: Component, options?: MountOptions): Promise<Component>;
-  mount(target: MountTarget, fn: FnInstance, options?: MountOptions): Promise<FnInstance>;
-
-  render(tree: VTree): Promise<void>;
+  isMounted: boolean;
+  vnode: VRootNode;
+  qweb: QWebTemplate;
 }
 
 // -----------------------------------------------------------------------------
 // Main owl engine
 // -----------------------------------------------------------------------------
-export const engine: OwlEngine = {
-  currentVTree: null,
+export const engine = {
+  current: null as null | ComponentData,
   mount,
   render,
 };
@@ -65,41 +44,59 @@ export const engine: OwlEngine = {
 // -----------------------------------------------------------------------------
 // Mount
 // -----------------------------------------------------------------------------
-async function mount(target: MountTarget, elem: any, options: MountOptions = {}): Promise<any> {
-  let tree: VTree;
-  let result: any = null;
+export type MountTarget = HTMLElement | DocumentFragment;
+
+export interface MountOptions {
+  props?: Object;
+  env?: Object;
+}
+
+type MountComponent = ClassComponent | Component | FunctionComponent | ComponentData;
+
+async function mount(
+  target: MountTarget,
+  elem: MountComponent,
+  options: MountOptions = {}
+): Promise<ComponentData> {
   if (!(target instanceof HTMLElement || target instanceof DocumentFragment)) {
-    const name = elem instanceof Component ? elem.constructor.name : elem.name || "Undefined";
+    const name =
+      elem instanceof Component ? elem.constructor.name : (elem as any).name || "Undefined";
     let message = `Component '${name}' cannot be mounted: the target is not a valid DOM node.`;
     message += `\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)`;
     throw new Error(message);
   }
   if (elem instanceof Component) {
-    return scheduler.addFiber(elem.__owl__!.data.fiber).then(() => {
+    const comp = elem.__owl__!;
+    return scheduler.addFiber(comp.fiber).then(() => {
       target.appendChild(elem.el!);
-      return elem;
+      return comp;
     });
   }
-  if (elem.prototype instanceof Component || elem === Component) {
-    tree = makeClassComponent(elem, options);
-  } else if (elem.vtree) {
-    tree = elem.vtree;
+  let component: ComponentData;
+  // let result: any = null;
+  if ((elem as any).prototype instanceof Component || elem === Component) {
+    component = makeClassComponent(elem as any, options);
+  } else if ((elem as any).vnode) {
+    component = elem as any;
   } else {
-    tree = makeFnComponent(elem, options);
-    result = {
-      vtree: tree,
-      context: tree.data.context,
-    };
+    component = makeFnComponent(elem as any, options);
   }
-  return scheduler.addFiber(tree.data.fiber).then(() => {
+  return scheduler.addFiber(component.fiber).then(() => {
     const fragment = document.createDocumentFragment();
-    buildTree(tree, (fragment as any) as HTMLElement);
+    buildTree(component.vnode, (fragment as any) as HTMLElement);
     target.appendChild(fragment);
-    return result || tree.data.context;
+    if (document.body.contains(target)) {
+      mountTree(component);
+    }
+    return component;
   });
 }
 
-function makeFnComponent(fn: FunctionComponent, options: MountOptions): VTree {
+function mountTree(component: ComponentData) {
+  component.isMounted = true;
+}
+
+function makeFnComponent(fn: FunctionComponent, options: MountOptions): ComponentData {
   let template: string = fn.template;
   if (!template) {
     const name = fn.name || "Anonymous Function Component";
@@ -110,75 +107,84 @@ function makeFnComponent(fn: FunctionComponent, options: MountOptions): VTree {
   const props = options.props || {};
   const env = options.env || {};
   const context = fn.setup ? fn.setup(props, env) : {};
+  const qtemplate = qweb.getTemplate(template);
+  const vnode = qtemplate.createRoot();
   const data: ComponentData = {
     fiber,
     context,
     components: fn.components || {},
+    isMounted: false,
+    vnode,
+    qweb: qtemplate,
   };
-  const tree: VTree = qweb.createRoot(fn.template, data);
+  // const tree: VTree = qweb.createRoot(fn.template, data);
 
   new Promise(async (resolve) => {
-    tree.renderFn(tree, context);
+    qtemplate.render(vnode, context, data);
     fiber.counter--;
     resolve();
   });
-  return tree;
+  return data;
 }
 
-function makeClassComponent(C: typeof Component, options: MountOptions): VTree {
+function makeClassComponent(C: typeof Component, options: MountOptions): ComponentData {
   let template: string = C.template;
   if (!template) {
     throw new Error(`Component "${C.name}" does not have a template defined!`);
   }
   const fiber = new Fiber(null);
   fiber.counter++;
+  const qtemplate = qweb.getTemplate(template);
+  const vnode = qtemplate.createRoot();
   const data: ComponentData = {
     fiber,
     context: null,
     components: C.components || {},
+    isMounted: false,
+    vnode: vnode,
+    qweb: qtemplate,
   };
-  const tree = qweb.createRoot(template, data);
   const props = options.props || {};
   const env = options.env || {};
-  engine.currentVTree = tree;
+  engine.current = data;
   const c = new C(props, env);
-  c.__owl__ = tree;
-  tree.data.context = c;
-  tree.hooks.create = (el) => (c.el = el);
+  c.__owl__ = data;
+  data.context = c;
+  vnode.hooks.create = (el) => (c.el = el);
   new Promise((resolve) => {
-    tree.renderFn(tree, c);
+    qtemplate.render(vnode, c, data);
     fiber.counter--;
     resolve();
   });
-  return tree;
+  return data;
 }
 
-qwebUtils.makeComponent = function (parent: VTree, name: string, context: RenderContext): VTree {
-  // todo: find a better way!!!! parent.data.context. ....
-  const definition = context[name] || parent.data.components[name];
-  if (definition.prototype instanceof Component) {
-    return makeClassComponent(definition, {});
-  } else {
-    return makeFnComponent(definition, {});
-  }
+qwebUtils.makeComponent = function (
+  parent: ComponentData,
+  name: string,
+  context: RenderContext
+): VRootNode {
+  const definition = context[name] || parent.components[name];
+  const isClass = definition.prototype instanceof Component;
+  let component = isClass ? makeClassComponent(definition, {}) : makeFnComponent(definition, {});
+  return component.vnode;
 };
 
 // -----------------------------------------------------------------------------
 // render
 // -----------------------------------------------------------------------------
 
-function render(tree: VTree): Promise<void> {
+function render(component: ComponentData): Promise<void> {
   const fiber = new Fiber(null);
-  const newTree: VTree = Object.create(tree);
-  newTree.child = null;
-  newTree.data.fiber = fiber;
+  const newRoot = component.qweb.createRoot();
+  component.fiber = fiber;
   fiber.counter = 1;
   new Promise((resolve) => {
-    tree.renderFn(newTree, newTree.data.context);
+    component.qweb.render(newRoot, component.context, component);
     fiber.counter--;
     resolve();
   });
   return scheduler.addFiber(fiber).then(() => {
-    patch(tree, newTree);
+    patch(component.vnode, newRoot);
   });
 }

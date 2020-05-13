@@ -1,4 +1,4 @@
-import { makeTestFixture } from "../helpers";
+import { makeTestFixture, mountComponent } from "../helpers";
 import { mount, xml } from "../../src/index";
 import { Component } from "../../src/core/component";
 
@@ -23,7 +23,7 @@ describe("mount", () => {
       static template = xml`<div>simple vnode</div>`;
     }
 
-    const test = await mount(fixture, Test);
+    const test = await mountComponent(fixture, Test);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
     expect(test).toBeInstanceOf(Component);
 
