@@ -174,12 +174,33 @@ describe("updating children in a dom node, with keys", () => {
 
       buildTree(vnode1, fixture);
       expect(fixture.innerHTML).toBe("<p><span>1</span></p>");
-      const p = fixture.firstElementChild!;
+      const span1 = fixture.querySelector("span")!;
+      expect(span1.outerHTML).toBe("<span>1</span>");
 
       patch(vnode1, vnode2);
       expect(fixture.innerHTML).toBe("<p><span>1</span><span>2</span><span>3</span></p>");
-      expect(fixture.firstElementChild!).toBe(p);
+      const spans = fixture.querySelectorAll("span")!;
+      expect(spans[0]).toBe(span1);
+      expect(spans[3]).not.toBe(span1);
       expect(vnode1.children.map((c: any) => c.children[0].text)).toEqual(["1", "2", "3"]);
+    });
+
+    test("prepends elements", function () {
+      const vnode1 = vDom("p", { key: 1 }, [4, 5].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, [1, 2, 3, 4, 5].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      expect(fixture.innerHTML).toBe("<p><span>4</span><span>5</span></p>");
+      const span1 = fixture.querySelector("span")!;
+      expect(span1.outerHTML).toBe("<span>4</span>");
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></p>"
+      );
+      const spans = fixture.querySelectorAll("span")!;
+      expect(spans[0]).not.toBe(span1);
+      expect(spans[3]).toBe(span1);
     });
   });
 });

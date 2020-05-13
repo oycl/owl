@@ -1,4 +1,13 @@
-import { NodePosition, NodeType, VDOMNode, VMultiNode, VNode, VTextNode, VRootNode } from "./types";
+import {
+  NodePosition,
+  NodeType,
+  VDOMNode,
+  VMultiNode,
+  VNode,
+  VTextNode,
+  VRootNode,
+  VStaticNode,
+} from "./types";
 
 // -----------------------------------------------------------------------------
 // patch and update
@@ -10,7 +19,7 @@ function addNode(node: Node, anchor: HTMLElement, position: NodePosition) {
       anchor.appendChild(node);
       break;
     case NodePosition.Before:
-      node.insertBefore(anchor.parentElement!, anchor);
+      anchor.parentElement!.insertBefore(node, anchor);
       break;
   }
 }
@@ -126,13 +135,16 @@ export function patch(vnode: VNode, target: VNode, staticNodes: HTMLElement[] = 
   switch (vnode.type) {
     case NodeType.Text:
       vnode.el!.textContent = (target as VTextNode).text;
+      (target as VTextNode).el = vnode.el;
       break;
     case NodeType.DOM:
       updateChildren(vnode, target as VDOMNode, staticNodes);
       vnode.children = (target as VDOMNode).children;
+      (target as VDOMNode).el = vnode.el;
       return;
     case NodeType.Static:
       // yeah! no need to do anything
+      (target as VStaticNode).el = vnode.el;
       break;
     case NodeType.Root:
       if (isSame(vnode.child!, (target as VRootNode).child!)) {
@@ -183,7 +195,7 @@ function updateChildren(
   staticNodes: HTMLElement[]
 ) {
   const oldChildren = vnode.children;
-  const parentElm = (vnode as any).el;
+  // const parentElm = (vnode as any).el;
   const newChildren = newParent.children;
   let oldStartIdx = 0;
   let newStartIdx = 0;
@@ -191,6 +203,8 @@ function updateChildren(
   let newEndIdx = newChildren.length - 1;
   let oldStartVnode = oldChildren[0];
   let newStartVnode = newChildren[0];
+  let oldEndVnode = oldChildren[oldEndIdx];
+  let newEndVnode = newChildren[newEndIdx];
   // console.warn(oldChildren, newChildren)
 
   // main update loop
@@ -199,9 +213,13 @@ function updateChildren(
     // console.warn( JSON.stringify(newStartVnode))
 
     if (isSame(oldStartVnode, newStartVnode)) {
-      patch(oldStartVnode, newStartVnode);
+      patch(oldStartVnode, newStartVnode, staticNodes);
       oldStartVnode = oldChildren[++oldStartIdx];
       newStartVnode = newChildren[++newStartIdx];
+    } else if (isSame(oldEndVnode, newEndVnode)) {
+      patch(oldEndVnode, newEndVnode);
+      oldEndVnode = oldChildren[--oldEndIdx];
+      newEndVnode = newChildren[--newEndIdx];
     } else {
       throw new Error("boom" + oldStartVnode);
     }
@@ -211,8 +229,17 @@ function updateChildren(
   // the diff is done now. But there may be still nodes to add or remove
   if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
     if (oldStartIdx > oldEndIdx) {
+      let before = newChildren[newEndIdx + 1];
+      let position, anchor;
+      if (before) {
+        position = NodePosition.Before;
+        anchor = getEl(before);
+      } else {
+        position = NodePosition.Append;
+        anchor = (vnode as any).el;
+      }
       for (; newStartIdx <= newEndIdx; ++newStartIdx) {
-        buildTree(newChildren[newStartIdx], parentElm, NodePosition.Append, staticNodes);
+        buildTree(newChildren[newStartIdx], anchor, position, staticNodes);
       }
       // before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
       // addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);

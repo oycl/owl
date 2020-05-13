@@ -6,6 +6,7 @@
  * Other ideas:
  *
  * - add a DOM_ONECHILD type => skip the patch process for each children
+ * - maybe a DOM_STATIC_CHILDREN
  */
 
 export type Key = string | number;
