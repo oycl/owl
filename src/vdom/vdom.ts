@@ -205,6 +205,9 @@ function updateChildren(
   let newStartVnode = newChildren[0];
   let oldEndVnode = oldChildren[oldEndIdx];
   let newEndVnode = newChildren[newEndIdx];
+  let oldKeyToIdx: any;
+  let idxInOld;
+
   // console.warn(oldChildren, newChildren)
 
   // main update loop
@@ -221,9 +224,27 @@ function updateChildren(
       oldEndVnode = oldChildren[--oldEndIdx];
       newEndVnode = newChildren[--newEndIdx];
     } else {
-      throw new Error("boom" + oldStartVnode);
+      if (oldKeyToIdx === undefined) {
+        oldKeyToIdx = {};
+        for (let i = oldStartIdx; i <= oldEndIdx; i++) {
+          let ch = oldChildren[i];
+          if (ch) {
+            let key = ch.key;
+            if (key !== undefined) {
+              oldKeyToIdx[key] = i;
+            }
+          }
+        }
+      }
+      idxInOld = oldKeyToIdx[newStartVnode.key as any];
+      if (idxInOld === undefined) {
+        // new element
+        buildTree(newStartVnode, getEl(oldStartVnode) as any, NodePosition.Before, staticNodes);
+        newStartVnode = newChildren[++newStartIdx];
+      } else {
+        throw new Error("boom" + oldStartVnode);
+      }
     }
-    // console.warn(oldStartIdx, oldEndIdx, newStartIdx, newEndIdx)
   }
 
   // the diff is done now. But there may be still nodes to add or remove
@@ -244,7 +265,9 @@ function updateChildren(
       // before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
       // addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
     } else {
-      // removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
+      for (let i = oldStartIdx; i <= oldEndIdx; i++) {
+        removeTree(oldChildren[i]);
+      }
     }
   }
 }

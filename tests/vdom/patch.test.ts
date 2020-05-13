@@ -202,6 +202,103 @@ describe("updating children in a dom node, with keys", () => {
       expect(spans[0]).not.toBe(span1);
       expect(spans[3]).toBe(span1);
     });
+
+    test("add elements in the middle", function () {
+      const vnode1 = vDom("p", { key: 1 }, [1, 2, 4, 5].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, [1, 2, 3, 4, 5].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>4</span><span>5</span></p>"
+      );
+      const span2 = fixture.querySelectorAll("span")[1];
+      expect(span2.outerHTML).toBe("<span>2</span>");
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></p>"
+      );
+      const spans = fixture.querySelectorAll("span")!;
+      expect(spans[1]).toBe(span2);
+    });
+
+    test("add elements at beginning and end", function () {
+      const vnode1 = vDom("p", { key: 1 }, [2, 3, 4].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, [1, 2, 3, 4, 5].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      expect(fixture.innerHTML).toBe("<p><span>2</span><span>3</span><span>4</span></p>");
+      const span2 = fixture.querySelectorAll("span")[0];
+      expect(span2.outerHTML).toBe("<span>2</span>");
+      const span4 = fixture.querySelectorAll("span")[2];
+      expect(span4.outerHTML).toBe("<span>4</span>");
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></p>"
+      );
+      const spans = fixture.querySelectorAll("span")!;
+      expect(spans[1]).toBe(span2);
+      expect(spans[3]).toBe(span4);
+    });
+
+    test("adds children to parent with no children", function () {
+      const vnode1 = vDom("p", { key: 1 }, []);
+      const vnode2 = vDom("p", { key: 1 }, [1, 2, 3].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      expect(fixture.innerHTML).toBe("<p></p>");
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe("<p><span>1</span><span>2</span><span>3</span></p>");
+    });
+
+    test("removes all children from parent", function () {
+      const vnode1 = vDom("p", { key: 1 }, [1, 2, 3].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, []);
+
+      buildTree(vnode1, fixture);
+      expect(fixture.innerHTML).toBe("<p><span>1</span><span>2</span><span>3</span></p>");
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe("<p></p>");
+    });
+  });
+
+  describe("addition of elements", () => {
+    test("removes elements from the beginning", function () {
+      const vnode1 = vDom("p", { key: 1 }, [1, 2, 3, 4, 5].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, [3, 4, 5].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      const span3 = fixture.querySelectorAll("span")[2];
+      expect(span3.innerHTML).toBe("3");
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></p>"
+      );
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe("<p><span>3</span><span>4</span><span>5</span></p>");
+      expect(fixture.querySelectorAll("span")[0]).toBe(span3);
+      expect(vnode1.children.length).toBe(3);
+    });
+
+    test("removes elements from the end", function () {
+      const vnode1 = vDom("p", { key: 1 }, [1, 2, 3, 4, 5].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, [1, 2, 3].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      const span3 = fixture.querySelectorAll("span")[2];
+      expect(span3.innerHTML).toBe("3");
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></p>"
+      );
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe("<p><span>1</span><span>2</span><span>3</span></p>");
+      expect(fixture.querySelectorAll("span")[2]).toBe(span3);
+      expect(vnode1.children.length).toBe(3);
+    });
   });
 });
 
