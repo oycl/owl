@@ -1,6 +1,7 @@
-import { makeTestFixture } from "../helpers";
-import { mount, xml } from "../../src/index";
+import { makeTestFixture, nextTick } from "../helpers";
+import { mount, xml, useState } from "../../src/index";
 import { FunctionComponent } from "../../src/core/rendering_engine";
+import { qweb } from "../../src/qweb/qweb";
 
 //------------------------------------------------------------------------------
 // Setup and helpers
@@ -121,21 +122,21 @@ describe("basic function component properties", () => {
   //     );
   //   });
 
-  //   test("display a nice message if mounted on an invalid node (*)", async () => {
-  //     class SomeWidget extends Component {
-  //       static template = xml`<div>content</div>`;
-  //     }
-  //     let error;
-  //     try {
-  //       await mount({} as any, SomeWidget);
-  //     } catch (e) {
-  //       error = e;
-  //     }
-  //     expect(error).toBeDefined();
-  //     expect(error.message).toBe(
-  //       "Component 'SomeWidget' cannot be mounted: the target is not a valid DOM node.\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)"
-  //     );
-  //   });
+  test("display a nice message if mounted on an invalid node (*)", async () => {
+    const SomeWidget = {
+      template: xml`<div>content</div>`,
+    };
+    let error;
+    try {
+      await mount({} as any, SomeWidget);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeDefined();
+    expect(error.message).toBe(
+      "Component 'No Name' cannot be mounted: the target is not a valid DOM node.\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)"
+    );
+  });
 
   // test("display an error message if result of rendering is empty", async () => {
   //   class SomeWidget extends Component {
@@ -161,70 +162,90 @@ describe("basic function component properties", () => {
   //     }
   //   });
 
-  //   test("can be clicked on and updated", async () => {
-  //     class Counter extends Component {
-  //       static template = xml`
-  //       <div><t t-esc="state.counter"/><button t-on-click="state.counter++">Inc</button></div>`;
-  //       state = useState({
-  //         counter: 0,
-  //       });
-  //     }
+  test("can be clicked on and updated", async () => {
+    const Counter = {
+      template: xml`
+          <div>
+            <t t-esc="state.counter"/><button t-on-click="state.counter++">Inc</button>
+          </div>`,
+      setup() {
+        const state = useState({ counter: 0 });
+        return { state };
+      },
+    };
 
-  //     const counter = new Counter();
-  //     counter.mount(fixture);
-  //     await nextTick();
-  //     expect(fixture.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //     const button = (<HTMLElement>counter.el).getElementsByTagName("button")[0];
-  //     button.click();
-  //     await nextTick();
-  //     expect(fixture.innerHTML).toBe("<div>1<button>Inc</button></div>");
-  //   });
+    await mount(fixture, Counter);
+    expect(fixture.innerHTML).toBe("<div>0<button>Inc</button></div>");
+    fixture.querySelector("button")!.click();
+    await nextTick();
+    expect(fixture.innerHTML).toBe("<div>1<button>Inc</button></div>");
+  });
 
-  //   test("can handle empty props", async () => {
-  //     class Child extends Component {
-  //       static template = xml`<span><t t-esc="props.val"/></span>`;
-  //     }
-  //     class Parent extends Component {
-  //       static template = xml`<div><Child val=""/></div>`;
-  //       static components = { Child };
-  //     }
+  test("can handle empty props", async () => {
+    const Child = {
+      template: xml`<span><t t-esc="props.val"/></span>`,
+    };
+    const Parent = {
+      template: xml`<div><Child val=""/></div>`,
+      components: { Child },
+    };
 
-  //     const parent = new Parent();
-  //     await parent.mount(fixture);
-  //     expect(env.qweb.templates[Parent.template].fn.toString()).toMatchSnapshot();
-  //     expect(fixture.innerHTML).toBe("<div><span></span></div>");
-  //   });
+    await mount(fixture, Parent);
+    expect(qweb.compiledTemplates[Parent.template].fn.toString()).toMatchSnapshot();
+    expect(fixture.innerHTML).toBe("<div><span></span></div>");
+  });
 
-  //   test("cannot be clicked on and updated if not in DOM", async () => {
-  //     class Counter extends Component {
-  //       static template = xml`
-  //       <div><t t-esc="state.counter"/><button t-on-click="state.counter++">Inc</button></div>`;
-  //       state = useState({
-  //         counter: 0,
-  //       });
-  //     }
+  test("can access env in template (*)", async () => {
+    const Test = {
+      template: xml`<span><t t-esc="env.val"/></span>`,
+    };
 
-  //     const counter = new Counter();
-  //     const target = document.createElement("div");
-  //     await counter.mount(target);
-  //     expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //     const button = (<HTMLElement>counter.el).getElementsByTagName("button")[0];
-  //     button.click();
-  //     await nextTick();
-  //     expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //     expect(counter.state.counter).toBe(0);
-  //   });
+    await mount(fixture, Test, { env: { val: 3 } });
+    expect(fixture.innerHTML).toBe("<span>3</span>");
+  });
 
-  //   test("widget style and classname", async () => {
-  //     class StyledWidget extends Component {
-  //       static template = xml`
-  //         <div style="font-weight:bold;" class="some-class">world</div>
-  //       `;
-  //     }
-  //     const widget = new StyledWidget();
-  //     await widget.mount(fixture);
-  //     expect(fixture.innerHTML).toBe(`<div style="font-weight:bold;" class="some-class">world</div>`);
-  //   });
+  test("components are flagged mounted if in dom (*)", async () => {
+    const Test = {
+      template: xml`<div></div>`,
+    };
+
+    const target = document.createElement("div");
+    const test1 = await mount(target, Test);
+    expect(test1.isMounted).toBe(false);
+    const test2 = await mount(fixture, Test);
+    expect(test2.isMounted).toBe(true);
+  });
+
+  test("cannot be clicked on and updated if not in DOM", async () => {
+    const Counter = {
+      template: xml`
+          <div>
+            <t t-esc="state.counter"/>
+            <button t-on-click="state.counter++">Inc</button>
+          </div>`,
+      setup() {
+        return { state: useState({ counter: 0 }) };
+      },
+    };
+
+    const target = document.createElement("div");
+    const counter = await mount(target, Counter);
+    expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
+    const button = target.querySelector("button")!;
+    button.click();
+    await nextTick();
+    expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
+    expect(counter.context.state.counter).toBe(0);
+  });
+
+  test("widget style and classname", async () => {
+    const StyledWidget = {
+      template: xml`
+          <div style="font-weight:bold;" class="some-class">world</div>`,
+    };
+    await mount(fixture, StyledWidget);
+    expect(fixture.innerHTML).toBe(`<div style="font-weight:bold;" class="some-class">world</div>`);
+  });
 
   //   test("changing state before first render does not trigger a render", async () => {
   //     const steps: string[] = [];

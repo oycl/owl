@@ -222,7 +222,16 @@ describe("basic component properties", () => {
     expect(fixture.innerHTML).toBe("<div><span></span></div>");
   });
 
-  test("components are flagged mounted if in dom", async () => {
+  test("can access env in template (*)", async () => {
+    class Test extends Component {
+      static template = xml`<span><t t-esc="env.val"/></span>`;
+    }
+
+    await mount(fixture, Test, { env: { val: 3 } });
+    expect(fixture.innerHTML).toBe("<span>3</span>");
+  });
+
+  test("components are flagged mounted if in dom (*)", async () => {
     class Test extends Component {
       static template = xml`<div></div>`;
     }
@@ -259,16 +268,15 @@ describe("basic component properties", () => {
     expect(counter.state.counter).toBe(0);
   });
 
-  //   test("widget style and classname", async () => {
-  //     class StyledWidget extends Component {
-  //       static template = xml`
-  //         <div style="font-weight:bold;" class="some-class">world</div>
-  //       `;
-  //     }
-  //     const widget = new StyledWidget();
-  //     await widget.mount(fixture);
-  //     expect(fixture.innerHTML).toBe(`<div style="font-weight:bold;" class="some-class">world</div>`);
-  //   });
+  test("widget style and classname", async () => {
+    class StyledWidget extends Component {
+      static template = xml`
+          <div style="font-weight:bold;" class="some-class">world</div>
+        `;
+    }
+    await mount(fixture, StyledWidget);
+    expect(fixture.innerHTML).toBe(`<div style="font-weight:bold;" class="some-class">world</div>`);
+  });
 
   //   test("changing state before first render does not trigger a render", async () => {
   //     const steps: string[] = [];
@@ -330,40 +338,43 @@ describe("basic component properties", () => {
   //     expect(steps).toEqual(["__render", "mounted"]);
   //   });
 
-  //   test("render method wait until rendering is done", async () => {
-  //     class TestW extends Component {
-  //       static template = xml`<div><t t-esc="state.drinks"/></div>`;
-  //       state = { drinks: 1 };
-  //     }
-  //     const widget = new TestW();
-  //     await widget.mount(fixture);
-  //     expect(fixture.innerHTML).toBe("<div>1</div>");
+  test("render method wait until rendering is done", async () => {
+    class TestW extends Component {
+      static template = xml`<div><t t-esc="state.drinks"/></div>`;
+      state = { drinks: 1 };
+    }
+    const { context: component } = await mount(fixture, TestW);
+    expect(fixture.innerHTML).toBe("<div>1</div>");
 
-  //     widget.state.drinks = 2;
+    component.state.drinks = 2;
 
-  //     const renderPromise = widget.render();
-  //     expect(fixture.innerHTML).toBe("<div>1</div>");
-  //     await renderPromise;
-  //     expect(fixture.innerHTML).toBe("<div>2</div>");
-  //   });
+    const renderPromise = component.render();
+    expect(fixture.innerHTML).toBe("<div>1</div>");
+    await renderPromise;
+    expect(fixture.innerHTML).toBe("<div>2</div>");
+  });
 
-  //   test("keeps a reference to env", async () => {
-  //     const widget = new Component();
-  //     expect(widget.env).toBe(env);
-  //   });
+  test("keeps a reference to env", async () => {
+    class Test extends Component {
+      static template = xml`<div></div>`;
+    }
+    const env = {};
+    const { context: component } = await mount(fixture, Test, { env });
+    expect(component.env).toBe(env);
+  });
 
-  //   test("do not remove previously rendered dom if not necessary", async () => {
-  //     class SomeComponent extends Component {
-  //       static template = xml`<div/>`;
-  //     }
-  //     const widget = new SomeComponent();
-  //     await widget.mount(fixture);
-  //     expect(fixture.innerHTML).toBe(`<div></div>`);
-  //     widget.el!.appendChild(document.createElement("span"));
-  //     expect(fixture.innerHTML).toBe(`<div><span></span></div>`);
-  //     widget.render(); // FIXME?
-  //     expect(fixture.innerHTML).toBe(`<div><span></span></div>`);
-  //   });
+  test("do not remove previously rendered dom if not necessary", async () => {
+    class SomeComponent extends Component {
+      static template = xml`<div/>`;
+    }
+    const { context: component } = await mount(fixture, SomeComponent);
+    expect(fixture.innerHTML).toBe(`<div></div>`);
+
+    component.el!.appendChild(document.createElement("span"));
+    expect(fixture.innerHTML).toBe(`<div><span></span></div>`);
+    await component.render();
+    expect(fixture.innerHTML).toBe(`<div><span></span></div>`);
+  });
 
   //   test("reconciliation alg is not confused in some specific situation", async () => {
   //     // in this test, we set t-key to 4 because it was in conflict with the

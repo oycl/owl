@@ -32,7 +32,7 @@ describe("mount", () => {
     expect(test.el).toBe(div);
   });
 
-  test("return value of mount is the result of setup", async () => {
+  test("return value of mount contains the result of setup", async () => {
     const obj = {};
     const Test = {
       template: xml`<div>simple vnode</div>`,
@@ -42,7 +42,7 @@ describe("mount", () => {
     };
 
     const mountResult = await mount(fixture, Test);
-    expect(mountResult.context).toBe(obj);
+    expect((mountResult.context as any).__proto__).toBe(obj);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
   });
 

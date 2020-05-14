@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`basic function component properties can handle empty props 1`] = `
+"function anonymous(tree, ctx, metadata
+) {
+    // Template: \`__template__10\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    vn1.children.push(this.makeComponent(metadata, \\"Child\\", ctx));
+}"
+`;

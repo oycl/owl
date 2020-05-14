@@ -1,4 +1,5 @@
 import { VNode, NodeType } from "./types";
+import { VDomArray } from "./vdom";
 
 // -----------------------------------------------------------------------------
 // html to vdom
@@ -16,7 +17,10 @@ const parser = new DOMParser();
  */
 const cache: { [html: string]: VNode[] } = {};
 
-export function htmlToVDOM(html: string): VNode[] {
+export function htmlToVDOM(html: string | VDomArray): VNode[] {
+  if (html instanceof VDomArray) {
+    return html;
+  }
   if (!cache[html]) {
     const doc = parser.parseFromString(html, "text/html");
     const result: VNode[] = [];

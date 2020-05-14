@@ -1,4 +1,4 @@
-import { OwlComponent, ComponentData } from "./rendering_engine";
+import { OwlComponent, ComponentData, engine } from "./rendering_engine";
 
 export class Component<Props = any, Env = any> {
   static template: string;
@@ -12,5 +12,9 @@ export class Component<Props = any, Env = any> {
   constructor(props: Props, env: Env) {
     this.props = props;
     this.env = env;
+  }
+
+  render(): Promise<void> {
+    return engine.render(this.__owl__!);
   }
 }

@@ -1,4 +1,4 @@
-import { buildTree, patch } from "../../src/vdom/vdom";
+import { buildTree, patch, VDomArray } from "../../src/vdom/vdom";
 import { vDom, vText, vMulti, vRoot } from "./helpers";
 import { VDOMNode } from "../../src/vdom/types";
 
@@ -8,7 +8,7 @@ beforeEach(() => {
   fixture = document.createElement("div");
 });
 
-describe("update function", () => {
+describe("patch function", () => {
   test("can update some text content", async () => {
     const vnode = vText("abc");
     buildTree(vnode, fixture);
@@ -159,6 +159,20 @@ describe("update function", () => {
     patch(vnode, vRoot(vDom("div", [])));
     expect(fixture.innerHTML).toBe("<div></div>");
     expect(fixture.childNodes[0]).not.toBe(div);
+  });
+
+  test("can patch a text node with a VDomArray of vnodes", () => {
+    const arr = new VDomArray();
+    arr.push(vDom("div", [vText("hey")]));
+    const vnode = vDom("div", [vText(arr)]);
+    buildTree(vnode, fixture);
+    expect(fixture.innerHTML).toBe("<div>&lt;div&gt;hey&lt;/div&gt;</div>");
+
+    const arr2 = new VDomArray();
+    arr2.push(vDom("div", [vText("hoy")]));
+    const vnode2 = vDom("div", [vText(arr2)]);
+    patch(vnode, vnode2);
+    expect(fixture.innerHTML).toBe("<div>&lt;div&gt;hoy&lt;/div&gt;</div>");
   });
 });
 

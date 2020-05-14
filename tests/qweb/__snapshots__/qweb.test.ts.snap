@@ -778,6 +778,15 @@ exports[`t-esc escaping 1`] = `
 }"
 `;
 
+exports[`t-esc escaping a list 1`] = `
+"function anonymous(tree, ctx, metadata
+) {
+    // Template: \`__template__1\`
+    const vn1 = tree.child = {type: 2, tag: \\"span\\", children: [], key: 1};
+    vn1.children.push({type: 3, text: ctx['var'], el: null});
+}"
+`;
+
 exports[`t-esc escaping on a node 1`] = `
 "function anonymous(tree, ctx, metadata
 ) {
@@ -824,6 +833,19 @@ exports[`t-esc literal 1`] = `
 }"
 `;
 
+exports[`t-esc t-esc inside t-call, with t-set outside 1`] = `
+"function anonymous(tree, ctx, metadata
+) {
+    // Template: \`__template__2\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    let _2 = new this.VDomArray();
+    _2.push({type: 3, text: \`Hi\`, el: null});
+    ctx.v = _2;
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx, metadata));
+}"
+`;
+
 exports[`t-esc t-esc is escaped 1`] = `
 "function anonymous(tree, ctx, metadata
 ) {
@@ -835,8 +857,7 @@ exports[`t-esc t-esc is escaped 1`] = `
     _2.push(vn3);
     vn3.children.push({type: 3, text: \`escaped\`, el: null});
     ctx.var = _2;
-    let _5 = this.vDomToString(ctx.var);
-    vn1.children.push({type: 3, text: _5, el: null});
+    vn1.children.push({type: 3, text: ctx['var'], el: null});
 }"
 `;
 
@@ -1340,8 +1361,7 @@ exports[`t-raw from a (template, value+body) variable (*) 1`] = `
         vn3.children.push({type: 3, text: \`def\`, el: null});
         ctx.v = _2
     }
-    let _5 = ctx.v instanceof this.VDomArray ? ctx.v : this.htmlToVDOM(ctx.v);
-    vn1.children.push({type: 1, children: _5});
+    vn1.children.push({type: 1, children: this.htmlToVDOM(ctx.v)});
 }"
 `;
 
@@ -1380,6 +1400,21 @@ exports[`t-raw t-raw and another sibling node 1`] = `
     vn1.children.push(vn2);
     vn2.children.push({type: 3, text: \`hello\`, el: null});
     vn1.children.push(...this.htmlToVDOM(ctx['var']));
+}"
+`;
+
+exports[`t-raw t-raw inside t-call, with t-set outside 1`] = `
+"function anonymous(tree, ctx, metadata
+) {
+    // Template: \`__template__2\`
+    ctx = Object.create(ctx);
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    let _2 = new this.VDomArray();
+    const vn3 = {type: 2, tag: \\"p\\", children: [], key: 1};
+    _2.push(vn3);
+    vn3.children.push({type: 3, text: \`Hi\`, el: null});
+    ctx.v = _2;
+    vn1.children.push(this.callTemplate(tree, \\"__template__1\\", ctx, metadata));
 }"
 `;
 
@@ -1445,8 +1480,7 @@ exports[`t-set set from body literal 1`] = `
     let _2 = new this.VDomArray();
     _2.push({type: 3, text: \`ok\`, el: null});
     ctx.value = _2;
-    let _4 = this.vDomToString(ctx.value);
-    vn1.children.push({type: 3, text: _4, el: null});
+    vn1.children.push({type: 3, text: ctx['value'], el: null});
 }"
 `;
 
@@ -1459,8 +1493,7 @@ exports[`t-set set from body lookup 1`] = `
     let _2 = new this.VDomArray();
     _2.push({type: 3, text: ctx['value'], el: null});
     ctx.stuff = _2;
-    let _4 = this.vDomToString(ctx.stuff);
-    vn1.children.push({type: 3, text: _4, el: null});
+    vn1.children.push({type: 3, text: ctx['stuff'], el: null});
 }"
 `;
 
@@ -1564,8 +1597,7 @@ exports[`t-set t-set with content and sub t-esc 1`] = `
     _2.push({type: 3, text: ctx['beep'], el: null});
     _2.push({type: 3, text: \` boop\`, el: null});
     ctx.setvar = _2;
-    let _5 = this.vDomToString(ctx.setvar);
-    vn1.children.push({type: 3, text: _5, el: null});
+    vn1.children.push({type: 3, text: ctx['setvar'], el: null});
 }"
 `;
 
@@ -1587,8 +1619,7 @@ exports[`t-set t-set with t-value (falsy) and body 1`] = `
     }
     ctx.v1 = 'after';
     ctx.v3 = true;
-    let _6 = ctx.v2 instanceof this.VDomArray ? ctx.v2 : this.htmlToVDOM(ctx.v2);
-    vn1.children.push({type: 1, children: _6});
+    vn1.children.push({type: 1, children: this.htmlToVDOM(ctx.v2)});
 }"
 `;
 
@@ -1610,8 +1641,7 @@ exports[`t-set t-set with t-value (truthy) and body 1`] = `
     }
     ctx.v1 = 'after';
     ctx.v3 = false;
-    let _6 = ctx.v2 instanceof this.VDomArray ? ctx.v2 : this.htmlToVDOM(ctx.v2);
-    vn1.children.push({type: 1, children: _6});
+    vn1.children.push({type: 1, children: this.htmlToVDOM(ctx.v2)});
 }"
 `;
 
@@ -1628,8 +1658,7 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 1`] = `
     } else {
         ctx.ourvar = 0;
     }
-    let _4 = ctx.ourvar instanceof this.VDomArray ? this.vDomToString(ctx.ourvar) : ctx.ourvar;
-    vn1.children.push({type: 3, text: _4, el: null});
+    vn1.children.push({type: 3, text: ctx['ourvar'], el: null});
 }"
 `;
 
@@ -1646,8 +1675,7 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 1 2`] = `
     } else {
         ctx.ourvar = 0;
     }
-    let _4 = ctx.ourvar instanceof this.VDomArray ? this.vDomToString(ctx.ourvar) : ctx.ourvar;
-    vn1.children.push({type: 3, text: _4, el: null});
+    vn1.children.push({type: 3, text: ctx['ourvar'], el: null});
 }"
 `;
 
@@ -1664,8 +1692,7 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 2 1`] = `
         _2.push({type: 3, text: \`0\`, el: null});
         ctx.ourvar = _2;
     }
-    let _4 = ctx.ourvar instanceof this.VDomArray ? this.vDomToString(ctx.ourvar) : ctx.ourvar;
-    vn1.children.push({type: 3, text: _4, el: null});
+    vn1.children.push({type: 3, text: ctx['ourvar'], el: null});
 }"
 `;
 
@@ -1682,8 +1709,7 @@ exports[`t-set t-set, t-if, and mix of expression/body lookup, 2 2`] = `
         _2.push({type: 3, text: \`0\`, el: null});
         ctx.ourvar = _2;
     }
-    let _4 = ctx.ourvar instanceof this.VDomArray ? this.vDomToString(ctx.ourvar) : ctx.ourvar;
-    vn1.children.push({type: 3, text: _4, el: null});
+    vn1.children.push({type: 3, text: ctx['ourvar'], el: null});
 }"
 `;
 
@@ -1699,8 +1725,7 @@ exports[`t-set value priority 1`] = `
         _2.push({type: 3, text: \`2\`, el: null});
         ctx.value = _2
     }
-    let _4 = ctx.value instanceof this.VDomArray ? this.vDomToString(ctx.value) : ctx.value;
-    vn1.children.push({type: 3, text: _4, el: null});
+    vn1.children.push({type: 3, text: ctx['value'], el: null});
 }"
 `;
 

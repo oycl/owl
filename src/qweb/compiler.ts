@@ -388,31 +388,13 @@ function compileEscNode(ctx: CompilerContext, ast: ASTEscNode) {
     closeIf(ctx);
   } else {
     if (ast.expr in ctx.variables) {
-      // this is a variable that was already defined, with a body
-      const id = uniqueId(ctx);
       const qwebVar = ctx.variables[ast.expr];
       if (!qwebVar.hasBody && !qwebVar.hasValue) {
         return;
       }
-      if (qwebVar.hasBody && qwebVar.hasValue) {
-        addLine(
-          ctx,
-          `let ${id} = ${qwebVar.expr} instanceof this.VDomArray ? this.vDomToString(${qwebVar.expr}) : ${qwebVar.expr};`
-        );
-        const vnode = `{type: ${NodeType.Text}, text: ${id}, el: null}`;
-        addVNode(ctx, vnode, false);
-      } else if (qwebVar.hasValue && !qwebVar.hasBody) {
-        const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
-        addVNode(ctx, vnode, false);
-      } else {
-        addLine(ctx, `let ${id} = this.vDomToString(${qwebVar.expr});`);
-        const vnode = `{type: ${NodeType.Text}, text: ${id}, el: null}`;
-        addVNode(ctx, vnode, false);
-      }
-    } else {
-      const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
-      addVNode(ctx, vnode, false);
     }
+    const vnode = `{type: ${NodeType.Text}, text: ${expr}, el: null}`;
+    addVNode(ctx, vnode, false);
   }
 }
 
@@ -444,12 +426,7 @@ function compileRawNode(ctx: CompilerContext, ast: ASTRawNode) {
     // this is a variable that was already defined, with a body
     const qwebVar = ctx.variables[ast.expr];
     if (qwebVar.hasBody && qwebVar.hasValue) {
-      const id = uniqueId(ctx);
-      addLine(
-        ctx,
-        `let ${id} = ${qwebVar.expr} instanceof this.VDomArray ? ${qwebVar.expr} : this.htmlToVDOM(${qwebVar.expr});`
-      );
-      const vnode = `{type: ${NodeType.Multi}, children: ${id}}`;
+      const vnode = `{type: ${NodeType.Multi}, children: this.htmlToVDOM(${qwebVar.expr})}`;
       addVNode(ctx, vnode, false);
     } else {
       const vnode = `{type: ${NodeType.Multi}, children: ${qwebVar.expr}}`;

@@ -167,6 +167,11 @@ describe("t-esc", () => {
     expect(render(template, { var: "ok" })).toBe("<span>ok</span>");
   });
 
+  test("escaping a list", () => {
+    const template = xml`<span><t t-esc="var"/></span>`;
+    expect(render(template, { var: [1, 2, 3] })).toBe("<span>1,2,3</span>");
+  });
+
   test("escaping", () => {
     const template = xml`<span><t t-esc="var"/></span>`;
     expect(render(template, { var: "<ok>abc</ok>" })).toBe(
@@ -225,6 +230,12 @@ describe("t-esc", () => {
     const template = xml`<span><t t-esc="[...state.list]"/></span>`;
     expect(render(template, { state: { list: [1, 2] } })).toBe("<span>1,2</span>");
   });
+
+  test("t-esc inside t-call, with t-set outside", () => {
+    const sub = xml`<span t-esc="v"/>`;
+    const main = xml`<div><t t-set="v">Hi</t><t t-call="${sub}"/></div>`;
+    expect(render(main)).toBe("<div><span>Hi</span></div>");
+  });
 });
 
 describe("t-raw", () => {
@@ -268,6 +279,12 @@ describe("t-raw", () => {
   test("empty value, and a body as default (*)", () => {
     const template = xml`<span><t t-raw="var">body</t></span>`;
     expect(render(template)).toBe("<span>body</span>");
+  });
+
+  test("t-raw inside t-call, with t-set outside", () => {
+    const sub = xml`<span t-raw="v"/>`;
+    const main = xml`<div><t t-set="v"><p>Hi</p></t><t t-call="${sub}"/></div>`;
+    expect(render(main)).toBe("<div><span><p>Hi</p></span></div>");
   });
 });
 

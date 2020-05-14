@@ -1,6 +1,6 @@
 import { compileTemplate, handle } from "./compiler";
-import { buildTree } from "../vdom/vdom";
-import { NodeType, VNode, VMultiNode, VRootNode } from "../vdom/types";
+import { buildTree, VDomArray } from "../vdom/vdom";
+import { NodeType, VMultiNode, VRootNode } from "../vdom/types";
 import { htmlToVDOM } from "../vdom/html_to_vdom";
 import { escape } from "../utils";
 import { TemplateInfo, RenderContext, QWebTemplate } from "./types";
@@ -16,12 +16,7 @@ import { TemplateInfo, RenderContext, QWebTemplate } from "./types";
  */
 const qwebContext: any = {
   zero: Symbol("zero"),
-  VDomArray: class VDomArray extends Array {},
-  vDomToString: function (vdomArray: VNode[]): string {
-    const div = document.createElement("div");
-    buildTree({ type: NodeType.Multi, children: vdomArray }, div);
-    return div.innerHTML;
-  },
+  VDomArray: VDomArray,
   vMultiToString: function (multi: VMultiNode): string {
     const div = document.createElement("div");
     buildTree(multi, div);

@@ -2,6 +2,8 @@
 // VDOM Type
 // -----------------------------------------------------------------------------
 
+import { VDomArray } from "./vdom";
+
 /**
  * Other ideas:
  *
@@ -69,7 +71,9 @@ export interface VStaticNode extends BaseNode {
 
 export interface VTextNode extends BaseNode {
   type: NodeType.Text;
-  text: any;
+  // sometimes the content of the body a qweb var is stored in a text node =>
+  // we need to call vdomToString in that case
+  text: any | VDomArray;
   el?: Text;
 }
 

@@ -1,4 +1,4 @@
-import { buildTree } from "../../src/vdom/vdom";
+import { buildTree, VDomArray } from "../../src/vdom/vdom";
 import { vDom, vText, vMulti, vRoot, vComment, vStatic } from "./helpers";
 
 let fixture: HTMLElement;
@@ -99,6 +99,20 @@ describe("patch function", () => {
     root.child = vStatic(root, "<div>hey</div>");
     buildTree(root, fixture);
     expect(fixture.innerHTML).toBe("<div>hey</div>");
+  });
+
+  test("can make a text node with list of numbers", () => {
+    const vnode = vDom("div", [vText([1, 2, 3])]);
+    buildTree(vnode, fixture);
+    expect(fixture.innerHTML).toBe("<div>1,2,3</div>");
+  });
+
+  test("can make a text node with VDomArray of vnodes", () => {
+    const arr = new VDomArray();
+    arr.push(vDom("div", [vText("hey")]));
+    const vnode = vDom("div", [vText(arr)]);
+    buildTree(vnode, fixture);
+    expect(fixture.innerHTML).toBe("<div>&lt;div&gt;hey&lt;/div&gt;</div>");
   });
 
   describe("attributes", () => {

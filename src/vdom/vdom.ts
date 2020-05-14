@@ -12,6 +12,7 @@ import {
 // -----------------------------------------------------------------------------
 // patch and update
 // -----------------------------------------------------------------------------
+export class VDomArray extends Array {}
 
 function addNode(node: Node, anchor: HTMLElement, position: NodePosition) {
   switch (position) {
@@ -24,6 +25,26 @@ function addNode(node: Node, anchor: HTMLElement, position: NodePosition) {
   }
 }
 
+function vDomToString(vdomArray: VNode[]): string {
+  const div = document.createElement("div");
+  buildTree({ type: NodeType.Multi, children: vdomArray }, div);
+  return div.innerHTML;
+}
+
+function anyToString(content: any): string {
+  switch (typeof content) {
+    case "undefined":
+      return "";
+    case "object":
+      if (content === null) {
+        return "";
+      } else if (content instanceof VDomArray) {
+        return vDomToString(content);
+      }
+  }
+  return content;
+}
+
 export function buildTree(
   vnode: VNode,
   anchor: HTMLElement,
@@ -32,10 +53,7 @@ export function buildTree(
 ) {
   switch (vnode.type) {
     case NodeType.Text:
-      let text = vnode.text; // === undefined ? "" : vnode.text;
-      if (text === undefined || text === null) {
-        text = "";
-      }
+      let text: any = anyToString(vnode.text);
       const textEl = document.createTextNode(text);
       vnode.el = textEl;
       addNode(textEl, anchor, position);
@@ -138,7 +156,7 @@ function getEl(vnode: VNode): HTMLElement | Text | Comment | null {
 export function patch(vnode: VNode, target: VNode, staticNodes: HTMLElement[] = []) {
   switch (vnode.type) {
     case NodeType.Text:
-      vnode.el!.textContent = (target as VTextNode).text;
+      vnode.el!.textContent = anyToString((target as VTextNode).text);
       (target as VTextNode).el = vnode.el;
       break;
     case NodeType.DOM:
