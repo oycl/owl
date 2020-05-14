@@ -8,11 +8,15 @@ function render(template: string, context: any = {}): string {
   return str;
 }
 
-function renderToDOM(templateName: string, context: any = {}): HTMLDivElement {
+function renderToDOM(
+  templateName: string,
+  context: any = {},
+  extra: any = { isMounted: true, context }
+): HTMLDivElement {
   const template = qweb.getTemplate(templateName);
   expect(qweb.compiledTemplates[templateName].fn.toString()).toMatchSnapshot();
   const tree = template.createRoot();
-  template.render(tree, context, null);
+  template.render(tree, context, extra);
   const div = document.createElement("div");
   buildTree(tree, div);
   return div;
@@ -1232,15 +1236,15 @@ describe("misc", () => {
 
 describe("t-on", () => {
   test("can bind event handler", () => {
+    expect.assertions(2);
     const template = xml`<button t-on-click="add">Click</button>`;
-    let a = 1;
-    const div = renderToDOM(template, {
+    let ctx = {
       add() {
-        a = 3;
+        expect(this).toBe(ctx);
       },
-    });
+    };
+    const div = renderToDOM(template, ctx);
     div.querySelector("button")!.click();
-    expect(a).toBe(3);
   });
 
   test("can bind two event handlers", () => {
@@ -1263,93 +1267,71 @@ describe("t-on", () => {
     expect(steps).toEqual(["click", "dblclick"]);
   });
 
-  //   test("can bind handlers with arguments", () => {
-  //     const template = xml`<button t-on-click="add(5)">Click</button>`;
-  //     let a = 1;
-  //     const node = renderToDOM(
-  //       qweb,
-  //       "test",
-  //       {
-  //         add(n) {
-  //           a = a + n;
-  //         },
-  //       },
-  //       { handlers: [] }
-  //     );
-  //     (<HTMLElement>node).click();
-  //     expect(a).toBe(6);
-  //   });
+  test("can bind handlers with arguments", () => {
+    expect.assertions(3);
+    const template = xml`<button t-on-click="add(5)">Click</button>`;
+    let ctx = {
+      add(n: number) {
+        expect(n).toBe(5);
+        expect(this).toBe(ctx);
+      },
+    };
+    const node = renderToDOM(template, ctx);
+    node.querySelector("button")!.click();
+  });
 
-  //   test("can bind handlers with object arguments", () => {
-  //     const template = xml`<button t-on-click="add({val: 5})">Click</button>`;
-  //     let a = 1;
-  //     const node = renderToDOM(
-  //       qweb,
-  //       "test",
-  //       {
-  //         add({ val }) {
-  //           a = a + val;
-  //         },
-  //       },
-  //       { handlers: [] }
-  //     );
-  //     (<HTMLElement>node).click();
-  //     expect(a).toBe(6);
-  //   });
+  test("can bind handlers with object arguments", () => {
+    const template = xml`<button t-on-click="add({val: 5})">Click</button>`;
+    let a = 1;
+    const node = renderToDOM(template, {
+      add({ val }: any) {
+        a = a + val;
+      },
+    });
+    node.querySelector("button")!.click();
+    expect(a).toBe(6);
+  });
 
-  //   test("can bind handlers with empty object", () => {
-  //     expect.assertions(2);
-  //     const template = xml`<button t-on-click="doSomething({})">Click</button>`;
-  //     const node = renderToDOM(
-  //       qweb,
-  //       "test",
-  //       {
-  //         doSomething(arg) {
-  //           expect(arg).toEqual({});
-  //         },
-  //       },
-  //       { handlers: [] }
-  //     );
-  //     (<HTMLElement>node).click();
-  //   });
+  test("can bind handlers with empty object", () => {
+    expect.assertions(2);
+    const template = xml`<button t-on-click="doSomething({})">Click</button>`;
+    const node = renderToDOM(template, {
+      doSomething(arg: any) {
+        expect(arg).toEqual({});
+      },
+    });
+    node.querySelector("button")!.click();
+  });
 
-  //   test("can bind handlers with empty object (with non empty inner string)", () => {
-  //     expect.assertions(2);
-  //     const template = xml`<button t-on-click="doSomething({ })">Click</button>`;
-  //     const node = renderToDOM(
-  //       qweb,
-  //       "test",
-  //       {
-  //         doSomething(arg) {
-  //           expect(arg).toEqual({});
-  //         },
-  //       },
-  //       { handlers: [] }
-  //     );
-  //     (<HTMLElement>node).click();
-  //   });
+  test("can bind handlers with empty object (with non empty inner string)", () => {
+    expect.assertions(2);
+    const template = xml`<button t-on-click="doSomething({ })">Click</button>`;
+    const node = renderToDOM(template, {
+      doSomething(arg: any) {
+        expect(arg).toEqual({});
+      },
+    });
+    node.querySelector("button")!.click();
+  });
 
-  //   test("can bind handlers with loop variable as argument", () => {
-  //     expect.assertions(2);
-  //     qweb.addTemplate(
-  //       "test",
-  //       `
-  //       <ul>
-  //         <li t-foreach="['someval']" t-as="action" t-key="action_index"><a t-on-click="activate(action)">link</a></li>
-  //       </ul>`
-  //     );
-  //     const node = renderToDOM(
-  //       qweb,
-  //       "test",
-  //       {
-  //         activate(action) {
-  //           expect(action).toBe("someval");
-  //         },
-  //       },
-  //       { handlers: [] }
-  //     );
-  //     (<HTMLElement>node).getElementsByTagName("a")[0].click();
-  //   });
+  test("can bind handlers with loop variable as argument", () => {
+    expect.assertions(3);
+    const template = xml`
+        <ul>
+          <li t-foreach="['someval']" t-as="action" t-key="action_index">
+            <a t-on-click="activate(action)">link</a>
+          </li>
+        </ul>`;
+    const context = {
+      activate(action: any) {
+        expect(action).toBe("someval");
+        expect(this).toBe(context);
+      },
+    };
+
+    const node = renderToDOM(template, context);
+    (<HTMLElement>node).getElementsByTagName("a")[0].click();
+  });
 
   test("handler is bound to proper owner", () => {
     expect.assertions(2);
@@ -1363,97 +1345,117 @@ describe("t-on", () => {
     node.querySelector("button")!.click();
   });
 
-  //   test("t-on with inline statement", () => {
-  //     const template = xml`<button t-on-click="state.counter++">Click</button>`;
-  //     let owner = {
-  //       state: {
-  //         counter: 0,
-  //       },
-  //     };
-  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-  //     expect(owner.state.counter).toBe(0);
-  //     (<HTMLElement>node).click();
-  //     expect(owner.state.counter).toBe(1);
-  //   });
+  test("t-on with inline statement", () => {
+    const template = xml`<button t-on-click="state.counter++">Click</button>`;
+    let context = {
+      state: {
+        counter: 0,
+      },
+    };
+    const node = renderToDOM(template, context);
+    expect(context.state.counter).toBe(0);
+    node.querySelector("button")!.click();
+    expect(context.state.counter).toBe(1);
+  });
 
-  //   test("t-on with inline statement (function call)", () => {
-  //     const template = xml`<button t-on-click="state.incrementCounter(2)">Click</button>`;
-  //     let owner = {
-  //       state: {
-  //         counter: 0,
-  //         incrementCounter: (inc) => {
-  //           owner.state.counter += inc;
-  //         },
-  //       },
-  //     };
-  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-  //     expect(owner.state.counter).toBe(0);
-  //     (<HTMLElement>node).click();
-  //     expect(owner.state.counter).toBe(2);
-  //   });
+  test("t-on with inline statement (function call)", () => {
+    const template = xml`<button t-on-click="state.incrementCounter(2)">Click</button>`;
+    let context = {
+      state: {
+        counter: 0,
+        incrementCounter: (inc: number) => {
+          context.state.counter += inc;
+        },
+      },
+    };
+    const node = renderToDOM(template, context);
+    expect(context.state.counter).toBe(0);
+    node.querySelector("button")!.click();
+    expect(context.state.counter).toBe(2);
+  });
 
-  //   test("t-on with inline statement, part 2", () => {
-  //     const template = xml`<button t-on-click="state.flag = !state.flag">Toggle</button>`;
-  //     let owner = {
-  //       state: {
-  //         flag: true,
-  //       },
-  //     };
-  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-  //     expect(owner.state.flag).toBe(true);
-  //     (<HTMLElement>node).click();
-  //     expect(owner.state.flag).toBe(false);
-  //     (<HTMLElement>node).click();
-  //     expect(owner.state.flag).toBe(true);
-  //   });
+  test("t-on with inline statement in a loop, capturing loop variable", () => {
+    const template = xml`
+        <div>
+          <t t-foreach="[33, 123]" t-as="elem" t-key="elem_index">
+            <button t-on-click="state.counter+=elem">Click</button>
+          </t>
+        </div>`;
+    let context = {
+      state: {
+        counter: 0,
+      },
+    };
+    const node = renderToDOM(template, context);
+    expect(context.state.counter).toBe(0);
+    node.querySelectorAll("button")[0].click();
+    expect(context.state.counter).toBe(33);
+    node.querySelectorAll("button")[1].click();
+    expect(context.state.counter).toBe(156);
+  });
 
-  //   test("t-on with inline statement, part 3", () => {
-  //     const template = xml`<button t-on-click="state.n = someFunction(3)">Toggle</button>`;
-  //     let owner = {
-  //       someFunction(n) {
-  //         return n + 1;
-  //       },
-  //       state: {
-  //         n: 11,
-  //       },
-  //     };
-  //     const node = renderToDOM(qweb, "test", owner, { handlers: [] });
-  //     expect(owner.state.n).toBe(11);
-  //     (<HTMLElement>node).click();
-  //     expect(owner.state.n).toBe(4);
-  //   });
+  test("t-on with inline statement, part 2", () => {
+    const template = xml`<button t-on-click="state.flag = !state.flag">Toggle</button>`;
+    let context = {
+      state: {
+        flag: true,
+      },
+    };
+    const node = renderToDOM(template, context);
+    expect(context.state.flag).toBe(true);
+    node.querySelector("button")!.click();
+    expect(context.state.flag).toBe(false);
+    node.querySelector("button")!.click();
+    expect(context.state.flag).toBe(true);
+  });
 
-  //   test("t-on with t-call", async () => {
-  //     expect.assertions(2);
-  //     qweb.addTemplate("sub", `<p t-on-click="update">lucas</p>`);
-  //     qweb.addTemplate("main", `<div><t t-call="sub"/></div>`);
+  test("t-on with inline statement, part 3", () => {
+    const template = xml`<button t-on-click="state.n = someFunction(3)">Toggle</button>`;
+    let context = {
+      someFunction(n: number) {
+        return n + 1;
+      },
+      state: {
+        n: 11,
+      },
+    };
+    const node = renderToDOM(template, context);
+    expect(context.state.n).toBe(11);
+    node.querySelector("button")!.click();
+    expect(context.state.n).toBe(4);
+  });
 
-  //     let owner = {
-  //       update() {
-  //         expect(this).toBe(owner);
-  //       },
-  //     };
+  test("t-on with t-call", async () => {
+    expect.assertions(2);
+    const sub = xml`<p t-on-click="update">lucas</p>`;
+    const main = xml`<div><t t-call="${sub}"/></div>`;
 
-  //     const node = renderToDOM(qweb, "main", owner, { handlers: [] });
-  //     (<HTMLElement>node).querySelector("p")!.click();
-  //   });
+    let context = {
+      update() {
+        expect(this).toBe(context);
+      },
+    };
 
-  //   test("t-on, with arguments and t-call", async () => {
-  //     expect.assertions(3);
-  //     qweb.addTemplate("sub", `<p t-on-click="update(value)">lucas</p>`);
-  //     qweb.addTemplate("main", `<div><t t-call="sub"/></div>`);
+    const node = renderToDOM(main, context);
+    (<HTMLElement>node).querySelector("p")!.click();
+  });
 
-  //     let owner = {
-  //       update(val) {
-  //         expect(this).toBe(owner);
-  //         expect(val).toBe(444);
-  //       },
-  //       value: 444,
-  //     };
+  test("t-on, with arguments and t-call", async () => {
+    expect.assertions(3);
+    const sub = xml`<p t-on-click="update(value)">lucas</p>`;
+    const main = xml`<div><t t-call="${sub}"/></div>`;
 
-  //     const node = renderToDOM(qweb, "main", owner, { handlers: [] });
-  //     (<HTMLElement>node).querySelector("p")!.click();
-  //   });
+    let context = {
+      update(val: number) {
+        expect(this).toBe(context);
+        expect(val).toBe(444);
+      },
+      value: 444,
+    };
+
+    const node = renderToDOM(main, context);
+    (<HTMLElement>node).querySelector("p")!.click();
+  });
 
   //   test("t-on with prevent and/or stop modifiers", async () => {
   //     expect.assertions(7);
@@ -1622,43 +1624,43 @@ describe("t-on", () => {
   //     button.click();
   //   });
 
-  //   test("t-on combined with t-esc", async () => {
-  //     expect.assertions(3);
-  //     const template = xml`<div><button t-on-click="onClick" t-esc="text"/></div>`;
-  //     const steps: string[] = [];
-  //     const owner = {
-  //       text: "Click here",
-  //       onClick() {
-  //         steps.push("onClick");
-  //       },
-  //     };
+  test("t-on combined with t-esc", async () => {
+    expect.assertions(3);
+    const template = xml`<div><button t-on-click="onClick" t-esc="text"/></div>`;
+    const steps: string[] = [];
+    const context = {
+      text: "Click here",
+      onClick() {
+        steps.push("onClick");
+      },
+    };
 
-  //     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
-  //     expect(node.outerHTML).toBe(`<div><button>Click here</button></div>`);
+    const node = <HTMLElement>renderToDOM(template, context);
+    expect(node.innerHTML).toBe(`<div><button>Click here</button></div>`);
 
-  //     node.querySelector("button")!.click();
+    node.querySelector("button")!.click();
 
-  //     expect(steps).toEqual(["onClick"]);
-  //   });
+    expect(steps).toEqual(["onClick"]);
+  });
 
-  //   test("t-on combined with t-raw", async () => {
-  //     expect.assertions(3);
-  //     const template = xml`<div><button t-on-click="onClick" t-raw="html"/></div>`;
-  //     const steps: string[] = [];
-  //     const owner = {
-  //       html: "Click <b>here</b>",
-  //       onClick() {
-  //         steps.push("onClick");
-  //       },
-  //     };
+  test("t-on combined with t-raw", async () => {
+    expect.assertions(3);
+    const template = xml`<div><button t-on-click="onClick" t-raw="html"/></div>`;
+    const steps: string[] = [];
+    const context = {
+      html: "Click <b>here</b>",
+      onClick() {
+        steps.push("onClick");
+      },
+    };
 
-  //     const node = <HTMLElement>renderToDOM(qweb, "test", owner, { handlers: [] });
-  //     expect(node.outerHTML).toBe(`<div><button>Click <b>here</b></button></div>`);
+    const node = <HTMLElement>renderToDOM(template, context);
+    expect(node.innerHTML).toBe(`<div><button>Click <b>here</b></button></div>`);
 
-  //     node.querySelector("button")!.click();
+    node.querySelector("button")!.click();
 
-  //     expect(steps).toEqual(["onClick"]);
-  //   });
+    expect(steps).toEqual(["onClick"]);
+  });
 
   //   test("t-on with .capture modifier", () => {
   //     expect.assertions(2);
@@ -1778,50 +1780,48 @@ describe("t-on", () => {
 //   });
 // });
 
-// describe("whitespace handling", () => {
-//   test("white space only text nodes are condensed into a single space", () => {
-//     const template = xml`<div>  </div>`;
-//     const result = render(template);
-//     expect(result).toBe(`<div> </div>`);
-//   });
+describe("whitespace handling", () => {
+  test("white space only text nodes are condensed into a single space", () => {
+    const template = xml`<div>  </div>`;
+    const result = render(template);
+    expect(result).toBe(`<div> </div>`);
+  });
 
-//   test("consecutives whitespaces are condensed into a single space", () => {
-//     const template = xml`<div>  abc  </div>`;
-//     const result = render(template);
-//     expect(result).toBe(`<div> abc </div>`);
-//   });
+  test("consecutives whitespaces are condensed into a single space", () => {
+    const template = xml`<div>  abc  </div>`;
+    const result = render(template);
+    expect(result).toBe(`<div> abc </div>`);
+  });
 
-//   test("whitespace only text nodes with newlines are removed", () => {
-//     qweb.addTemplate(
-//       "test",
-//       `<div>
-//         <span>abc</span>
-//        </div>`
-//     );
-//     const result = render(template);
-//     expect(result).toBe(`<div><span>abc</span></div>`);
-//   });
+  test("whitespace only text nodes with newlines are removed", () => {
+    const template = xml`
+      <div>
+        <span>abc</span>
+       </div>`;
+    const result = render(template);
+    expect(result).toBe(`<div><span>abc</span></div>`);
+  });
 
-//   test("nothing is done in pre tags", () => {
-//     const template = xml`<pre>  </pre>`;
-//     const result = render(template);
-//     expect(result).toBe(`<pre>  </pre>`);
+  //   test("nothing is done in pre tags", () => {
+  //     const template = xml`<pre>  </pre>`;
+  //     const result = render(template);
+  //     expect(result).toBe(`<pre>  </pre>`);
 
-//     const pretagtext = `<pre>
-//         some text
-//       </pre>`;
-//     qweb.addTemplate("test2", pretagtext);
-//     const result2 = renderToString(qweb, "test2");
-//     expect(result2).toBe(pretagtext);
+  //     const pretagtext = `<pre>
+  //         some text
+  //       </pre>`;
+  //     qweb.addTemplate("test2", pretagtext);
+  //     const result2 = renderToString(qweb, "test2");
+  //     expect(result2).toBe(pretagtext);
 
-//     const pretagwithonlywhitespace = `<pre>
+  //     const pretagwithonlywhitespace = `<pre>
 
-//       </pre>`;
-//     qweb.addTemplate("test3", pretagwithonlywhitespace);
-//     const result3 = renderToString(qweb, "test3");
-//     expect(result3).toBe(pretagwithonlywhitespace);
-//   });
-// });
+  //       </pre>`;
+  //     qweb.addTemplate("test3", pretagwithonlywhitespace);
+  //     const result3 = renderToString(qweb, "test3");
+  //     expect(result3).toBe(pretagwithonlywhitespace);
+  //   });
+});
 
 // describe("t-key", () => {
 //   test("can use t-key directive on a node", () => {

@@ -1,5 +1,5 @@
 import { NodeType } from "../vdom/types";
-import { compileExpr } from "./expression_parser";
+import { compileExpr, compileExprToArray } from "./expression_parser";
 import {
   AST,
   ASTCallNode,
@@ -12,6 +12,7 @@ import {
 } from "./types";
 import { parse } from "./parser";
 import { QWeb } from "./qweb";
+import { ComponentData } from "../core/rendering_engine";
 
 interface QWebVar {
   expr: string;
@@ -237,8 +238,50 @@ function addToAttrs(attrs: { [key: string]: string }, key: string, value: string
   attrs[key] = key in attrs ? attrs[key] + ' + " " + ' + value : value;
 }
 
-export function handleEvent(ev: Event, ctx: any, fn: any) {
-  fn.call(ctx, ev);
+export function handle(ev: Event, ctx: ComponentData, args: any, fn: string | Function) {
+  // console.warn(ctx)
+  if (!ctx.isMounted) {
+    return;
+  }
+  if (typeof fn === "string") {
+    ctx.context[fn](...args, ev);
+  } else {
+    fn(args);
+  }
+  // if (typeof cb === "function") {
+  //   cb.call(ctx.context, ev);
+  // }
+}
+
+const FNAMEREGEXP = /^[$A-Z_][0-9A-Z_$]*$/i;
+
+function makeEventHandler(ctx: CompilerContext, eventName: string, expr: string): string {
+  let args: string = "";
+  const name: string = expr.replace(/\(.*\)/, function (_args) {
+    args = _args.slice(1, -1);
+    return "";
+  });
+  const isMethodCall = FNAMEREGEXP.test(name);
+  if (isMethodCall) {
+    if (args) {
+      let id = uniqueId(ctx);
+      addLine(ctx, `let ${id} = [${compileExpr(args)}];`);
+      return `ev => this.handle(ev, metadata, ${id}, '${name}')`;
+    } else {
+      return `ev => this.handle(ev, metadata, [], '${name}')`;
+    }
+  } else {
+    const tokens = compileExprToArray(expr);
+    const capturedVars: string[] = [];
+    for (let token of tokens) {
+      if (token.varName) {
+        capturedVars.push(`'${token.varName}':${token.value}`);
+      }
+    }
+    let id = uniqueId(ctx);
+    addLine(ctx, `let ${id} = {${capturedVars.join(",")}};`);
+    return `ev => this.handle(ev, metadata, ${id}, ctx => {${compileExpr(expr)}})`;
+  }
 }
 
 function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
@@ -268,9 +311,7 @@ function compileDOMNode(ctx: CompilerContext, ast: ASTDOMNode) {
     let h: string[] = [];
     ctx.shouldDefineRootContext = true;
     for (let ev in ast.on) {
-      const expr = compileExpr(ast.on[ev].expr);
-      const cb = `ev => this.handleEvent(ev, rootCtx, ${expr})`;
-      h.push(`${ev}: {cb: ${cb}}`);
+      h.push(`${ev}: ${makeEventHandler(ctx, ev, ast.on[ev].expr)}`);
     }
     handlers = `, on: {` + h.join(", ") + "}";
   }
@@ -441,7 +482,7 @@ function compileCallNode(ctx: CompilerContext, ast: ASTCallNode) {
     });
     addLine(ctx, `ctx[this.zero] = ${id};`);
   }
-  const vnode = `this.callTemplate(tree, "${ast.template}", ctx)`;
+  const vnode = `this.callTemplate(tree, "${ast.template}", ctx, metadata)`;
 
   addVNode(ctx, vnode, false);
   if (ast.children.length) {

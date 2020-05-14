@@ -234,30 +234,30 @@ describe("basic component properties", () => {
     expect(test2.isMounted).toBe(true);
   });
 
-  // test.skip("cannot be clicked on and updated if not in DOM", async () => {
-  //   class Counter extends Component {
-  //     static template = xml`
-  //         <div>
-  //           <t t-esc="state.counter"/>
-  //           <button t-on-click="increment">Inc</button>
-  //         </div>`;
-  //     state = useState({
-  //       counter: 0,
-  //     });
-  //     increment() {
-  //       this.state.counter++;
-  //     }
-  //   }
+  test("cannot be clicked on and updated if not in DOM", async () => {
+    class Counter extends Component {
+      static template = xml`
+          <div>
+            <t t-esc="state.counter"/>
+            <button t-on-click="increment">Inc</button>
+          </div>`;
+      state = useState({
+        counter: 0,
+      });
+      increment() {
+        this.state.counter++;
+      }
+    }
 
-  //   const target = document.createElement("div");
-  //   const counter = await mount(target, Counter);
-  //   expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //   const button = target.getElementsByTagName("button")[0];
-  //   button.click();
-  //   await nextTick();
-  //   expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
-  //   expect(counter.state.counter).toBe(0);
-  // });
+    const target = document.createElement("div");
+    const counter = await mountComponent(target, Counter);
+    expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
+    const button = target.getElementsByTagName("button")[0];
+    button.click();
+    await nextTick();
+    expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
+    expect(counter.state.counter).toBe(0);
+  });
 
   //   test("widget style and classname", async () => {
   //     class StyledWidget extends Component {

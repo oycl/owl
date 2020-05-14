@@ -32,9 +32,7 @@ interface BaseNode {
   key?: Key;
 }
 
-export interface Handler {
-  cb: (this: HTMLElement, ev: any) => any;
-}
+type Handler = (ev: Event) => void;
 
 // the position of a node, relative to an anchor HTMLElement
 export const enum NodePosition {
@@ -59,6 +57,7 @@ export interface VDOMNode extends BaseNode {
   el?: HTMLElement;
   attrs?: { [name: string]: string | boolean | number | null };
   on?: { [event: string]: Handler };
+  listener?: Handler;
   class?: { [name: string]: boolean };
 }
 

@@ -51,7 +51,7 @@ export function buildTree(
       for (let child of vnode.children) {
         buildTree(child, el, NodePosition.Append, staticNodes);
       }
-      const attrs = vnode.attrs;
+      const { attrs, class: classList, on } = vnode;
       for (let name in attrs) {
         let value = attrs[name];
         if (value === true) {
@@ -60,15 +60,19 @@ export function buildTree(
           el.setAttribute(name, String(value));
         }
       }
-      for (let c in vnode.class) {
-        if (vnode.class[c]) {
+      for (let c in classList) {
+        if (classList[c]) {
           el.classList.add(c);
         }
       }
-      if (vnode.on) {
-        for (let ev in vnode.on) {
-          const handler = vnode.on[ev];
-          el.addEventListener(ev as any, handler.cb);
+      if (on) {
+        const listener = (ev: Event) => {
+          const vnode = (listener as any).vnode;
+          vnode.on![ev.type](ev);
+        };
+        (listener as any).vnode = vnode;
+        for (let eventName in on) {
+          el.addEventListener(eventName as any, listener);
         }
       }
       addNode(el, anchor, position);
@@ -140,6 +144,7 @@ export function patch(vnode: VNode, target: VNode, staticNodes: HTMLElement[] = 
     case NodeType.DOM:
       updateChildren(vnode, target as VDOMNode, staticNodes);
       vnode.children = (target as VDOMNode).children;
+      vnode.on = (target as VDOMNode).on;
       (target as VDOMNode).el = vnode.el;
       return;
     case NodeType.Static:

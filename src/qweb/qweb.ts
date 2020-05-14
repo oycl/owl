@@ -1,4 +1,4 @@
-import { compileTemplate, handleEvent } from "./compiler";
+import { compileTemplate, handle } from "./compiler";
 import { buildTree } from "../vdom/vdom";
 import { NodeType, VNode, VMultiNode, VRootNode } from "../vdom/types";
 import { htmlToVDOM } from "../vdom/html_to_vdom";
@@ -34,7 +34,7 @@ const qwebContext: any = {
     return subtree;
   },
   htmlToVDOM,
-  handleEvent,
+  handle: handle,
   toClassObj(expr: any) {
     if (typeof expr === "string") {
       expr = expr.trim();

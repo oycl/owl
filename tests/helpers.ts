@@ -19,11 +19,11 @@ export async function nextTick(): Promise<void> {
   });
 }
 
-export async function mountComponent(
+export async function mountComponent<C extends typeof Component>(
   fixture: MountTarget,
-  C: typeof Component,
+  C: C,
   options?: MountOptions
-): Promise<Component> {
+): Promise<InstanceType<C>> {
   const c = await mount(fixture, C, options);
   return c.context;
 }

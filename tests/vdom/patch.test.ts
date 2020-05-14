@@ -301,15 +301,3 @@ describe("updating children in a dom node, with keys", () => {
     });
   });
 });
-
-describe("event handling", () => {
-  test("can bind an event handler", () => {
-    const vnode = vDom("button", [vText("abc")]);
-    let clicked = false;
-    vnode.on = { click: { cb: () => (clicked = true) } };
-
-    buildTree(vnode, fixture);
-    fixture.querySelector("button")!.click();
-    expect(clicked).toBe(true);
-  });
-});
