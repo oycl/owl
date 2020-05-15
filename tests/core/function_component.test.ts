@@ -1,6 +1,6 @@
 import { makeTestFixture, nextTick } from "../helpers";
 import { mount, xml, useState } from "../../src/index";
-import { FunctionComponent } from "../../src/core/rendering_engine";
+import { FComponent } from "../../src/core/rendering_engine";
 import { qweb } from "../../src/qweb/qweb";
 
 //------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ describe("basic function component properties", () => {
     let e: Error | null = null;
     const Test = {};
     try {
-      await mount(fixture, Test as any);
+      await mount(Test as any, fixture);
     } catch (error) {
       e = error;
     }
@@ -45,19 +45,19 @@ describe("basic function component properties", () => {
       },
     };
 
-    await mount(fixture, Test);
+    await mount(Test, fixture);
   });
 
   test("env is set on root component (*)", async () => {
     expect.assertions(1);
 
-    const Test: FunctionComponent = {
+    const Test: FComponent = {
       template: xml`<div></div>`,
       setup(props, env) {
         expect(env).toEqual({});
       },
     };
-    await mount(fixture, Test);
+    await mount(Test, fixture);
   });
 
   test("env is set on root component (*)", async () => {
@@ -70,7 +70,7 @@ describe("basic function component properties", () => {
         expect(env).toBe(env);
       },
     };
-    await mount(fixture, Test, { env });
+    await mount(Test, fixture, { env });
   });
 
   test("can give props to component with mount method", async () => {
@@ -84,14 +84,14 @@ describe("basic function component properties", () => {
       },
     };
 
-    await mount(fixture, Test, { props: p });
+    await mount(Test, fixture, { props: p });
   });
 
   test("can be mounted in a div", async () => {
     const Test = {
       template: xml`<div>content</div>`,
     };
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("<div>content</div>");
   });
 
@@ -100,9 +100,9 @@ describe("basic function component properties", () => {
       template: xml`<div>content</div>`,
     };
     const fragment = document.createDocumentFragment();
-    const fn = await mount(fragment, Test);
+    const test = await mount(Test, fragment);
     expect(fixture.innerHTML).toBe("");
-    await mount(fixture, fn);
+    await mount(test, fixture);
     expect(fixture.innerHTML).toBe("<div>content</div>");
   });
 
@@ -123,12 +123,12 @@ describe("basic function component properties", () => {
   //   });
 
   test("display a nice message if mounted on an invalid node (*)", async () => {
-    const SomeWidget = {
+    const Test = {
       template: xml`<div>content</div>`,
     };
     let error;
     try {
-      await mount({} as any, SomeWidget);
+      await mount(Test, {} as any);
     } catch (e) {
       error = e;
     }
@@ -144,7 +144,7 @@ describe("basic function component properties", () => {
   //   }
   //   let error;
   //   try {
-  //     await mount(fixture, SomeWidget);
+  //     await mount(SomeWidget, fixture);
   //   } catch (e) {
   //     error = e;
   //   }
@@ -174,7 +174,7 @@ describe("basic function component properties", () => {
       },
     };
 
-    await mount(fixture, Counter);
+    await mount(Counter, fixture);
     expect(fixture.innerHTML).toBe("<div>0<button>Inc</button></div>");
     fixture.querySelector("button")!.click();
     await nextTick();
@@ -190,7 +190,7 @@ describe("basic function component properties", () => {
       components: { Child },
     };
 
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(qweb.compiledTemplates[Parent.template].fn.toString()).toMatchSnapshot();
     expect(fixture.innerHTML).toBe("<div><span></span></div>");
   });
@@ -200,7 +200,7 @@ describe("basic function component properties", () => {
       template: xml`<span><t t-esc="env.val"/></span>`,
     };
 
-    await mount(fixture, Test, { env: { val: 3 } });
+    await mount(Test, fixture, { env: { val: 3 } });
     expect(fixture.innerHTML).toBe("<span>3</span>");
   });
 
@@ -210,10 +210,10 @@ describe("basic function component properties", () => {
     };
 
     const target = document.createElement("div");
-    const test1 = await mount(target, Test);
-    expect(test1.isMounted).toBe(false);
-    const test2 = await mount(fixture, Test);
-    expect(test2.isMounted).toBe(true);
+    const test1 = await mount(Test, target);
+    expect(test1.__owl__.isMounted).toBe(false);
+    const test2 = await mount(Test, fixture);
+    expect(test2.__owl__.isMounted).toBe(true);
   });
 
   test("cannot be clicked on and updated if not in DOM", async () => {
@@ -229,21 +229,21 @@ describe("basic function component properties", () => {
     };
 
     const target = document.createElement("div");
-    const counter = await mount(target, Counter);
+    const counter = await mount(Counter, target);
     expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
     const button = target.querySelector("button")!;
     button.click();
     await nextTick();
     expect(target.innerHTML).toBe("<div>0<button>Inc</button></div>");
-    expect(counter.context.state.counter).toBe(0);
+    expect(counter.state.counter).toBe(0);
   });
 
-  test("widget style and classname", async () => {
-    const StyledWidget = {
+  test("component style and classname", async () => {
+    const Test = {
       template: xml`
           <div style="font-weight:bold;" class="some-class">world</div>`,
     };
-    await mount(fixture, StyledWidget);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe(`<div style="font-weight:bold;" class="some-class">world</div>`);
   });
 

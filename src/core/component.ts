@@ -1,13 +1,13 @@
-import { OwlComponent, ComponentData, engine } from "./rendering_engine";
+import { FComponent, CComponent, OwlElement, render } from "./rendering_engine";
 
 export class Component<Props = any, Env = any> {
   static template: string;
-  static components: { [key: string]: OwlComponent } = {};
+  static components: { [key: string]: FComponent | CComponent } = {};
   props: Props;
   env: Env;
 
   el: HTMLElement | Text | Comment | null = null;
-  __owl__: ComponentData | null = null;
+  __owl__: OwlElement | null = null;
 
   constructor(props: Props, env: Env) {
     this.props = props;
@@ -15,6 +15,6 @@ export class Component<Props = any, Env = any> {
   }
 
   render(): Promise<void> {
-    return engine.render(this.__owl__!);
+    return render(this.__owl__!);
   }
 }

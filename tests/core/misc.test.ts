@@ -1,4 +1,4 @@
-import { makeTestFixture, mountComponent } from "../helpers";
+import { makeTestFixture } from "../helpers";
 import { mount, xml } from "../../src/index";
 import { Component } from "../../src/core/component";
 
@@ -14,7 +14,7 @@ describe("mount", () => {
       template: xml`<div>simple vnode</div>`,
     };
 
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
   });
 
@@ -23,7 +23,7 @@ describe("mount", () => {
       static template = xml`<div>simple vnode</div>`;
     }
 
-    const test = await mountComponent(fixture, Test);
+    const test = await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
     expect(test).toBeInstanceOf(Component);
 
@@ -41,8 +41,9 @@ describe("mount", () => {
       },
     };
 
-    const mountResult = await mount(fixture, Test);
-    expect((mountResult.context as any).__proto__).toBe(obj);
+    const test = await mount(Test, fixture);
+    test.__owl__;
+    expect((test as any).__proto__).toBe(obj);
     expect(fixture.innerHTML).toBe("<div>simple vnode</div>");
   });
 
@@ -53,7 +54,7 @@ describe("mount", () => {
     const Test = {
       template: xml`simple text node`,
     };
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("simple text node");
   });
 
@@ -62,7 +63,7 @@ describe("mount", () => {
       static template = xml`simple text node`;
     }
 
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("simple text node");
   });
 
@@ -75,7 +76,7 @@ describe("mount", () => {
       template: xml`<div>a</div><div>b</div>`,
     };
 
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("<div>a</div><div>b</div>");
   });
 
@@ -84,7 +85,7 @@ describe("mount", () => {
       static template = xml`<div>a</div><div>b</div>`;
     }
 
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("<div>a</div><div>b</div>");
   });
 
@@ -100,7 +101,7 @@ describe("mount", () => {
       },
     };
 
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
   });
 
@@ -110,7 +111,7 @@ describe("mount", () => {
       name = "Alex";
     }
 
-    await mount(fixture, Test);
+    await mount(Test, fixture);
     expect(fixture.innerHTML).toBe("<div>Hello Alex</div>");
   });
 
@@ -129,7 +130,7 @@ describe("mount", () => {
       },
     };
 
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
@@ -142,7 +143,7 @@ describe("mount", () => {
       components: { Child },
     };
 
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
@@ -157,7 +158,7 @@ describe("mount", () => {
         return { Child };
       },
     };
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
@@ -170,7 +171,7 @@ describe("mount", () => {
       template: xml`<span><Child/></span>`,
       components: { Child },
     };
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
@@ -184,7 +185,7 @@ describe("mount", () => {
       Child = Child;
     }
 
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
@@ -198,7 +199,7 @@ describe("mount", () => {
       static components = { Child };
     }
 
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
@@ -212,7 +213,7 @@ describe("mount", () => {
       Child = Child;
     }
 
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
@@ -226,7 +227,7 @@ describe("mount", () => {
       static components = { Child };
     }
 
-    await mount(fixture, Parent);
+    await mount(Parent, fixture);
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 });

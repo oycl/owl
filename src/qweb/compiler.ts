@@ -12,7 +12,7 @@ import {
 } from "./types";
 import { parse } from "./parser";
 import { QWeb } from "./qweb";
-import { ComponentData } from "../core/rendering_engine";
+import { OwlElement } from "../core/rendering_engine";
 
 interface QWebVar {
   expr: string;
@@ -238,13 +238,16 @@ function addToAttrs(attrs: { [key: string]: string }, key: string, value: string
   attrs[key] = key in attrs ? attrs[key] + ' + " " + ' + value : value;
 }
 
-export function handle(ev: Event, ctx: ComponentData, args: any, fn: string | Function) {
+/**
+ * Todo: move this out of QWeb compiler
+ */
+export function handle(ev: Event, element: OwlElement, args: any, fn: string | Function) {
   // console.warn(ctx)
-  if (!ctx.isMounted) {
+  if (!element.isMounted) {
     return;
   }
   if (typeof fn === "string") {
-    ctx.context[fn](...args, ev);
+    element.instance[fn](...args, ev);
   } else {
     fn(args);
   }

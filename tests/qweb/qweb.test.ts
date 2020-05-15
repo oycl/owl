@@ -11,7 +11,7 @@ function render(template: string, context: any = {}): string {
 function renderToDOM(
   templateName: string,
   context: any = {},
-  extra: any = { isMounted: true, context }
+  extra: any = { isMounted: true, instance: context }
 ): HTMLDivElement {
   const template = qweb.getTemplate(templateName);
   expect(qweb.compiledTemplates[templateName].fn.toString()).toMatchSnapshot();
