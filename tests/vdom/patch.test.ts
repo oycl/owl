@@ -279,7 +279,7 @@ describe("updating children in a dom node, with keys", () => {
     });
   });
 
-  describe("addition of elements", () => {
+  describe("removal of elements", function () {
     test("removes elements from the beginning", function () {
       const vnode1 = vDom("p", { key: 1 }, [1, 2, 3, 4, 5].map(spanNum));
       const vnode2 = vDom("p", { key: 1 }, [3, 4, 5].map(spanNum));
@@ -312,6 +312,50 @@ describe("updating children in a dom node, with keys", () => {
       expect(fixture.innerHTML).toBe("<p><span>1</span><span>2</span><span>3</span></p>");
       expect(fixture.querySelectorAll("span")[2]).toBe(span3);
       expect(vnode1.children.length).toBe(3);
+    });
+
+    test("removes elements from the middle", function () {
+      const vnode1 = vDom("p", { key: 1 }, [1, 2, 3, 4, 5].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, [1, 2, 4, 5].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      const span3 = fixture.querySelectorAll("span")[2];
+      expect(span3.innerHTML).toBe("3");
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></p>"
+      );
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>4</span><span>5</span></p>"
+      );
+      expect(fixture.contains(span3)).toBeFalsy();
+    });
+  });
+
+  describe("element reordering", function () {
+    test("moves element forward", function () {
+      const vnode1 = vDom("p", { key: 1 }, [1, 2, 3, 4].map(spanNum));
+      const vnode2 = vDom("p", { key: 1 }, [2, 3, 1, 4].map(spanNum));
+
+      buildTree(vnode1, fixture);
+      const span1 = fixture.querySelectorAll("span")[0];
+      const span2 = fixture.querySelectorAll("span")[1];
+      const span3 = fixture.querySelectorAll("span")[2];
+      const span4 = fixture.querySelectorAll("span")[3];
+
+      expect(fixture.innerHTML).toBe(
+        "<p><span>1</span><span>2</span><span>3</span><span>4</span></p>"
+      );
+
+      patch(vnode1, vnode2);
+      expect(fixture.innerHTML).toBe(
+        "<p><span>2</span><span>3</span><span>1</span><span>4</span></p>"
+      );
+      expect(fixture.querySelectorAll("span")[0]).toBe(span2);
+      expect(fixture.querySelectorAll("span")[1]).toBe(span3);
+      expect(fixture.querySelectorAll("span")[2]).toBe(span1);
+      expect(fixture.querySelectorAll("span")[3]).toBe(span4);
     });
   });
 });
