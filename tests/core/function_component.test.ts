@@ -61,7 +61,7 @@ describe("basic function component properties", () => {
   });
 
   test("env is set on root component (*)", async () => {
-    expect.assertions(1);
+    expect.assertions(2);
     const env = { a: 1 };
 
     const Test = {
@@ -70,7 +70,8 @@ describe("basic function component properties", () => {
         expect(env).toBe(env);
       },
     };
-    await mount(Test, fixture, { env });
+    const test = await mount(Test, fixture, { env });
+    expect(test.env).toBe(env);
   });
 
   test("can give props to component with mount method", async () => {

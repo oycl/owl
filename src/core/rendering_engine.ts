@@ -21,7 +21,7 @@ export interface FComponent<T = any, Env = any> {
 
 export type CComponent = typeof Component;
 
-export type CInstance = Component;
+export type CInstance<Props = any, Env = any> = Component<Props, Env>;
 
 export type FInstance<T = {}, Env = any> = T & {
   __owl__: OwlElement<T>;
@@ -50,9 +50,9 @@ export const core = {
 // -----------------------------------------------------------------------------
 export type MountTarget = HTMLElement | DocumentFragment;
 
-export interface MountConfig {
+export interface MountConfig<Env = any> {
   props?: Object;
-  env?: Object;
+  env?: Env;
 }
 
 export function mount<C extends CComponent>(
@@ -65,16 +65,16 @@ export function mount(
   target: MountTarget,
   config?: MountConfig
 ): Promise<CInstance>;
-export function mount<T>(
+export function mount<T, Env>(
   Comp: FComponent<T>,
   target: MountTarget,
-  config?: MountConfig
-): Promise<FInstance<T extends {} ? T : {}>>;
-export function mount(
+  config?: MountConfig<Env>
+): Promise<FInstance<T extends {} ? T : {}, Env>>;
+export function mount<T, Env>(
   comp: FInstance,
   target: MountTarget,
-  config?: MountConfig
-): Promise<FInstance>;
+  config?: MountConfig<Env>
+): Promise<FInstance<T extends {} ? T : {}, Env>>;
 export async function mount(
   info: any,
   target: MountTarget,
@@ -192,11 +192,14 @@ function makeCComponent<C extends typeof Component>(C: C, props: any, env: any):
 qwebUtils.makeComponent = function (
   parent: OwlElement,
   name: string,
-  context: RenderContext
+  context: RenderContext,
+  props: any
 ): VRootNode {
   const definition = context[name] || parent.components[name];
   const isClass = definition.prototype instanceof Component;
-  let component = isClass ? makeCComponent(definition, {}, {}) : makeFComponent(definition, {}, {});
+  let component = isClass
+    ? makeCComponent(definition, props, {})
+    : makeFComponent(definition, props, {});
   return component.vnode;
 };
 

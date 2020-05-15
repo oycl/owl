@@ -5,6 +5,39 @@ exports[`basic component properties can handle empty props 1`] = `
 ) {
     // Template: \`__template__12\`
     const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
-    vn1.children.push(this.makeComponent(metadata, \\"Child\\", ctx));
+    let _2 = {val:undefined};
+    vn1.children.push(this.makeComponent(metadata, \\"Child\\", ctx, _2));
+}"
+`;
+
+exports[`basic component properties reconciliation alg works for t-foreach in t-foreach 1`] = `
+"function anonymous(tree, ctx, metadata
+) {
+    // Template: \`__template__23\`
+    const vn1 = tree.child = {type: 2, tag: \\"div\\", children: [], key: 1};
+    let _3 = ctx['state'].s;
+    let length2 = _3.length;
+    ctx = Object.create(ctx);
+    for (let i = 0; i < length2; i++) {
+        ctx.section_first = i === 0;
+        ctx.section_last = i === length2 - 1;
+        ctx.section = _3[i];
+        ctx.section_index = i;
+        ctx.section_value = _3[i];
+        let _5 = ctx['section'].blips;
+        let length4 = _5.length;
+        ctx = Object.create(ctx);
+        for (let i = 0; i < length4; i++) {
+            ctx.blip_first = i === 0;
+            ctx.blip_last = i === length4 - 1;
+            ctx.blip = _5[i];
+            ctx.blip_index = i;
+            ctx.blip_value = _5[i];
+            let _6 = {blip:ctx['blip']};
+            vn1.children.push(this.makeComponent(metadata, \\"Child\\", ctx, _6));
+        }
+        ctx = ctx.__proto__;
+    }
+    ctx = ctx.__proto__;
 }"
 `;

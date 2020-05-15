@@ -147,6 +147,21 @@ describe("mount", () => {
     expect(fixture.innerHTML).toBe("<span><div>simple vnode</div></span>");
   });
 
+  test("props are passed from parent to child", async () => {
+    const Child = {
+      template: xml`<div><t t-esc="props.value"/></div>`,
+    };
+    const Parent = {
+      template: xml`<span><Child value="v"/></span>`,
+      setup() {
+        return { Child, v: 123 };
+      },
+    };
+
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe("<span><div>123</div></span>");
+  });
+
   test("a class component inside a function component", async () => {
     class Child extends Component {
       static template = xml`<div>simple vnode</div>`;

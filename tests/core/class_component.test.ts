@@ -358,7 +358,7 @@ describe("basic component properties", () => {
     class Test extends Component {
       static template = xml`<div></div>`;
     }
-    const env = {};
+    const env = { a: 3 };
     const test = await mount(Test, fixture, { env });
     expect(test.env).toBe(env);
   });
@@ -376,54 +376,51 @@ describe("basic component properties", () => {
     expect(fixture.innerHTML).toBe(`<div><span></span></div>`);
   });
 
-  //   test("reconciliation alg is not confused in some specific situation", async () => {
-  //     // in this test, we set t-key to 4 because it was in conflict with the
-  //     // template id corresponding to the first child.
-  //     class Child extends Component {
-  //       static template = xml`<span>child</span>`;
-  //     }
+  test("reconciliation alg is not confused in some specific situation", async () => {
+    // in this test, we set t-key to 4 because it was in conflict with the
+    // template id corresponding to the first child.
+    class Child extends Component {
+      static template = xml`<span>child</span>`;
+    }
 
-  //     class Parent extends Component {
-  //       static template = xml`
-  //         <div>
-  //             <Child />
-  //             <Child t-key="4"/>
-  //         </div>
-  //       `;
-  //       static components = { Child };
-  //     }
+    class Parent extends Component {
+      static template = xml`
+          <div>
+              <Child />
+              <Child t-key="4"/>
+          </div>
+        `;
+      static components = { Child };
+    }
 
-  //     const widget = new Parent();
-  //     await widget.mount(fixture);
-  //     expect(fixture.innerHTML).toBe("<div><span>child</span><span>child</span></div>");
-  //   });
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe("<div><span>child</span><span>child</span></div>");
+  });
 
-  //   test("reconciliation alg works for t-foreach in t-foreach", async () => {
-  //     const warn = console.warn;
-  //     console.warn = () => {};
-  //     class Child extends Component {
-  //       static template = xml`<div><t t-esc="props.blip"/></div>`;
-  //     }
+  test("reconciliation alg works for t-foreach in t-foreach", async () => {
+    // const warn = console.warn;
+    // console.warn = () => {};
+    class Child extends Component {
+      static template = xml`<div><t t-esc="props.blip"/></div>`;
+    }
 
-  //     class Parent extends Component {
-  //       static template = xml`
-  //         <div>
-  //             <t t-foreach="state.s" t-as="section">
-  //                 <t t-foreach="section.blips" t-as="blip">
-  //                   <Child blip="blip"/>
-  //                 </t>
-  //             </t>
-  //         </div>`;
-  //       static components = { Child };
-  //       state = { s: [{ blips: ["a1", "a2"] }, { blips: ["b1"] }] };
-  //     }
+    class Parent extends Component {
+      static template = xml`
+          <div>
+              <t t-foreach="state.s" t-as="section">
+                  <t t-foreach="section.blips" t-as="blip">
+                    <Child blip="blip"/>
+                  </t>
+              </t>
+          </div>`;
+      static components = { Child };
+      state = { s: [{ blips: ["a1", "a2"] }, { blips: ["b1"] }] };
+    }
 
-  //     const widget = new Parent();
-  //     await widget.mount(fixture);
-  //     expect(fixture.innerHTML).toBe("<div><div>a1</div><div>a2</div><div>b1</div></div>");
-  //     expect(env.qweb.templates[Parent.template].fn.toString()).toMatchSnapshot();
-  //     console.warn = warn;
-  //   });
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe("<div><div>a1</div><div>a2</div><div>b1</div></div>");
+    expect(qweb.compiledTemplates[Parent.template].fn.toString()).toMatchSnapshot();
+  });
 
   //   test("reconciliation alg works for t-foreach in t-foreach, 2", async () => {
   //     class Child extends Component {

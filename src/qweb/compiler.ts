@@ -162,7 +162,13 @@ function generateCode(ast: AST | AST[], ctx: CompilerContext) {
       }
       break;
     case "COMPONENT": {
-      const vnode = `this.makeComponent(metadata, "${ast.name}", ctx)`;
+      let id = uniqueId(ctx);
+      let props: string[] = [];
+      for (let p in ast.props) {
+        props.push(`${p}:${compileExpr(ast.props[p])}`);
+      }
+      addLine(ctx, `let ${id} = {${props.join(",")}};`);
+      const vnode = `this.makeComponent(metadata, "${ast.name}", ctx, ${id})`;
       addVNode(ctx, vnode, false);
       break;
     }
@@ -242,7 +248,6 @@ function addToAttrs(attrs: { [key: string]: string }, key: string, value: string
  * Todo: move this out of QWeb compiler
  */
 export function handle(ev: Event, element: OwlElement, args: any, fn: string | Function) {
-  // console.warn(ctx)
   if (!element.isMounted) {
     return;
   }
@@ -251,9 +256,6 @@ export function handle(ev: Event, element: OwlElement, args: any, fn: string | F
   } else {
     fn(args);
   }
-  // if (typeof cb === "function") {
-  //   cb.call(ctx.context, ev);
-  // }
 }
 
 const FNAMEREGEXP = /^[$A-Z_][0-9A-Z_$]*$/i;

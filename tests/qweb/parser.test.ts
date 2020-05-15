@@ -189,6 +189,26 @@ describe("qweb parser", () => {
     });
   });
 
+  test("dom node and component with props", () => {
+    const ast = parse(`<div><MyComponent a="valueA" b="valueB" /></div>`);
+    const compNode = (ast as any).children[0];
+    expect(compNode).toEqual({
+      type: "COMPONENT",
+      name: "MyComponent",
+      props: { a: "valueA", b: "valueB" },
+    });
+  });
+
+  test("dom node and component with directive", () => {
+    const ast = parse(`<div><MyComponent a="a" t-some-directive="" /></div>`);
+    const compNode = (ast as any).children[0];
+    expect(compNode).toEqual({
+      type: "COMPONENT",
+      name: "MyComponent",
+      props: { a: "a" },
+    });
+  });
+
   test("dom node with dynamic attribute", () => {
     const ast = parse(`<div t-att-foo="'bar'"/>`) as ASTDOMNode;
     expect(structure(ast)).toEqual({

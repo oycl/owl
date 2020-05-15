@@ -277,7 +277,9 @@ export function compileExprToArray(expr: string): Token[] {
 }
 
 export function compileExpr(expr: string): string {
-  return compileExprToArray(expr)
-    .map((t) => t.value)
-    .join("");
+  return (
+    compileExprToArray(expr)
+      .map((t) => t.value)
+      .join("") || "undefined"
+  );
 }

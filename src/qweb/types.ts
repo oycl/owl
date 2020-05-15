@@ -42,6 +42,7 @@ export interface ASTStaticNode {
 export interface ASTComponentNode {
   type: "COMPONENT";
   name: string;
+  props: { [name: string]: string };
 }
 
 export interface ASTTextNode {
