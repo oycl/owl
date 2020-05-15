@@ -23,11 +23,13 @@ interface Handler {
   expr: string;
 }
 
+export type Key = string;
+
 export interface ASTDOMNode {
   type: "DOM";
   tag: string;
   children: AST[];
-  key: string | number;
+  key: Key;
   attrs: { [name: string]: string };
   on: { [event: string]: Handler };
   attClass?: string;
@@ -42,6 +44,7 @@ export interface ASTStaticNode {
 export interface ASTComponentNode {
   type: "COMPONENT";
   name: string;
+  key: Key;
   props: { [name: string]: string };
 }
 

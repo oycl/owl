@@ -162,12 +162,18 @@ function parseComponentNode(ctx: ParserContext, node: Element): AST | null {
   }
   ctx.isStatic = false;
   const props: { [key: string]: string } = {};
+  let key = "";
 
   const attributes = node.attributes;
   for (let i = 0; i < attributes.length; i++) {
     const name = attributes[i].name;
-    if (!name.startsWith("t-")) {
-      props[name] = attributes[i].textContent!;
+    const value = attributes[i].textContent!;
+    if (name.startsWith("t-")) {
+      if (name === "t-key") {
+        key = value;
+      }
+    } else {
+      props[name] = value;
     }
   }
 
@@ -175,6 +181,7 @@ function parseComponentNode(ctx: ParserContext, node: Element): AST | null {
     type: "COMPONENT",
     name: node.tagName,
     props,
+    key,
   };
 }
 

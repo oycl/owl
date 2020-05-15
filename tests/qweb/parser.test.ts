@@ -196,6 +196,18 @@ describe("qweb parser", () => {
       type: "COMPONENT",
       name: "MyComponent",
       props: { a: "valueA", b: "valueB" },
+      key: "",
+    });
+  });
+
+  test("dom node and component with t-key", () => {
+    const ast = parse(`<div><MyComponent t-key="blip" /></div>`);
+    const compNode = (ast as any).children[0];
+    expect(compNode).toEqual({
+      type: "COMPONENT",
+      name: "MyComponent",
+      props: {},
+      key: "blip",
     });
   });
 
@@ -206,6 +218,7 @@ describe("qweb parser", () => {
       type: "COMPONENT",
       name: "MyComponent",
       props: { a: "a" },
+      key: "",
     });
   });
 

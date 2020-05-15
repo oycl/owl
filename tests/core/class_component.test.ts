@@ -422,35 +422,34 @@ describe("basic component properties", () => {
     expect(qweb.compiledTemplates[Parent.template].fn.toString()).toMatchSnapshot();
   });
 
-  //   test("reconciliation alg works for t-foreach in t-foreach, 2", async () => {
-  //     class Child extends Component {
-  //       static template = xml`<div><t t-esc="props.row + '_' + props.col"/></div>`;
-  //     }
+  test.only("reconciliation alg works for t-foreach in t-foreach, 2", async () => {
+    class Child extends Component {
+      static template = xml`<div><t t-esc="props.row + '_' + props.col"/></div>`;
+    }
 
-  //     class Parent extends Component {
-  //       static template = xml`
-  //         <div>
-  //           <p t-foreach="state.rows" t-as="row" t-key="row">
-  //             <p t-foreach="state.cols" t-as="col" t-key="col">
-  //                 <Child row="row" col="col"/>
-  //               </p>
-  //             </p>
-  //         </div>`;
-  //       static components = { Child };
-  //       state = useState({ rows: [1, 2], cols: ["a", "b"] });
-  //     }
+    class Parent extends Component {
+      static template = xml`
+          <div>
+            <p t-foreach="state.rows" t-as="row" t-key="row">
+              <p t-foreach="state.cols" t-as="col" t-key="col">
+                  <Child row="row" col="col"/>
+                </p>
+              </p>
+          </div>`;
+      static components = { Child };
+      state = useState({ rows: [1, 2], cols: ["a", "b"] });
+    }
 
-  //     const widget = new Parent();
-  //     await widget.mount(fixture);
-  //     expect(fixture.innerHTML).toBe(
-  //       "<div><p><p><div>1_a</div></p><p><div>1_b</div></p></p><p><p><div>2_a</div></p><p><div>2_b</div></p></p></div>"
-  //     );
-  //     widget.state.rows = [2, 1];
-  //     await nextTick();
-  //     expect(fixture.innerHTML).toBe(
-  //       "<div><p><p><div>2_a</div></p><p><div>2_b</div></p></p><p><p><div>1_a</div></p><p><div>1_b</div></p></p></div>"
-  //     );
-  //   });
+    const parent = await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(
+      "<div><p><p><div>1_a</div></p><p><div>1_b</div></p></p><p><p><div>2_a</div></p><p><div>2_b</div></p></p></div>"
+    );
+    parent.state.rows = [2, 1];
+    await nextTick();
+    expect(fixture.innerHTML).toBe(
+      "<div><p><p><div>2_a</div></p><p><div>2_b</div></p></p><p><p><div>1_a</div></p><p><div>1_b</div></p></p></div>"
+    );
+  });
 
   //   test("same t-keys in two different places", async () => {
   //     class Child extends Component {
