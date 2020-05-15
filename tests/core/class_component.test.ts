@@ -432,9 +432,9 @@ describe("basic component properties", () => {
           <div>
             <p t-foreach="state.rows" t-as="row" t-key="row">
               <p t-foreach="state.cols" t-as="col" t-key="col">
-                  <Child row="row" col="col"/>
-                </p>
+                <Child row="row" col="col"/>
               </p>
+            </p>
           </div>`;
       static components = { Child };
       state = useState({ rows: [1, 2], cols: ["a", "b"] });

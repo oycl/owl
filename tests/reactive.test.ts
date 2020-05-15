@@ -80,7 +80,22 @@ describe("reactive", () => {
     obj.arr[0] = "nope";
 
     expect(n).toBe(1);
+    expect(obj.arr[0]).toBe("nope");
     expect(obj.arr).toEqual(["nope", 2]);
+  });
+
+  test("can observe: changing array in object to another array", () => {
+    let n = 0;
+    const obj = reactive({ arr: [1, 2] }, () => n++) as any;
+
+    expect(Array.isArray(obj.arr)).toBe(true);
+    expect(n).toBe(0);
+
+    obj.arr = [2, 1];
+
+    expect(n).toBe(1);
+    expect(obj.arr[0]).toBe(2);
+    expect(obj.arr).toEqual([2, 1]);
   });
 
   test("getting twice an object properties return same object", () => {
@@ -247,7 +262,7 @@ describe("reactive", () => {
     expect(n).toBe(3);
   });
 
-  test.skip("properly handle already observed state", () => {
+  test("properly handle already observed state", () => {
     let n1 = 0;
     let n2 = 0;
     const obj1 = reactive({ a: 1 }, () => n1++) as any;
@@ -264,8 +279,22 @@ describe("reactive", () => {
 
     obj1.a = 33;
     expect(n1).toBe(2);
-    // TODO: make this one work...
     expect(n2).toBe(3);
+  });
+
+  test("properly handle already observed state in observed state", () => {
+    let n1 = 0;
+    let n2 = 0;
+    const obj1 = reactive({ a: { c: 2 } }, () => n1++) as any;
+    const obj2 = reactive({ b: 1 }, () => n2++) as any;
+
+    obj2.c = obj1;
+    expect(n1).toBe(0);
+    expect(n2).toBe(1);
+
+    obj1.a.c = 33;
+    expect(n1).toBe(1);
+    expect(n2).toBe(2);
   });
 
   test("can set a property more than once", () => {
@@ -279,7 +308,7 @@ describe("reactive", () => {
     expect(n).toBe(2);
   });
 
-  test.skip("properly handle swapping elements", () => {
+  test("properly handle swapping elements", () => {
     let n = 0;
     const obj = reactive({ a: { arr: [] }, b: 1 }, () => n++) as any;
 
