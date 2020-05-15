@@ -422,7 +422,7 @@ describe("basic component properties", () => {
     expect(qweb.compiledTemplates[Parent.template].fn.toString()).toMatchSnapshot();
   });
 
-  test.only("reconciliation alg works for t-foreach in t-foreach, 2", async () => {
+  test.skip("reconciliation alg works for t-foreach in t-foreach, 2", async () => {
     class Child extends Component {
       static template = xml`<div><t t-esc="props.row + '_' + props.col"/></div>`;
     }

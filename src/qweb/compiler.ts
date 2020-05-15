@@ -56,7 +56,7 @@ export function compileTemplate(qweb: QWeb, name: string, template: string): Tem
   if (ctx.shouldDefineRootContext) {
     ctx.code.splice(1, 0, `    const rootCtx = ctx;`);
   }
-  console.warn(ctx.code.join("\n"));
+  // console.warn(ctx.code.join("\n"));
   const fn = new Function("tree, ctx, metadata", ctx.code.join("\n")) as any;
   return {
     fn,
