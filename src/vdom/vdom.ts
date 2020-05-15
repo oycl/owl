@@ -265,7 +265,7 @@ function updateChildren(
         buildTree(newStartVnode, getEl(oldStartVnode) as any, NodePosition.Before, staticNodes);
         newStartVnode = newChildren[++newStartIdx];
       } else {
-        throw new Error("boom" + oldStartVnode);
+        throw new Error("boom" + JSON.stringify(oldStartVnode));
       }
     }
   }
